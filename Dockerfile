@@ -1,7 +1,7 @@
 FROM php:8.2-apache
 
 # Instalar dependências
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     libpng-dev \
@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     mariadb-client \
-    supervisor
+    supervisor \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # Configurar PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -27,7 +28,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Instalar Node.js (opcional, se precisar)
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # Definir diretório de trabalho
 WORKDIR /var/www/html
