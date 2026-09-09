@@ -1,23 +1,77 @@
-version: "3.3"
-
 services:
     app:
         build:
             context: .
-            dockerfile: Dockerfile
+            dockerfile: docker/api/Dockerfile
         container_name: oiai-app
         ports:
-            - "8001:80"
-            - "5173:5173"
+            - "8001:8001"
         volumes:
-            - ./:/var/www/html
+            - ./apps/api:/var/www/html
+            - api_vendor:/var/www/html/vendor
         working_dir: /var/www/html
-        command: sh -c "npm run dev & apache2-foreground"
+        entrypoint: []
+        command: >
+            sh -c "
+            php artisan config:clear &&
+            php artisan serve --host=0.0.0.0 --port=8001
+            "
         environment:
-            - APACHE_RUN_USER=www-data
-            - APACHE_RUN_GROUP=www-data
+            APACHE_RUN_USER: www-data
+            APACHE_RUN_GROUP: www-data
+            FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
         depends_on:
-            - db
+            db:
+                condition: service_healthy
+
+    queue:
+        build:
+            context: .
+            dockerfile: docker/api/Dockerfile
+        container_name: oiai-queue
+        working_dir: /var/www/html
+        entrypoint: []
+        command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+        volumes:
+            - ./apps/api:/var/www/html
+        depends_on:
+            db:
+                condition: service_healthy
+
+    scheduler:
+        build:
+            context: .
+            dockerfile: docker/api/Dockerfile
+        container_name: oiai-scheduler
+        working_dir: /var/www/html
+        entrypoint: []
+        command: php artisan schedule:work
+        volumes:
+            - ./apps/api:/var/www/html
+        depends_on:
+            db:
+                condition: service_healthy
+
+    oiai-front:
+        build:
+            context: ./apps/web
+            dockerfile: Dockerfile
+        container_name: oiai-front
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./apps/web:/app
+            - /app/node_modules
+        working_dir: /app
+        command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+        environment:
+            CHOKIDAR_USEPOLLING: "true"
+            WATCHPACK_POLLING: "true"
+            NODE_ENV: development
+        depends_on:
+            - app
+        stdin_open: true
+        tty: true
 
     db:
         image: mysql:5.7
@@ -30,6 +84,11 @@ services:
             - dbdata:/var/lib/mysql
         ports:
             - "3306:3306"
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+            interval: 5s
+            timeout: 5s
+            retries: 20
 
     mailhog:
         image: mailhog/mailhog
@@ -50,20 +109,6 @@ services:
         depends_on:
             - db
 
-    react:
-        build:
-            context: ../oiai-front
-            dockerfile: Dockerfile
-        container_name: oiai-front
-        ports:
-            - "8081:3000"
-        volumes:
-            - ./oiai-front:/app
-        working_dir: /app
-        stdin_open: true
-        tty: true
-        environment:
-            - CHOKIDAR_USEPOLLING=true
-
 volumes:
     dbdata:
+    api_vendor:
