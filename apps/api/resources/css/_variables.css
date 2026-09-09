@@ -1,0 +1,28 @@
+:root {
+    /* COLORS */
+    --color-primary: #f2c94c;
+    --color-secondary: #2D9CDB;
+    --color-background: #f0f0f0;
+    --color-light: #fdfdfd;
+    --color-dark: #1d1d1d;
+    --color-transparent: rgba(0, 0, 0, 0);
+
+    --background-primary: #FFFFFF;
+    --background-secondary: #2D9CDB;
+    --background-terciary: #E0E0E0;
+    --icon-primary: #FFFFFF;
+    --icon-secondary: #000000;
+    --icon-inactive: #888888;
+    --button-bg-primary: #f2c94c;
+    --button-bg-inactive: #666666;
+    --button-label-primary: #505050;
+    --button-bg-add: #298EC7;
+    --button-bg-sub: #EB5757;
+    --text-primary: #505050;
+    --text-secondary: #E0E0E0;
+    --input-txt-primary: #505050;
+    --input-txt-secondary: #AEAEAE;
+
+    /* FONTS */
+    --font-primary: 'Ubuntu', sans-serif;
+}
