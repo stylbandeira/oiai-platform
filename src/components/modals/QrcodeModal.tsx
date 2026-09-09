@@ -81,7 +81,8 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
                     facingMode: 'environment',
                     width: { ideal: 1920, min: 1280 },
                     height: { ideal: 1080, min: 720 },
-                    frameRate: { ideal: 30, max: 30 }
+                    frameRate: { ideal: 30, max: 30 },
+                    resizeMode: 'crop-and-scale'
                 },
                 audio: false
             };
@@ -93,11 +94,21 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             const track = stream.getVideoTracks()[0];
             const capabilities = track.getCapabilities?.() as MediaTrackCapabilities & {
                 focusMode?: string[];
+                focusDistance?: { min?: number; max?: number };
                 zoom?: { max?: number };
             };
             const advanced: MediaTrackConstraintSet = {};
             if (capabilities.focusMode?.includes('continuous')) advanced.focusMode = 'continuous';
-            if (capabilities.zoom?.max && capabilities.zoom.max > 1) advanced.zoom = Math.min(2, capabilities.zoom.max);
+            // Quando disponível, aproximar o plano focal da distância mínima
+            // permite ler QR Codes pequenos sem depender de um modo "macro" proprietário.
+            if (capabilities.focusDistance?.min !== undefined) {
+                const min = capabilities.focusDistance.min;
+                const max = capabilities.focusDistance.max ?? min;
+                advanced.focusDistance = min + (max - min) * 0.15;
+            }
+            if (capabilities.zoom?.max && capabilities.zoom.max > 1) {
+                advanced.zoom = Math.min(2.5, capabilities.zoom.max);
+            }
             if (Object.keys(advanced).length) await track.applyConstraints({ advanced: [advanced] });
 
             const NativeDetector = (window as typeof window & { BarcodeDetector?: new (options?: { formats: string[] }) => typeof detectorRef.current }).BarcodeDetector;
