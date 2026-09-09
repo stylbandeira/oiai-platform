@@ -34,18 +34,18 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 # Definir diretório de trabalho
 WORKDIR /var/www/html
 
-# Copiar o projeto
-COPY . /var/www/html
+# Copiar o projeto Laravel
+COPY apps/api /var/www/html
 
 # Instalar dependências do Composer
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
 # Copiar entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
+COPY docker/api/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Copiar configuração do Supervisor
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/api/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Corrigir DocumentRoot do Apache
 RUN sed -i "s|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g" /etc/apache2/sites-available/000-default.conf
