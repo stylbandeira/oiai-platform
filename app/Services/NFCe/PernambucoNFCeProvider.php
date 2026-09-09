@@ -2,32 +2,22 @@
 
 namespace App\Services\NFCe;
 
-use App\Contracts\NFCe\StateNFCeProvider;
 use App\Services\NFCeXMLParserService;
 use Exception;
-use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use Symfony\Component\DomCrawler\Crawler;
 use Illuminate\Support\Facades\Log;
 
-class PernambucoNFCeProvider implements StateNFCeProvider
+class PernambucoNFCeProvider extends AbstractNFCeProvider
 {
     private const BASE_URL = 'https://nfce.sefaz.pe.gov.br/nfce/consulta';
     private const DFE_PORTAL_URL = 'https://dfe-portal.svrs.rs.gov.br/Dfe/ConsultaPublicaDfe';
 
-    private Client $client;
     private NFCeXMLParserService $xmlParser;
 
     public function __construct(NFCeXMLParserService $xmlParser)
     {
-        $this->client = new Client([
-            'timeout' => 30,
-            'headers' => [
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            ],
-            'verify' => false,
-        ]);
+        parent::__construct();
 
         $this->xmlParser = $xmlParser;
     }

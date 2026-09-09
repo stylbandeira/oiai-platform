@@ -7,11 +7,37 @@ use App\Services\NFCe\SantaCatarinaNFCeProvider;
 use App\Services\NFCe\PernambucoNFCeProvider;
 use App\Services\NFCeScraperService;
 use App\Services\NFCeXMLParserService;
+use App\Contracts\NFCe\StateNFCeProvider;
+use Illuminate\Support\Facades\Cache;
 use ReflectionMethod;
 use Tests\TestCase;
 
 class NFCeScraperServiceTest extends TestCase
 {
+    public function test_normalizes_qr_data_and_caches_repeated_lookup(): void
+    {
+        Cache::fake();
+        $calls = 0;
+        $provider = new class($calls) implements StateNFCeProvider {
+            private $calls;
+            public function __construct(int &$calls) { $this->calls =& $calls; }
+            public function supports(string $qrData): bool { return $qrData === 'qr-data'; }
+            public function scrapeFromQRCode(string $qrData): array
+            {
+                $this->calls++;
+                return ['status' => 'success', 'data' => ['chave_acesso' => 'key']];
+            }
+        };
+        $service = new NFCeScraperService([$provider]);
+
+        $first = $service->scrapeFromQRCode(" qr-\ndata ");
+        $second = $service->scrapeFromQRCode('qr-data');
+
+        $this->assertSame('success', $first['status']);
+        $this->assertSame($first, $second);
+        $this->assertSame(1, $calls);
+    }
+
     public function test_returns_error_when_no_state_provider_supports_input(): void
     {
         $service = new NFCeScraperService([]);

@@ -2,29 +2,13 @@
 
 namespace App\Services\NFCe;
 
-use App\Contracts\NFCe\StateNFCeProvider;
 use Exception;
-use GuzzleHttp\Client;
 use Symfony\Component\DomCrawler\Crawler;
 
-class SantaCatarinaNFCeProvider implements StateNFCeProvider
+class SantaCatarinaNFCeProvider extends AbstractNFCeProvider
 {
     private const BASE_URL = 'https://sat.sef.sc.gov.br/nfce/consulta';
-
-    private Client $client;
-
-    public function __construct()
-    {
-        $this->client = new Client([
-            'timeout' => 30,
-            'verify' => false,
-            'headers' => [
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept' => 'text/html,application/xhtml+xml,*/*;q=0.8',
-            ],
-        ]);
-    }
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
     public function supports(string $qrData): bool
     {
         $host = strtolower(parse_url($qrData, PHP_URL_HOST) ?? '');
