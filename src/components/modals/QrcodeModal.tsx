@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, Camera, AlertCircle, QrCode } from "lucide-react";
+import { Upload, Camera, AlertCircle, QrCode, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import jsQR from 'jsqr';
 import api from "@/lib/api";
@@ -26,6 +26,10 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animationFrameRef = useRef<number>();
     const processingRef = useRef(false);
+    const scanningRef = useRef(false);
+    const detectedRef = useRef(false);
+    const detectorRef = useRef<{ detect: (source: CanvasImageSource) => Promise<Array<{ rawValue?: string }>> } | null>(null);
+    const lastScanRef = useRef(0);
 
     // Limpar recursos quando o modal fechar
     useEffect(() => {
@@ -35,6 +39,9 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             setError(null);
             setQrDetected(false);
             setScanning(false);
+            scanningRef.current = false;
+            detectedRef.current = false;
+            processingRef.current = false;
 
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
@@ -72,8 +79,10 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             const constraints = {
                 video: {
                     facingMode: 'environment',
-                    width: { ideal: 640 },
-                    height: { ideal: 480 }
+                    width: { ideal: 1920, min: 1280 },
+                    height: { ideal: 1080, min: 720 },
+                    frameRate: { ideal: 30, max: 30 },
+                    resizeMode: 'crop-and-scale'
                 },
                 audio: false
             };
@@ -81,6 +90,29 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             const stream = await navigator.mediaDevices.getUserMedia(constraints);
             setCameraStream(stream);
             setPermissionStatus('granted');
+
+            const track = stream.getVideoTracks()[0];
+            const capabilities = track.getCapabilities?.() as MediaTrackCapabilities & {
+                focusMode?: string[];
+                focusDistance?: { min?: number; max?: number };
+                zoom?: { max?: number };
+            };
+            const advanced: MediaTrackConstraintSet = {};
+            if (capabilities.focusMode?.includes('continuous')) advanced.focusMode = 'continuous';
+            // Quando disponível, aproximar o plano focal da distância mínima
+            // permite ler QR Codes pequenos sem depender de um modo "macro" proprietário.
+            if (capabilities.focusDistance?.min !== undefined) {
+                const min = capabilities.focusDistance.min;
+                const max = capabilities.focusDistance.max ?? min;
+                advanced.focusDistance = min + (max - min) * 0.15;
+            }
+            if (capabilities.zoom?.max && capabilities.zoom.max > 1) {
+                advanced.zoom = Math.min(2.5, capabilities.zoom.max);
+            }
+            if (Object.keys(advanced).length) await track.applyConstraints({ advanced: [advanced] });
+
+            const NativeDetector = (window as typeof window & { BarcodeDetector?: new (options?: { formats: string[] }) => typeof detectorRef.current }).BarcodeDetector;
+            if (NativeDetector) detectorRef.current = new NativeDetector({ formats: ['qr_code'] });
 
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
@@ -105,35 +137,8 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
                     }
                 });
                 setScanning(true);
-
-                setTimeout(() => {
-                    const scan = () => {
-                        if (!videoRef.current || !canvasRef.current || qrDetected) {
-                            return;
-                        }
-                        scanQRCode();
-
-                        if (!qrDetected) {
-                            animationFrameRef.current = requestAnimationFrame(scan);
-                        }
-                    };
-
-                    animationFrameRef.current = requestAnimationFrame(scan);
-                }, 100);
-
-                const scanFrame = () => {
-                    if (!videoRef.current || !canvasRef.current || !isOpen || mode !== 'camera' || qrDetected || !scanning) {
-                        return;
-                    }
-
-                    scanQRCode();
-
-                    if (scanning && !qrDetected) {
-                        animationFrameRef.current = requestAnimationFrame(scanFrame);
-                    }
-                };
-
-                animationFrameRef.current = requestAnimationFrame(scanFrame);
+                scanningRef.current = true;
+                startScanLoop();
             }
         } catch (err: any) {
             console.error('Erro ao acessar câmera:', err);
@@ -149,14 +154,17 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
         }
 
         const scan = () => {
-            if (!videoRef.current || !canvasRef.current || !isOpen || mode !== 'camera' || qrDetected || !scanning) {
+            if (!videoRef.current || !canvasRef.current || !isOpen || mode !== 'camera' || detectedRef.current || !scanningRef.current) {
                 return;
             }
 
-            scanQRCode();
+            if (performance.now() - lastScanRef.current >= 100) {
+                lastScanRef.current = performance.now();
+                scanQRCode();
+            }
 
             // Continuar o loop
-            if (scanning && !qrDetected) {
+            if (scanningRef.current && !detectedRef.current) {
                 animationFrameRef.current = requestAnimationFrame(scan);
             }
         };
@@ -202,9 +210,36 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
             // Detectar QR Code
-            const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+            let qrCode = null;
+            if (detectorRef.current) {
+                detectorRef.current.detect(canvas).then((codes) => {
+                    const data = codes[0]?.rawValue;
+                    if (data && !processingRef.current) processQRCode(data);
+                }).catch(() => undefined);
+            }
+
+            // Fallback e reforço para navegadores sem BarcodeDetector: analisar
+            // também recortes ampliados, onde QRs densos ficam mais legíveis.
+            const sources = [imageData];
+            const crop = document.createElement('canvas');
+            const cropContext = crop.getContext('2d', { willReadFrequently: true });
+            if (cropContext) {
+                const size = 0.7;
+                const width = Math.floor(canvas.width * size);
+                const height = Math.floor(canvas.height * size);
+                crop.width = width * 2;
+                crop.height = height * 2;
+                cropContext.imageSmoothingEnabled = false;
+                cropContext.drawImage(canvas, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height, 0, 0, crop.width, crop.height);
+                sources.push(cropContext.getImageData(0, 0, crop.width, crop.height));
+            }
+            for (const source of sources) {
+                qrCode = jsQR(source.data, source.width, source.height, { inversionAttempts: 'attemptBoth' });
+                if (qrCode?.data) break;
+            }
 
             if (qrCode && qrCode.data && !processingRef.current) {
+                detectedRef.current = true;
                 processQRCode(qrCode.data);
                 return; // Para imediatamente após detectar
             }
@@ -219,8 +254,13 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
         }
 
         processingRef.current = true;
+        detectedRef.current = true;
+        scanningRef.current = false;
         setQrDetected(true);
         setScanning(false);
+        scanningRef.current = false;
+        detectedRef.current = false;
+        detectorRef.current = null;
         stopCamera();
 
         setLoading(true);
@@ -231,10 +271,13 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             setTimeout(() => {
                 onClose();
             }, 500);
-        } catch (err) {
+        } catch (err: any) {
             setQrDetected(false);
             setScanning(false);
-            setError('Erro ao processar QR Code. Tente novamente.');
+            const errorMessage = err.response?.data?.error ||
+                err.response?.data?.message ||
+                'Erro ao processar QR Code. Tente novamente.';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -367,7 +410,10 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             onClose();
 
         } catch (err: any) {
-            setError(err.response.data.message || 'Não foi possível ler o QR Code da imagem.');
+            setError(err.response?.data?.error ||
+                err.response?.data?.message ||
+                err.message ||
+                'Não foi possível ler o QR Code da imagem.');
         } finally {
             setLoading(false);
             // Limpar o input file
@@ -391,6 +437,9 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
         } catch (err: any) {
             const errorMessage = err.response?.data?.error ||
                 err.response?.data?.message ||
+                (err.response?.status === 409
+                    ? 'Este QR Code já foi cadastrado anteriormente.'
+                    : null) ||
                 'Erro ao processar nota fiscal';
             setError(errorMessage);
 
