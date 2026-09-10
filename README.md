@@ -10,6 +10,12 @@ pesquisar as melhores opções de compra.
 - Criação de lista de compras
 - Otimização de lista de compras por preço/distância
 
+### Disponibilidade
+Atualmente, a leitura de notas fiscais está disponível apenas para os estados:
+- Pernambuco
+- Rio de Janeiro
+- São Paulo
+
 ## Tecnologias utilizadas
 
 ### Backend
