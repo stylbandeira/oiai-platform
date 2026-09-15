@@ -16,7 +16,9 @@ class NFCeScraperServiceTest extends TestCase
 {
     public function test_normalizes_qr_data_and_caches_repeated_lookup(): void
     {
-        Cache::fake();
+        config(['cache.default' => 'array']);
+        Cache::clearResolvedInstances();
+        Cache::store('array')->flush();
         $calls = 0;
         $provider = new class($calls) implements StateNFCeProvider {
             private $calls;
