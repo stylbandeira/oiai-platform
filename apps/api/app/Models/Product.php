@@ -6,10 +6,11 @@ use App\Enums\ProductQuantitySource;
 use App\Enums\ProductRefinementStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Product extends BaseModel
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Searchable;
     protected $table = 'products';
     const AVERAGE_PRICE_JOB_CONSTANCY_DAYS = 1;
     const AVERAGE_PRICE_PURCHASE_DATE_LIMIT_WEEKS = 4;
@@ -80,6 +81,40 @@ class Product extends BaseModel
     public function userFavorites()
     {
         return $this->belongsToMany(User::class, 'favorite_products', 'product_id', 'user_id');
+    }
+
+    public function searchableAs(): string
+    {
+        return config('scout.prefix').'products';
+    }
+
+    public function toSearchableArray(): array
+    {
+        $attributes = $this->attributesToArray();
+
+        return array_filter([
+            'id' => $this->getKey(),
+            'name' => $this->name,
+            'normalized_name' => $this->normalized_name,
+            'description' => $this->search_description ?: ($this->description ?: null),
+            'brand' => $attributes['brand'] ?? null,
+            'category' => $this->category?->name,
+            'aliases' => $attributes['aliases'] ?? [],
+            'search_terms' => $attributes['search_terms'] ?? null,
+            'ean' => $this->ean,
+            'sku' => $this->sku,
+            'quantity_base' => $this->normalized_quantity,
+            'quantity_dimension' => $this->quantity_dimension,
+            'validated' => (bool) $this->validated,
+            'average_price' => $this->average_price,
+            'brand_id' => $attributes['brand_id'] ?? null,
+            'category_id' => $this->category_id,
+            'unit_id' => $this->unit_id,
+            'available_states' => $attributes['available_states'] ?? [],
+            'popularity' => $attributes['popularity'] ?? 0,
+            'offer_count' => $attributes['offer_count'] ?? 0,
+            'updated_at' => $this->updated_at?->timestamp,
+        ], static fn ($value) => $value !== null);
     }
 
     public function getMentionedQuantityVariantAttribute()
