@@ -27,13 +27,32 @@ class ProductRepository
     public function list(User $user, array $data)
     {
         $query = $this->product->with(['category', 'unity', 'companies']);
+        $searchResultIds = null;
 
-        if (isset($data['search'])) {
-            $searchTerm = '%' . $data['search'] . '%';
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', $searchTerm)
-                    ->orWhere('sku', 'like', $searchTerm);
+        if (isset($data['search']) && trim($data['search']) !== '') {
+            $search = trim($data['search']);
+            $searchResultIds = $this->searchProductIds($search);
+            $likeTerm = '%'.$search.'%';
+            $isExactCode = preg_match('/^\d{8,14}$/', $search) === 1;
+
+            $query->where(function ($searchQuery) use ($search, $likeTerm, $isExactCode, $searchResultIds) {
+                if ($isExactCode) {
+                    $searchQuery->where('products.ean', $search)
+                        ->orWhere('products.sku', $search);
+                } else {
+                    $searchQuery->where('products.name', 'like', $likeTerm)
+                        ->orWhere('products.sku', 'like', $likeTerm);
+                }
+
+                if ($searchResultIds !== []) {
+                    $searchQuery->orWhereIn('products.id', $searchResultIds);
+                }
             });
+
+            if ($searchResultIds !== []) {
+                $quotedIds = implode(',', array_map('intval', $searchResultIds));
+                $query->orderByRaw("FIELD(products.id, {$quotedIds}) DESC");
+            }
         }
 
         if (isset($data['validated']) && !$user->isClient()) {
@@ -61,9 +80,32 @@ class ProductRepository
             ->limit(1500);
     }
 
+    /**
+     * Search through Scout/Meilisearch while keeping the final result in an
+     * Eloquent query so authorization, relations and pagination stay intact.
+     */
+    private function searchProductIds(string $search): array
+    {
+        $isExactCode = preg_match('/^\d{8,14}$/', $search) === 1;
+
+        try {
+            $builder = Product::search($isExactCode ? '' : $search);
+
+            if ($isExactCode) {
+                $builder->where('ean', $search);
+            }
+
+            return $builder->get()->pluck('id')->map(fn ($id) => (int) $id)->all();
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return [];
+        }
+    }
+
     public function paginate(User $user, array $data)
     {
-        return $this->list($user, $data)->paginate($filters['paginate'] ?? 15);
+        return $this->list($user, $data)->paginate($data['per_page'] ?? 15);
     }
 
     public function find($id)

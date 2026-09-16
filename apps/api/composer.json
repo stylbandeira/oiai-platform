@@ -13,7 +13,9 @@
         "inertiajs/inertia-laravel": "^1.0",
         "laravel/framework": "^11.51.0",
         "laravel/sanctum": "^4.0",
+        "laravel/scout": "^10.11",
         "laravel/tinker": "^2.8",
+        "meilisearch/meilisearch-php": "^1.11",
         "symfony/dom-crawler": "^7.4",
         "tightenco/ziggy": "^1.0"
     },
@@ -59,12 +61,18 @@
         }
     },
     "config": {
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
-        "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true
-        }
+        },
+        "audit": {
+            "block-insecure": false
+        },
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.2.33"
+        },
+        "preferred-install": "dist",
+        "sort-packages": true
     },
     "minimum-stability": "stable",
     "prefer-stable": true
