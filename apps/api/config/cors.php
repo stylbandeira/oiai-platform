@@ -21,6 +21,8 @@ return [
 
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:3000'),
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
         'https://worrisome-green-moneywise.ngrok-free.dev/',  // Adicione seu link ngrok
         'https://*.ngrok-free.dev',  // Ou use coringa para qualquer ngrok
         'https://*.serveo.net',  // Permite qualquer subdomínio do Serveo
