@@ -12,8 +12,8 @@ class ExportProductAction
     {
         $query = Product::with(['category', 'unity']);
 
-        if ($request->has('search') && !empty($request->search)) {
-            $searchTerm = '%' . $request->search . '%';
+        if ($request->has('search') && ! empty($request->search)) {
+            $searchTerm = '%'.$request->search.'%';
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', $searchTerm)
                     ->orWhere('sku', 'like', $searchTerm);

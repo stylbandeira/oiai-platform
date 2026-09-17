@@ -67,7 +67,7 @@ class CompanyOwnerServiceTest extends TestCase
         $notificationService = Mockery::mock(NotificationService::class);
         $notificationService->shouldReceive('userOwnershipRequestActivated')
             ->once()
-            ->with(Mockery::on(fn(User $arg) => $arg->id === $user->id), Mockery::on(fn(Company $arg) => $arg->id === $newCompany->id));
+            ->with(Mockery::on(fn (User $arg) => $arg->id === $user->id), Mockery::on(fn (Company $arg) => $arg->id === $newCompany->id));
         $service = new CompanyOwnerService($notificationService);
 
         $service->sync($user->load('companies'), [

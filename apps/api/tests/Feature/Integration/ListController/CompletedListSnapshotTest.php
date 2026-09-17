@@ -23,7 +23,7 @@ class CompletedListSnapshotTest extends TestCase
         [$user, $list, $product] = $this->createListWithProduct();
 
         $this->actingAs($user)
-            ->putJson('/api/lists/' . $list->id, ['status' => ItensList::STATUS_COMPLETED])
+            ->putJson('/api/lists/'.$list->id, ['status' => ItensList::STATUS_COMPLETED])
             ->assertOk()
             ->assertJsonPath('list.status', ItensList::STATUS_COMPLETED);
 
@@ -41,13 +41,13 @@ class CompletedListSnapshotTest extends TestCase
         [$user, $list, $product] = $this->createListWithProduct();
 
         $this->actingAs($user)
-            ->putJson('/api/lists/' . $list->id, ['status' => ItensList::STATUS_COMPLETED])
+            ->putJson('/api/lists/'.$list->id, ['status' => ItensList::STATUS_COMPLETED])
             ->assertOk();
 
         $product->update(['name' => 'Nome alterado depois da conclusão']);
 
         $this->actingAs($user)
-            ->getJson('/api/lists/' . $list->id)
+            ->getJson('/api/lists/'.$list->id)
             ->assertOk()
             ->assertJsonPath('list.products.0.name', 'Arroz')
             ->assertJsonPath('list.status', ItensList::STATUS_COMPLETED);
@@ -58,15 +58,15 @@ class CompletedListSnapshotTest extends TestCase
         [$user, $list] = $this->createListWithProduct();
 
         $this->actingAs($user)
-            ->putJson('/api/lists/' . $list->id, ['status' => ItensList::STATUS_COMPLETED])
+            ->putJson('/api/lists/'.$list->id, ['status' => ItensList::STATUS_COMPLETED])
             ->assertOk();
 
         $this->actingAs($user)
-            ->putJson('/api/lists/' . $list->id, ['name' => 'Nome posterior'])
+            ->putJson('/api/lists/'.$list->id, ['name' => 'Nome posterior'])
             ->assertOk();
 
         $this->actingAs($user)
-            ->getJson('/api/lists/' . $list->id)
+            ->getJson('/api/lists/'.$list->id)
             ->assertOk()
             ->assertJsonPath('list.name', 'Compras');
     }
@@ -77,7 +77,7 @@ class CompletedListSnapshotTest extends TestCase
         $product->update(['name' => 'Arroz integral']);
 
         $this->actingAs($user)
-            ->getJson('/api/lists/' . $list->id)
+            ->getJson('/api/lists/'.$list->id)
             ->assertOk()
             ->assertJsonPath('list.products.0.name', 'Arroz integral');
 
@@ -89,7 +89,7 @@ class CompletedListSnapshotTest extends TestCase
         [$user, $list] = $this->createListWithProduct();
 
         $this->actingAs($user)
-            ->putJson('/api/lists/' . $list->id, ['status' => ItensList::STATUS_COMPLETED])
+            ->putJson('/api/lists/'.$list->id, ['status' => ItensList::STATUS_COMPLETED])
             ->assertOk();
 
         $this->assertDatabaseCount('list_products', 1);
@@ -102,7 +102,7 @@ class CompletedListSnapshotTest extends TestCase
         $this->assertSame(40.0, $product->fresh()->average_price);
 
         $this->actingAs($user)
-            ->getJson('/api/lists/' . $completedList->id)
+            ->getJson('/api/lists/'.$completedList->id)
             ->assertOk()
             ->assertJsonPath('list.products.0.average_price', 10)
             ->assertJsonPath('list.total', 20);
@@ -115,7 +115,7 @@ class CompletedListSnapshotTest extends TestCase
         $this->addProductToList($newList, $product, 2);
 
         $this->actingAs($user)
-            ->getJson('/api/lists/' . $newList->id)
+            ->getJson('/api/lists/'.$newList->id)
             ->assertOk()
             ->assertJsonPath('list.products.0.average_price', 40)
             ->assertJsonPath('list.total', 80);
@@ -153,7 +153,7 @@ class CompletedListSnapshotTest extends TestCase
         $this->addProductToList($completedList, $product, 2);
 
         $this->actingAs($user)
-            ->putJson('/api/lists/' . $completedList->id, [
+            ->putJson('/api/lists/'.$completedList->id, [
                 'status' => ItensList::STATUS_COMPLETED,
             ])
             ->assertOk();

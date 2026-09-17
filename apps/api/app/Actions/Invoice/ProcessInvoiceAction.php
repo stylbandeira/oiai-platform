@@ -46,7 +46,7 @@ class ProcessInvoiceAction
         $receiptData = $invoiceData['protocolo']['data_recebimento']
             ?? $invoiceData['dados_nota']['data_emissao']
             ?? null;
-        $invoiceCode = ($accessKey ? 'NFCe' . $accessKey : null) ?? $invoiceData['chave_acesso'];
+        $invoiceCode = ($accessKey ? 'NFCe'.$accessKey : null) ?? $invoiceData['chave_acesso'];
 
         $invoice = Invoice::firstOrCreate(
             [
@@ -60,7 +60,7 @@ class ProcessInvoiceAction
             ]
         );
 
-        if (!$invoice->wasRecentlyCreated) {
+        if (! $invoice->wasRecentlyCreated) {
             return response([
                 'success' => true,
                 'message' => 'NFCe já cadastrada',

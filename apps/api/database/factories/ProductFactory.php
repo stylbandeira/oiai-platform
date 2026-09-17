@@ -4,13 +4,14 @@ namespace Database\Factories;
 
 use App\Enums\ProductQuantitySource;
 use App\Enums\ProductRefinementStatus;
+use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Unity;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Product>
+ * @extends Factory<Product>
  */
 class ProductFactory extends Factory
 {

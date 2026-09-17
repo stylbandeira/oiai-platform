@@ -2,7 +2,6 @@
 
 namespace App\Actions\Product;
 
-use App\Models\Product;
 use App\Repositories\ProductRepository;
 
 class DestroyProductAction

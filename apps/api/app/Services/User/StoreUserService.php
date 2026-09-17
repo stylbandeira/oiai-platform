@@ -4,9 +4,8 @@ namespace App\Services\User;
 
 use App\Models\User;
 use App\Services\CompanyOwners\CompanyOwnerService;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class StoreUserService
 {

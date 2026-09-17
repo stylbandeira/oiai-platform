@@ -17,7 +17,7 @@ class CompanyDestroyTest extends TestCase
         $company = Company::factory()->create();
 
         $response = $this->actingAs($admin)
-            ->deleteJson('/api/admin/companies/' . $company->id);
+            ->deleteJson('/api/admin/companies/'.$company->id);
 
         $response
             ->assertStatus(200)
@@ -36,14 +36,14 @@ class CompanyDestroyTest extends TestCase
         $company = Company::factory()->create();
 
         $response = $this->actingAs($client)
-            ->deleteJson('/api/companies/' . $company->id);
+            ->deleteJson('/api/companies/'.$company->id);
 
         $response
             ->assertStatus(403);
 
         $this->assertDatabaseHas('company', [
             'id' => $company->id,
-            'deleted_at' => null
+            'deleted_at' => null,
         ]);
     }
 
@@ -53,14 +53,14 @@ class CompanyDestroyTest extends TestCase
         $company = Company::factory()->create();
 
         $response = $this->actingAs($companyUser)
-            ->deleteJson('/api/companies/' . $company->id);
+            ->deleteJson('/api/companies/'.$company->id);
 
         $response
             ->assertStatus(403);
 
         $this->assertDatabaseHas('company', [
             'id' => $company->id,
-            'deleted_at' => null
+            'deleted_at' => null,
         ]);
     }
 }

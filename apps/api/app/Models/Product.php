@@ -10,9 +10,12 @@ use Laravel\Scout\Searchable;
 
 class Product extends BaseModel
 {
-    use HasFactory, SoftDeletes, Searchable;
+    use HasFactory, Searchable, SoftDeletes;
+
     protected $table = 'products';
+
     const AVERAGE_PRICE_JOB_CONSTANCY_DAYS = 1;
+
     const AVERAGE_PRICE_PURCHASE_DATE_LIMIT_WEEKS = 4;
 
     protected $fillable = [
@@ -42,7 +45,7 @@ class Product extends BaseModel
         'category_id' => 1,
         'listAdded' => 0,
         'description' => '',
-        'average_price' => NULL
+        'average_price' => null,
     ];
 
     protected $casts = [
@@ -121,7 +124,7 @@ class Product extends BaseModel
     {
         if ($this->mentioned_quantity > 100) {
             return 'perfect';
-        } else if ($this->mentioned_quantity > 50) {
+        } elseif ($this->mentioned_quantity > 50) {
             return 'secondary';
         } else {
             return 'destructive';

@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Services;
 
-use App\Services\NFCe\SaoPauloNFCeProvider;
-use App\Services\NFCe\SantaCatarinaNFCeProvider;
+use App\Contracts\NFCe\StateNFCeProvider;
 use App\Services\NFCe\PernambucoNFCeProvider;
+use App\Services\NFCe\SantaCatarinaNFCeProvider;
+use App\Services\NFCe\SaoPauloNFCeProvider;
 use App\Services\NFCeScraperService;
 use App\Services\NFCeXMLParserService;
-use App\Contracts\NFCe\StateNFCeProvider;
 use Illuminate\Support\Facades\Cache;
 use ReflectionMethod;
 use Tests\TestCase;
@@ -20,13 +20,24 @@ class NFCeScraperServiceTest extends TestCase
         Cache::clearResolvedInstances();
         Cache::store('array')->flush();
         $calls = 0;
-        $provider = new class($calls) implements StateNFCeProvider {
+        $provider = new class($calls) implements StateNFCeProvider
+        {
             private $calls;
-            public function __construct(int &$calls) { $this->calls =& $calls; }
-            public function supports(string $qrData): bool { return $qrData === 'qr-data'; }
+
+            public function __construct(int &$calls)
+            {
+                $this->calls = &$calls;
+            }
+
+            public function supports(string $qrData): bool
+            {
+                return $qrData === 'qr-data';
+            }
+
             public function scrapeFromQRCode(string $qrData): array
             {
                 $this->calls++;
+
                 return ['status' => 'success', 'data' => ['chave_acesso' => 'key']];
             }
         };
@@ -57,7 +68,7 @@ class NFCeScraperServiceTest extends TestCase
             .'http://nfce.sefaz.pe.gov.br/nfce-web/consultarNFCe?p='
             .$accessKey.'|2|1|1|5DAD78B79B33A16C8A1E567BCD4B1ED0F994C193'
             .'</span>';
-        $provider = new PernambucoNFCeProvider(new NFCeXMLParserService());
+        $provider = new PernambucoNFCeProvider(new NFCeXMLParserService);
         $extract = new ReflectionMethod($provider, 'extractQRCodeUrlFromDfeHtml');
 
         $url = $extract->invoke($provider, $html, $accessKey);
@@ -72,7 +83,7 @@ class NFCeScraperServiceTest extends TestCase
     public function test_sao_paulo_provider_owns_detection_and_url_creation(): void
     {
         $accessKey = '35260747508411094703651070005749261615098569';
-        $provider = new SaoPauloNFCeProvider();
+        $provider = new SaoPauloNFCeProvider;
 
         $this->assertTrue($provider->supports($accessKey));
         $this->assertFalse($provider->supports('26260747508411094703651070005749261615098569'));
@@ -108,7 +119,7 @@ class NFCeScraperServiceTest extends TestCase
         </div>
         HTML;
 
-        $provider = new SaoPauloNFCeProvider();
+        $provider = new SaoPauloNFCeProvider;
         $result = $provider->parseHtml($html, 'https://www.nfce.fazenda.sp.gov.br/');
 
         $this->assertSame('success', $result['status']);
@@ -123,7 +134,7 @@ class NFCeScraperServiceTest extends TestCase
     {
         $accessKey = '42260752783575000121650010000785941922606426';
         $qrParameter = $accessKey.'|2|1|1|F664A7CEB56CF83F99E0684D74E8A0991C9098F4';
-        $provider = new SantaCatarinaNFCeProvider();
+        $provider = new SantaCatarinaNFCeProvider;
 
         $this->assertTrue($provider->supports($accessKey));
         $this->assertTrue($provider->supports('https://sat.sef.sc.gov.br/nfce/consulta?p='.$qrParameter));
@@ -159,7 +170,7 @@ class NFCeScraperServiceTest extends TestCase
         </div>
         HTML;
 
-        $provider = new SantaCatarinaNFCeProvider();
+        $provider = new SantaCatarinaNFCeProvider;
         $result = $provider->parseHtml($html, 'https://sat.sef.sc.gov.br/nfce/consulta');
 
         $this->assertSame('success', $result['status']);
@@ -172,7 +183,7 @@ class NFCeScraperServiceTest extends TestCase
 
     public function test_santa_catarina_provider_rejects_security_verification_page(): void
     {
-        $provider = new SantaCatarinaNFCeProvider();
+        $provider = new SantaCatarinaNFCeProvider;
 
         $this->expectExceptionMessage('O portal da NFC-e de Santa Catarina solicitou validação de segurança.');
 

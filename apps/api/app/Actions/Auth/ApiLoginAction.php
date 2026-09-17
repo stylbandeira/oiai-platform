@@ -13,7 +13,7 @@ class ApiLoginAction
             ->where('type', $data['user_type'])
             ->first();
 
-        if (!Hash::check($data['password'], $user->password)) {
+        if (! Hash::check($data['password'], $user->password)) {
             return response()->json([
                 'message' => 'Credenciais inválidas',
             ], 401);

@@ -2,7 +2,6 @@
 
 namespace App\Rulesets;
 
-use App\Models\Company;
 use App\Models\CompanyOwners;
 use Illuminate\Validation\Rule;
 
@@ -17,7 +16,7 @@ class UserCompaniesRules
                 'distinct',
                 Rule::exists('company', 'id')->where('status', 'active'),
             ],
-            'companies.*.status' => ['required', 'in:' . implode(',', CompanyOwners::VALID_STATUSES)],
+            'companies.*.status' => ['required', 'in:'.implode(',', CompanyOwners::VALID_STATUSES)],
         ];
     }
 }

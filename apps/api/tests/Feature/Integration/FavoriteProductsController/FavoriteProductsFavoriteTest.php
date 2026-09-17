@@ -18,7 +18,7 @@ class FavoriteProductsFavoriteTest extends TestCase
         $product = Product::factory()->create();
 
         $response = $this->actingAs($user)
-            ->postJson('/api/products/' . $product->id . '/favorite', [
+            ->postJson('/api/products/'.$product->id.'/favorite', [
                 'favorite' => 'not-a-boolean',
             ]);
 
@@ -33,7 +33,7 @@ class FavoriteProductsFavoriteTest extends TestCase
         $product = Product::factory()->create();
 
         $response = $this->actingAs($user)
-            ->postJson('/api/products/' . $product->id . '/favorite', [
+            ->postJson('/api/products/'.$product->id.'/favorite', [
                 'favorite' => true,
             ]);
 
@@ -72,7 +72,7 @@ class FavoriteProductsFavoriteTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)
-            ->postJson('/api/products/' . $product->id . '/favorite', [
+            ->postJson('/api/products/'.$product->id.'/favorite', [
                 'favorite' => false,
             ]);
 
@@ -94,7 +94,7 @@ class FavoriteProductsFavoriteTest extends TestCase
         $product = Product::factory()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/products/' . $product->id . '/favorite')
+            ->postJson('/api/products/'.$product->id.'/favorite')
             ->assertStatus(200);
 
         $this->assertDatabaseHas('favorite_products', [
@@ -103,7 +103,7 @@ class FavoriteProductsFavoriteTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->postJson('/api/products/' . $product->id . '/favorite')
+            ->postJson('/api/products/'.$product->id.'/favorite')
             ->assertStatus(200);
 
         $this->assertDatabaseMissing('favorite_products', [

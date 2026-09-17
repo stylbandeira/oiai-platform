@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\File;
 class MakeRepository extends Command
 {
     protected $signature = 'make:repository {name} {--model=}';
+
     protected $description = 'Create a new repository class';
 
     public function handle()
@@ -17,23 +18,24 @@ class MakeRepository extends Command
 
         // Garantir que o diretório existe
         $directory = app_path('Repositories');
-        if (!File::exists($directory)) {
+        if (! File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
 
-        $path = $directory . '/' . $name . '.php';
+        $path = $directory.'/'.$name.'.php';
 
         if (file_exists($path)) {
             $this->error("Repository {$name} already exists!");
+
             return 1;
         }
 
         // Caminho do stub
-        $stubPath = __DIR__ . '/stubs/repository.stub';
+        $stubPath = __DIR__.'/stubs/repository.stub';
 
-        if (!file_exists($stubPath)) {
+        if (! file_exists($stubPath)) {
             $this->error("Stub file not found at: {$stubPath}");
-            $this->info("Creating default stub...");
+            $this->info('Creating default stub...');
 
             // Criar stub automaticamente se não existir
             $this->createDefaultStub($stubPath);
@@ -122,7 +124,7 @@ class {{ClassName}}
 
         // Criar diretório de stubs se não existir
         $stubDir = dirname($stubPath);
-        if (!File::exists($stubDir)) {
+        if (! File::exists($stubDir)) {
             File::makeDirectory($stubDir, 0755, true);
         }
 

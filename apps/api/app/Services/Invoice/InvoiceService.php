@@ -34,5 +34,4 @@ class InvoiceService
     {
         return $this->documentModel($invoiceCode) === self::NFCE_MODEL;
     }
-
 }

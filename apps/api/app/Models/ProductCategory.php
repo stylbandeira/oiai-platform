@@ -11,8 +11,9 @@ class ProductCategory extends BaseModel
     use HasFactory, SoftDeletes;
 
     protected $table = 'product_category';
+
     protected $fillable = [
-        'name'
+        'name',
     ];
 
     public function products()
@@ -23,8 +24,8 @@ class ProductCategory extends BaseModel
     public function name(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => ucfirst($value),
-            set: fn($value) => ucfirst($value)
+            get: fn ($value) => ucfirst($value),
+            set: fn ($value) => ucfirst($value)
         );
     }
 }

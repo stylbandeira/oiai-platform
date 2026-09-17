@@ -23,7 +23,7 @@ class UnityRepository
         $query = Unity::query();
 
         if (isset($filters['search'])) {
-            $searchTerm = '%' . $filters['search'] . '%';
+            $searchTerm = '%'.$filters['search'].'%';
 
             $query->where(function ($query) use ($searchTerm) {
                 $query->where('name', 'like', $searchTerm)
@@ -55,6 +55,7 @@ class UnityRepository
     {
         $record = $this->find($id);
         $record->update($data);
+
         return $record;
     }
 

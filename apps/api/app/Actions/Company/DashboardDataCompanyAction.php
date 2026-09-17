@@ -4,7 +4,6 @@ namespace App\Actions\Company;
 
 use App\Http\Resources\CompanyResource;
 use App\Models\Company;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardDataCompanyAction
 {

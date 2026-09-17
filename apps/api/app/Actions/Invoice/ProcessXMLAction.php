@@ -7,9 +7,7 @@ use App\Services\NFCeXMLParserService;
 
 class ProcessXMLAction
 {
-    public function __construct(private NFCeXMLParserService $xmlParser)
-    {
-    }
+    public function __construct(private NFCeXMLParserService $xmlParser) {}
 
     public function execute(ProcessXMLRequest $request)
     {

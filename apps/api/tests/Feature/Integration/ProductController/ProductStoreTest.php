@@ -60,7 +60,7 @@ class ProductStoreTest extends TestCase
             'name' => 'Produto Company',
             'sku' => 'SKU-COMPANY',
             'average_price' => 12.5,
-            'company_id' => $company->id
+            'company_id' => $company->id,
         ]);
 
         $response = $this->actingAs($companyUser)

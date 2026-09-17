@@ -1,4 +1,5 @@
 <?php
+
 // app/Services/ExportService.php
 
 namespace App\Services;
@@ -17,7 +18,7 @@ class ExportService
         string $filename,
         string $delimiter = ';'
     ): StreamedResponse {
-        $filename = $filename . '_' . now()->format('Y-m-d_H-i-s') . '.csv';
+        $filename = $filename.'_'.now()->format('Y-m-d_H-i-s').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=utf-8',

@@ -2,15 +2,12 @@
 
 namespace App\Helpers;
 
-use Illuminate\Support\Carbon;
-
 class GlobalHelper
 {
     /**
      * Return numbers from any string
      *
      * @param [type] $string
-     * @return string
      */
     public static function onlyNumbers($string): string
     {

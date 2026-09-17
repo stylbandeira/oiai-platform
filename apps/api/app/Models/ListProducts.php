@@ -11,13 +11,13 @@ class ListProducts extends BaseModel
     protected $table = 'list_products';
 
     protected $attributes = [
-        'company_product_id' => 0
+        'company_product_id' => 0,
     ];
 
     public $fillable = [
         'list_id',
         'product_id',
-        'quantity'
+        'quantity',
     ];
 
     public function list()

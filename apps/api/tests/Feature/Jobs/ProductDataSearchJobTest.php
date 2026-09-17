@@ -72,7 +72,7 @@ class ProductDataSearchJobTest extends TestCase
             ->andReturn($oscbrResult);
         $categoryRepository = Mockery::mock(ProductCategoryRepository::class);
 
-        (new ProductDataSearchJob())->handle($productDataService, $categoryRepository);
+        (new ProductDataSearchJob)->handle($productDataService, $categoryRepository);
 
         $this->assertSame('Produto validado pelo admin', $adminProduct->fresh()->name);
         $this->assertSame('Produto validado pela Cosmos', $cosmosProduct->fresh()->name);
@@ -127,7 +127,7 @@ class ProductDataSearchJobTest extends TestCase
             ->with(ProductRefinementStatus::Unrefined, ['cosmos', 'oscbr'])
             ->andReturnFalse();
 
-        (new ProductDataSearchJob())->handle(
+        (new ProductDataSearchJob)->handle(
             $productDataService,
             Mockery::mock(ProductCategoryRepository::class),
         );

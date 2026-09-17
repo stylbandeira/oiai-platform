@@ -15,6 +15,7 @@ use App\Http\Resources\ClientCompanyResource;
 use App\Http\Resources\CompanyResource;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class CompanyController extends Controller
 {
@@ -26,7 +27,7 @@ class CompanyController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index(Request $request, IndexCompanyAction $action)
     {
@@ -36,8 +37,8 @@ class CompanyController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @return Response
      */
     public function store(CompanyStoreRequest $request, StoreCompanyAction $action)
     {
@@ -47,8 +48,7 @@ class CompanyController extends Controller
     /**
      * Display the specified company.
      *
-     * @param  \App\Models\Company  $company
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function show(Request $request, Company $company, ShowCompanyAction $action)
     {
@@ -77,9 +77,8 @@ class CompanyController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Company  $company
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @return Response
      */
     public function update(CompanyUpdateRequest $request, Company $company, UpdateCompanyAction $action)
     {
@@ -89,8 +88,7 @@ class CompanyController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Company  $company
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy(Company $company, DestroyCompanyAction $action)
     {

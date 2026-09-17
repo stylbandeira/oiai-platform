@@ -16,22 +16,22 @@ class Unity extends BaseModel
         'abbreviation',
         'dimension',
         'convertion_factor',
-        'base_unity_id'
+        'base_unity_id',
     ];
 
     public function name(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => strtolower($value),
-            set: fn($value) => strtolower($value)
+            get: fn ($value) => strtolower($value),
+            set: fn ($value) => strtolower($value)
         );
     }
 
     public function abbreviation(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => strtolower($value),
-            set: fn($value) => strtolower($value)
+            get: fn ($value) => strtolower($value),
+            set: fn ($value) => strtolower($value)
         );
     }
 }

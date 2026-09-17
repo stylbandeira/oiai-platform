@@ -13,6 +13,7 @@ class IndexUnityAction
     public function execute(array $array)
     {
         $unities = $this->unity_repository->paginate($array);
+
         return $unities;
     }
 }

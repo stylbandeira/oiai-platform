@@ -3,7 +3,6 @@
 namespace App\Actions\FavoriteProducts;
 
 use App\Http\Requests\FavoriteProducts\FavoriteProductRequest;
-use App\Models\FavoriteProducts;
 use App\Models\Product;
 use App\Repositories\FavoriteProductsRepository;
 use Illuminate\Support\Facades\Log;
@@ -13,6 +12,7 @@ class FavoriteProductAction
     public function __construct(
         private FavoriteProductsRepository $favoriteProductsRepository
     ) {}
+
     public function execute(FavoriteProductRequest $request, Product $product)
     {
         $user = $request->user();
@@ -22,13 +22,13 @@ class FavoriteProductAction
 
             $shouldFavorite = $request->has('favorite')
                 ? $request->validated()['favorite']
-                : !$favorite;
+                : ! $favorite;
 
-            if ($shouldFavorite && !$favorite) {
+            if ($shouldFavorite && ! $favorite) {
                 $this->favoriteProductsRepository->create($user, $product);
             }
 
-            if (!$shouldFavorite && $favorite) {
+            if (! $shouldFavorite && $favorite) {
                 $favorite->delete();
             }
         } catch (\Throwable $th) {

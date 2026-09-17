@@ -9,7 +9,9 @@ class ItensList extends BaseModel
     use HasFactory;
 
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_INACTIVE = 'inactive';
 
     public const VALID_STATUSES = [
@@ -18,7 +20,7 @@ class ItensList extends BaseModel
         self::STATUS_INACTIVE,
     ];
 
-    protected $table = "list";
+    protected $table = 'list';
 
     public $fillable = [
         'user_id',
@@ -26,7 +28,7 @@ class ItensList extends BaseModel
         'favorite',
         'total',
         'optimized',
-        'status'
+        'status',
     ];
 
     public function products()

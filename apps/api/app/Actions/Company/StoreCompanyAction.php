@@ -3,7 +3,6 @@
 namespace App\Actions\Company;
 
 use App\Http\Requests\Company\CompanyStoreRequest;
-use App\Models\Company;
 use App\Repositories\CompanyRepository;
 
 class StoreCompanyAction

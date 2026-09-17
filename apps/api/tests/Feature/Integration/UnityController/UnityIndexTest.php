@@ -19,7 +19,7 @@ class UnityIndexTest extends TestCase
         $admin = User::factory()->admin()->create();
 
         $response = $this->actingAs($admin)
-            ->getJson('/api/unities?' . http_build_query($query));
+            ->getJson('/api/unities?'.http_build_query($query));
 
         $response
             ->assertStatus(422)

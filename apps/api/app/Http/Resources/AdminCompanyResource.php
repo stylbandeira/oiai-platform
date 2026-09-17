@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AdminCompanyResource extends JsonResource
@@ -9,8 +11,8 @@ class AdminCompanyResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @param  Request  $request
+     * @return array|Arrayable|\JsonSerializable
      */
     public function toArray($request)
     {
@@ -19,7 +21,7 @@ class AdminCompanyResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'cnpj' => $this->cnpj,
-            'img' => $this->img ? config('app.url') . $this->img_url : null,
+            'img' => $this->img ? config('app.url').$this->img_url : null,
             'website' => $this->website,
             'status' => $this->status,
             'phone' => $this->phone,
@@ -27,7 +29,7 @@ class AdminCompanyResource extends JsonResource
             'raw_address' => $this->raw_address,
             'created_at' => $this->created_at->format('m/d/Y'),
 
-            //Only for Admin
+            // Only for Admin
             'total_products' => $this->whenLoaded('products', $this->products->count()),
         ];
     }

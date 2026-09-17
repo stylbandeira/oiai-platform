@@ -2,8 +2,9 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Log;
 
 class BaseUserResource extends JsonResource
 {
@@ -31,20 +32,20 @@ class BaseUserResource extends JsonResource
             'points' => $this->points,
             'notifications' => $this->when(
                 $this->withNotifications,
-                fn() => BaseEventResource::collection(
+                fn () => BaseEventResource::collection(
                     $this->notifications()->get()
                 )
             ),
             'notificationList' => $this->when(
                 $this->withNotifications,
-                fn() => BaseEventResource::collection(
+                fn () => BaseEventResource::collection(
                     $this->visibleEvents()
                         ->latest()
                         ->get()
                 )
             ),
             'token' => $this->token,
-            'email_verified' => $this->hasVerifiedEmail()
+            'email_verified' => $this->hasVerifiedEmail(),
         ];
     }
 
@@ -59,8 +60,8 @@ class BaseUserResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @param  Request  $request
+     * @return array|Arrayable|\JsonSerializable
      */
     public function toArray($request)
     {

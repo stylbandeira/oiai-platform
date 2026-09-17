@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    public function verifyEmail(Int $id, String $hash, VerifyEmailAction $action)
+    public function verifyEmail(int $id, string $hash, VerifyEmailAction $action)
     {
         return $action->execute($id, $hash);
     }

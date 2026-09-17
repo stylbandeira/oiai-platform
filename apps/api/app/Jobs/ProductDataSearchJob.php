@@ -22,16 +22,15 @@ class ProductDataSearchJob implements ShouldQueue
     public function handle(
         ProductDataService $productDataService,
         ProductCategoryRepository $productCategoryRepository,
-    ): void
-    {
+    ): void {
         $productDataService->startRun();
         $maximumProducts = $productDataService->maximumProductsPerRun();
 
         $products = Product::with('providerAttempts')->whereIn('refined', [
-                ProductRefinementStatus::Unrefined->value,
-                ProductRefinementStatus::OscbrValidated->value,
-                ProductRefinementStatus::CosmosValidated->value,
-            ])
+            ProductRefinementStatus::Unrefined->value,
+            ProductRefinementStatus::OscbrValidated->value,
+            ProductRefinementStatus::CosmosValidated->value,
+        ])
             ->whereNotNull('ean')
             ->lazyById()
             ->filter(function (Product $product) use ($productDataService) {
@@ -48,10 +47,10 @@ class ProductDataSearchJob implements ShouldQueue
             $productData = match ($product->refined) {
                 ProductRefinementStatus::CosmosValidated => $productDataService
                     ->getSupplementalProductData(
-                    $product->ean,
-                    $product->refined,
-                    $excludedProviders,
-                ),
+                        $product->ean,
+                        $product->refined,
+                        $excludedProviders,
+                    ),
                 ProductRefinementStatus::OscbrValidated => $productDataService
                     ->getUpgradeProductData(
                         $product->ean,

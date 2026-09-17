@@ -21,7 +21,7 @@ class UpdateUserServiceTest extends TestCase
             'name' => 'Old Name',
         ]);
         $companyOwnerService = Mockery::mock(CompanyOwnerService::class);
-        $companyOwnerService->shouldReceive('detach')->once()->with(Mockery::on(fn(User $arg) => $arg->id === $user->id));
+        $companyOwnerService->shouldReceive('detach')->once()->with(Mockery::on(fn (User $arg) => $arg->id === $user->id));
         $service = new UpdateUserService($companyOwnerService);
 
         $updated = $service->execute($user, [
@@ -44,7 +44,7 @@ class UpdateUserServiceTest extends TestCase
         $companyOwnerService = Mockery::mock(CompanyOwnerService::class);
         $companyOwnerService->shouldReceive('sync')
             ->once()
-            ->with(Mockery::on(fn(User $arg) => $arg->id === $companyUser->id), [
+            ->with(Mockery::on(fn (User $arg) => $arg->id === $companyUser->id), [
                 ['id' => $company->id, 'status' => CompanyOwners::STATUS_ACTIVE],
             ], 1);
         $service = new UpdateUserService($companyOwnerService);
@@ -62,7 +62,7 @@ class UpdateUserServiceTest extends TestCase
         $companyOwnerService = Mockery::mock(CompanyOwnerService::class);
         $companyOwnerService->shouldReceive('detach')
             ->once()
-            ->with(Mockery::on(fn(User $arg) => $arg->id === $user->id));
+            ->with(Mockery::on(fn (User $arg) => $arg->id === $user->id));
         $service = new UpdateUserService($companyOwnerService);
 
         $service->execute($user, [

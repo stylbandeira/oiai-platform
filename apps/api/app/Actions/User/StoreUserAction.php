@@ -2,10 +2,7 @@
 
 namespace App\Actions\User;
 
-use App\Http\Requests\User\UserStoreRequest;
 use App\Services\User\StoreUserService;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class StoreUserAction
 {

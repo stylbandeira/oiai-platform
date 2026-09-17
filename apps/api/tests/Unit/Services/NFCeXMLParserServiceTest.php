@@ -69,7 +69,7 @@ class NFCeXMLParserServiceTest extends TestCase
         </nfeProc>
         XML;
 
-        $result = (new NFCeXMLParserService())->parseXML($xml);
+        $result = (new NFCeXMLParserService)->parseXML($xml);
 
         $this->assertSame('success', $result['status']);
         $this->assertSame(

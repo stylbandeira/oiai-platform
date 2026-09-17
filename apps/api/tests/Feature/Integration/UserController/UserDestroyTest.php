@@ -22,7 +22,7 @@ class UserDestroyTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)
-            ->deleteJson('/api/admin/users/' . $companyUser->id);
+            ->deleteJson('/api/admin/users/'.$companyUser->id);
 
         $response
             ->assertStatus(400)
@@ -36,7 +36,7 @@ class UserDestroyTest extends TestCase
         $admin = User::factory()->admin()->create();
 
         $response = $this->actingAs($admin)
-            ->deleteJson('/api/admin/users/' . $admin->id);
+            ->deleteJson('/api/admin/users/'.$admin->id);
 
         $response
             ->assertStatus(403);
@@ -48,7 +48,7 @@ class UserDestroyTest extends TestCase
         $target = User::factory()->client()->create();
 
         $this->actingAs($client)
-            ->deleteJson('/api/admin/users/' . $target->id)
+            ->deleteJson('/api/admin/users/'.$target->id)
             ->assertStatus(403);
     }
 
@@ -58,7 +58,7 @@ class UserDestroyTest extends TestCase
         $target = User::factory()->client()->create();
 
         $response = $this->actingAs($admin)
-            ->deleteJson('/api/admin/users/' . $target->id);
+            ->deleteJson('/api/admin/users/'.$target->id);
 
         $response
             ->assertStatus(200)

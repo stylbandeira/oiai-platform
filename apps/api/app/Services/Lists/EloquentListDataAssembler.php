@@ -50,10 +50,10 @@ class EloquentListDataAssembler implements ListDataAssembler
 
             $distance = $this->geolocation_service->between([
                 'latitude' => $company->address?->latitude ?? null,
-                'longitude' => $company->address?->longitude ?? null
+                'longitude' => $company->address?->longitude ?? null,
             ], [
                 'latitude' => $list->latitude,
-                'longitude' => $list->longitude
+                'longitude' => $list->longitude,
             ]);
 
             $isTooFar = $list->distance !== null

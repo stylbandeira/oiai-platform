@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\ItensList;
-use App\Models\ListProducts;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -54,6 +53,7 @@ class ListRepository
     {
         $record = $this->find($id);
         $record->update($data);
+
         return $record;
     }
 
@@ -111,8 +111,6 @@ class ListRepository
     /**
      * Attach products with quantities on a list
      *
-     * @param ItensList $list
-     * @param array $productsWithQuantities
      * @return void
      */
     public function attachProducts(ItensList $list, array $productsWithQuantities)

@@ -10,6 +10,7 @@ class DestroyListAction
     public function __construct(
         private ListRepository $listRepository,
     ) {}
+
     public function execute(ItensList $list)
     {
         $this->listRepository->delete($list->id);

@@ -6,7 +6,6 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class CompanyRepository
 {
@@ -29,7 +28,7 @@ class CompanyRepository
 
         $user = User::find(Auth::user()->id);
 
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             $query->whereNot('status', Company::STATUS_INACTIVE);
         }
 
@@ -65,6 +64,7 @@ class CompanyRepository
     {
         $record = $this->find($id);
         $record->update($data);
+
         return $record;
     }
 
@@ -78,7 +78,7 @@ class CompanyRepository
         $query = Company::query();
 
         if ($request->has('search')) {
-            $searchTerm = '%' . $request->search . '%';
+            $searchTerm = '%'.$request->search.'%';
             $query->where(function ($query) use ($searchTerm) {
                 $query->where('name', 'like', $searchTerm)
                     ->orWhere('email', 'like', $searchTerm)
@@ -94,7 +94,7 @@ class CompanyRepository
 
             $query->withTrashed();
 
-            //TO-DO - QUERO DEIXAR ISSO MAIS AUTOMÁTICO
+            // TO-DO - QUERO DEIXAR ISSO MAIS AUTOMÁTICO
             if ($request->has('status')) {
                 $query->where('status', $request->status);
             }
@@ -109,7 +109,7 @@ class CompanyRepository
             ->with(['owners', 'products'])
             ->when(
                 $user->isCompany(),
-                fn($query) => $query->ownedByActiveUser($user)
+                fn ($query) => $query->ownedByActiveUser($user)
             )
             ->withOwnerRelationshipFor($user)
             ->withCount('products')

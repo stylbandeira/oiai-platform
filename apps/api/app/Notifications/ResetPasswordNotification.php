@@ -3,13 +3,13 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ResetPasswordNotification extends Notification
 {
     use Queueable;
+
     public $token;
 
     /**
@@ -37,7 +37,7 @@ class ResetPasswordNotification extends Notification
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail($notifiable)
     {
@@ -50,7 +50,7 @@ class ResetPasswordNotification extends Notification
             ->subject('Redefinição de senha')
             ->view('emails.reset-password', [
                 'url' => $url,
-                'user' => $notifiable
+                'user' => $notifiable,
             ]);
     }
 

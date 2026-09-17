@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class UserAddedProducts extends BaseModel
 {
     use HasFactory;
+
     protected $table = 'user_added_products';
 
     const AVERAGE_PRICE_JOB_CONSTANCY = 1;
+
     const AVERAGE_PRICE_JOB_CHUNK = 1000;
 
     protected $fillable = [
@@ -18,7 +20,7 @@ class UserAddedProducts extends BaseModel
         'product_id',
         'price',
         'processed',
-        'purchase_date'
+        'purchase_date',
     ];
 
     public function product()

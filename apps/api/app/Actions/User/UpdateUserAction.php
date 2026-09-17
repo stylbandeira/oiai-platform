@@ -2,8 +2,6 @@
 
 namespace App\Actions\User;
 
-use App\Http\Requests\User\UserUpdateRequest;
-use App\Http\Resources\AdminUserResource;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Services\User\UpdateUserService;

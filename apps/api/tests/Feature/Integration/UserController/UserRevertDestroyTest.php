@@ -25,7 +25,7 @@ class UserRevertDestroyTest extends TestCase
         $target = User::factory()->client()->create();
 
         $this->actingAs($admin)
-            ->postJson('/api/admin/users/revertDeleted/' . $target->id)
+            ->postJson('/api/admin/users/revertDeleted/'.$target->id)
             ->assertStatus(400)
             ->assertJsonFragment([
                 'message' => 'Usuário não precisa ser reativado.',
@@ -41,7 +41,7 @@ class UserRevertDestroyTest extends TestCase
         $target->delete();
 
         $response = $this->actingAs($admin)
-            ->postJson('/api/admin/users/revertDeleted/' . $target->id);
+            ->postJson('/api/admin/users/revertDeleted/'.$target->id);
 
         $response
             ->assertStatus(200)

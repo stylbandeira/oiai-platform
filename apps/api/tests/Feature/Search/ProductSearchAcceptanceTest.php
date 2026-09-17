@@ -44,5 +44,4 @@ class ProductSearchAcceptanceTest extends TestCase
         $this->assertTrue($settings['typoTolerance']['enabled']);
         $this->assertSame(['ean', 'sku'], $settings['typoTolerance']['disableOnAttributes']);
     }
-
 }

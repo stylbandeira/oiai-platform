@@ -28,7 +28,7 @@ class ProductDestroyTest extends TestCase
         $this->assertDatabaseCount('products', 1);
 
         $response = $this->actingAs($admin)
-            ->deleteJson('/api/products/' . $product->id);
+            ->deleteJson('/api/products/'.$product->id);
 
         $this->assertDatabaseCount('products', 1);
 

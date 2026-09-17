@@ -22,7 +22,7 @@ use App\Models\User;
 use App\Services\CompanyOwners\CompanyOwnerService;
 use App\Services\ExportService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
@@ -44,7 +44,6 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param IndexUserRequest $request
      * @return void
      */
     public function index(IndexUserRequest $request, IndexUserAction $action)
@@ -61,7 +60,7 @@ class UserController extends Controller
     /**
      * Store a new user.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function store(UserStoreRequest $request, StoreUserAction $action)
     {
@@ -76,9 +75,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param Request $request
-     * @param integer $id
-     * @param ShowUserAction $action
+     * @param  int  $id
      * @return void
      */
     public function show(Request $request, User $user, ShowUserAction $action)
@@ -89,9 +86,9 @@ class UserController extends Controller
 
         if ($currentUser->isAdmin()) {
             return new AdminUserResource($user);
-        } else if ($currentUser->isClient() && $user->id === $currentUser->id) {
+        } elseif ($currentUser->isClient() && $user->id === $currentUser->id) {
             return new ClientUserResource($user);
-        } else if ($currentUser->isCompany() && $user->id === $currentUser->id) {
+        } elseif ($currentUser->isCompany() && $user->id === $currentUser->id) {
             return new CompanyUserResource($user);
         }
 
@@ -103,8 +100,6 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param UserUpdateRequest $request
-     * @param User $user
      * @return void
      */
     public function update(UserUpdateRequest $request, User $user, UpdateUserAction $action)
@@ -130,7 +125,6 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param User $user
      * @return void
      */
     public function destroy(User $user, DestroyUserAction $action)
@@ -157,12 +151,11 @@ class UserController extends Controller
     /**
      * Função para reverter deleção de usuário
      *
-     * @param User $user
      * @return void
      */
     public function revertDestroy(User $user, RevertDestroyUserAction $action)
     {
-        if (!$user->deleted_at) {
+        if (! $user->deleted_at) {
             return response([
                 'message' => 'Usuário não precisa ser reativado.',
             ], 400);

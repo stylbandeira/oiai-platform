@@ -4,8 +4,6 @@ namespace App\Actions\List;
 
 use App\Http\Requests\List\ListStoreRequest;
 use App\Http\Resources\ClientListResource;
-use App\Models\ItensList;
-use App\Models\Product;
 use App\Repositories\ListRepository;
 use App\Repositories\ProductRepository;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +15,7 @@ class StoreListAction
         private ProductRepository $productRepository,
         private ListRepository $listRepository,
     ) {}
+
     public function execute(ListStoreRequest $request)
     {
         $user = Auth::user();

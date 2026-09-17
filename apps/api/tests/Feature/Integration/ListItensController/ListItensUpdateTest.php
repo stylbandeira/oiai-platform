@@ -22,7 +22,7 @@ class ListItensUpdateTest extends TestCase
         $list = $this->createList($user);
 
         $response = $this->actingAs($user)
-            ->putJson('/api/listItems/' . $list->id, $payload);
+            ->putJson('/api/listItems/'.$list->id, $payload);
 
         $response
             ->assertStatus(422)
@@ -53,7 +53,7 @@ class ListItensUpdateTest extends TestCase
         $this->createListProduct($list, $notCompletedProduct);
 
         $response = $this->actingAs($user)
-            ->putJson('/api/listItems/' . $list->id, [
+            ->putJson('/api/listItems/'.$list->id, [
                 'completed_items' => [$completedProduct->id],
             ]);
 
@@ -89,7 +89,7 @@ class ListItensUpdateTest extends TestCase
         $this->createListProduct($list, $thirdProduct);
 
         $this->actingAs($user)
-            ->putJson('/api/listItems/' . $list->id, [
+            ->putJson('/api/listItems/'.$list->id, [
                 'completed_items' => [$completedProduct->id],
             ])
             ->assertStatus(200)
@@ -113,7 +113,7 @@ class ListItensUpdateTest extends TestCase
         );
 
         $this->actingAs($user)
-            ->putJson('/api/listItems/' . $list->id, [
+            ->putJson('/api/listItems/'.$list->id, [
                 'completed_items' => [],
             ])
             ->assertStatus(200)
@@ -151,7 +151,7 @@ class ListItensUpdateTest extends TestCase
 
     private function createListProduct(ItensList $list, Product $product): ListProducts
     {
-        return ListProducts::unguarded(fn() => ListProducts::create([
+        return ListProducts::unguarded(fn () => ListProducts::create([
             'list_id' => $list->id,
             'product_id' => $product->id,
             'quantity' => 1,

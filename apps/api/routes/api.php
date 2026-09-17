@@ -32,7 +32,6 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/login', [AuthController::class, 'login']);
 
-
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::prefix('admin')->group(function () {
         Route::post('/users/revertDeleted/{user}', [UserController::class, 'revertDestroy'])->withTrashed();
@@ -48,7 +47,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::apiResource('/categories', ProductCategoryController::class);
     });
 });
-
 
 // Rotas de verificação de email
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
@@ -85,7 +83,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     // UNITIES
     Route::apiResource('/unities', UnityController::class);
-    //FAVORITE-PRODUCTS
+    // FAVORITE-PRODUCTS
     Route::post('/products/{product}/favorite', [FavoriteProductsController::class, 'favorite']);
 
     // CATEGORIES
@@ -95,7 +93,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/invoice/process', [InvoiceController::class, 'processInvoice']);
     Route::post('/invoice/processXML', [InvoiceController::class, 'processXML']);
 
-    //EVENTS
+    // EVENTS
     Route::apiResource('/events', EventController::class);
     Route::post('/events/check-all', [EventController::class, 'checkAll']);
 
@@ -104,7 +102,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/companies/{company}/dashboard', [CompanyController::class, 'dashboardData']);
     Route::post('/companies/submit', [CompanyController::class, 'submit']);
 
-    //COMPANY OWNERS
+    // COMPANY OWNERS
     Route::post('companies/{company}/request-access', [CompanyOwnersController::class, 'requestAccess']);
     Route::post('companies/request-with-new-company', [CompanyOwnersController::class, 'storeCompanyAndRequest']);
     Route::get('user/company-requests', [CompanyOwnersController::class, 'index']);

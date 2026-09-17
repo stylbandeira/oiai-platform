@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use SimpleXMLElement;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Support\Facades\Log;
+use SimpleXMLElement;
 
 class NFCeXMLParserService
 {
@@ -20,7 +20,7 @@ class NFCeXMLParserService
             // Carregar XML
             $xml = simplexml_load_string($xmlContent);
 
-            if (!$xml) {
+            if (! $xml) {
                 throw new Exception('Não foi possível carregar XML');
             }
 
@@ -29,17 +29,17 @@ class NFCeXMLParserService
 
             return [
                 'status' => 'success',
-                'data' => $dados
+                'data' => $dados,
             ];
         } catch (Exception $e) {
             Log::error('Erro ao processar XML NFCe:', [
                 'error' => $e->getMessage(),
-                'xml_preview' => substr($xmlContent, 0, 500)
+                'xml_preview' => substr($xmlContent, 0, 500),
             ]);
 
             return [
                 'status' => 'error',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
     }
@@ -80,7 +80,7 @@ class NFCeXMLParserService
         $nfeChildren = $nfeNamespace ? $nfe->children($nfeNamespace) : $nfe;
         $infNFe = $nfeChildren->infNFe[0];
 
-        if (!isset($infNFe)) {
+        if (! isset($infNFe)) {
             throw new Exception('Nó infNFe não encontrado no XML');
         }
 
@@ -157,10 +157,10 @@ class NFCeXMLParserService
 
             if (isset($dest->CPF)) {
                 $destinatario['cpf'] = $this->formatCPF((string) $dest->CPF);
-                $destinatario['nome'] = 'CONSUMIDOR FINAL (CPF: ' . $destinatario['cpf'] . ')';
+                $destinatario['nome'] = 'CONSUMIDOR FINAL (CPF: '.$destinatario['cpf'].')';
             } elseif (isset($dest->CNPJ)) {
                 $destinatario['cnpj'] = $this->formatCNPJ((string) $dest->CNPJ);
-                $destinatario['nome'] = 'CONSUMIDOR FINAL (CNPJ: ' . $destinatario['cnpj'] . ')';
+                $destinatario['nome'] = 'CONSUMIDOR FINAL (CNPJ: '.$destinatario['cnpj'].')';
             }
         }
 
@@ -232,7 +232,7 @@ class NFCeXMLParserService
     {
         $produtos = [];
 
-        if (!isset($infNFe->det)) {
+        if (! isset($infNFe->det)) {
             return $produtos;
         }
 
@@ -267,7 +267,7 @@ class NFCeXMLParserService
     {
         $pagamentos = [];
 
-        if (!isset($infNFe->pag->detPag)) {
+        if (! isset($infNFe->pag->detPag)) {
             return $pagamentos;
         }
 
@@ -376,7 +376,7 @@ class NFCeXMLParserService
         // Tentar pegar do protNFe, inclusive no envelope específico da SEFAZ-PE.
         $prot = $xml->xpath('//*[local-name()="protNFe"]');
 
-        if (!empty($prot)) {
+        if (! empty($prot)) {
             $prot = $prot[0];
             $protNamespace = $prot->getNamespaces(true)[''] ?? null;
             $protChildren = $protNamespace ? $prot->children($protNamespace) : $prot;
@@ -397,8 +397,9 @@ class NFCeXMLParserService
     private function formatCEP($cep)
     {
         if (strlen($cep) === 8) {
-            return substr($cep, 0, 5) . '-' . substr($cep, 5, 3);
+            return substr($cep, 0, 5).'-'.substr($cep, 5, 3);
         }
+
         return $cep;
     }
 
@@ -408,11 +409,12 @@ class NFCeXMLParserService
     private function formatCPF($cpf)
     {
         if (strlen($cpf) === 11) {
-            return substr($cpf, 0, 3) . '.' .
-                substr($cpf, 3, 3) . '.' .
-                substr($cpf, 6, 3) . '-' .
+            return substr($cpf, 0, 3).'.'.
+                substr($cpf, 3, 3).'.'.
+                substr($cpf, 6, 3).'-'.
                 substr($cpf, 9, 2);
         }
+
         return $cpf;
     }
 
@@ -422,12 +424,13 @@ class NFCeXMLParserService
     private function formatCNPJ($cnpj)
     {
         if (strlen($cnpj) === 14) {
-            return substr($cnpj, 0, 2) . '.' .
-                substr($cnpj, 2, 3) . '.' .
-                substr($cnpj, 5, 3) . '/' .
-                substr($cnpj, 8, 4) . '-' .
+            return substr($cnpj, 0, 2).'.'.
+                substr($cnpj, 2, 3).'.'.
+                substr($cnpj, 5, 3).'/'.
+                substr($cnpj, 8, 4).'-'.
                 substr($cnpj, 12, 2);
         }
+
         return $cnpj;
     }
 
@@ -438,8 +441,9 @@ class NFCeXMLParserService
     {
         try {
             $date = new \DateTime($dateTime);
+
             return $date->format('d/m/Y H:i:s');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $dateTime;
         }
     }

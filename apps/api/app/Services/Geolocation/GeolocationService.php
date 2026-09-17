@@ -2,9 +2,7 @@
 
 namespace App\Services\Geolocation;
 
-use App\Models\Address;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class GeolocationService
 {
@@ -52,10 +50,6 @@ class GeolocationService
 
     /**
      * Returns distance between two points using Haversine formula
-     *
-     * @param array $origin
-     * @param array $destination
-     * @return float|null
      */
     public function between(array $origin, array $destination): ?float
     {

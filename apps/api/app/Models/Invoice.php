@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Invoice extends BaseModel
 {
     use HasFactory;
+
     const VALID_AREA_CODES = [
         'PE' => '26',
         'SP' => '35',
@@ -20,7 +21,7 @@ class Invoice extends BaseModel
         'company_id',
         'receipt_data',
         'invoice_data',
-        'pending'
+        'pending',
     ];
 
     public function user()

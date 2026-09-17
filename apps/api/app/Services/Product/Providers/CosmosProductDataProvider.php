@@ -117,7 +117,7 @@ class CosmosProductDataProvider extends AbstractProductDataProvider implements P
         $weight = $this->positiveNumber($payload['net_weight'] ?? null)
             ?? $this->positiveNumber($payload['gross_weight'] ?? null);
         $quantity = $weight !== null
-            ? $this->formatNumber($weight) . ' g'
+            ? $this->formatNumber($weight).' g'
             : $this->extractQuantityFromName($rawName);
 
         $data = [
@@ -146,5 +146,4 @@ class CosmosProductDataProvider extends AbstractProductDataProvider implements P
 
         return $data;
     }
-
 }

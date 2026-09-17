@@ -11,7 +11,7 @@ class ExportServiceTest extends TestCase
 {
     public function test_export_to_csv_returns_streamed_response_with_headers_and_rows(): void
     {
-        $service = new ExportService();
+        $service = new ExportService;
         $product = new Product([
             'name' => 'Arroz',
             'sku' => 'SKU-1',
@@ -23,7 +23,7 @@ class ExportServiceTest extends TestCase
             [
                 'Nome' => 'name',
                 'SKU' => 'sku',
-                'Preço' => fn(Product $item) => number_format($item->average_price, 2),
+                'Preço' => fn (Product $item) => number_format($item->average_price, 2),
                 'Categoria' => 'category.name',
             ],
             'produtos'
@@ -42,7 +42,7 @@ class ExportServiceTest extends TestCase
 
     public function test_simple_export_delegates_to_csv_export(): void
     {
-        $service = new ExportService();
+        $service = new ExportService;
 
         $response = $service->simpleExport(
             new Collection([new Product(['name' => 'Feijao'])]),

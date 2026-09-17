@@ -43,7 +43,7 @@ class ListOptimizeTest extends TestCase
         $onlyCompanyProduct = $this->createCompanyProduct($secondProduct, 6.5);
 
         $response = $this->actingAs($user)
-            ->postJson('/api/lists/' . $list->id . '/optimize');
+            ->postJson('/api/lists/'.$list->id.'/optimize');
 
         $response
             ->assertStatus(200)
@@ -84,17 +84,17 @@ class ListOptimizeTest extends TestCase
         $cheapCompanyProduct = $this->createCompanyProduct($product, 1100.25);
 
         $this->actingAs($user)
-            ->getJson('/api/lists/' . $list->id)
+            ->getJson('/api/lists/'.$list->id)
             ->assertOk()
             ->assertJsonPath('list.products.0.average_price', 1250.75);
 
         $this->actingAs($user)
-            ->postJson('/api/lists/' . $list->id . '/optimize')
+            ->postJson('/api/lists/'.$list->id.'/optimize')
             ->assertOk()
             ->assertJsonFragment(['average_price' => 1100.25]);
 
         $response = $this->actingAs($user)
-            ->getJson('/api/lists/' . $list->id);
+            ->getJson('/api/lists/'.$list->id);
 
         $response
             ->assertOk()
@@ -124,7 +124,7 @@ class ListOptimizeTest extends TestCase
         $cheapCompanyProduct = $this->createCompanyProduct($product, 10);
 
         $this->actingAs($user)
-            ->postJson('/api/lists/' . $list->id . '/optimize')
+            ->postJson('/api/lists/'.$list->id.'/optimize')
             ->assertOk()
             ->assertJsonFragment(['average_price' => 10]);
 
@@ -162,7 +162,7 @@ class ListOptimizeTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->postJson('/api/lists/' . $list->id . '/optimize', [
+            ->postJson('/api/lists/'.$list->id.'/optimize', [
                 'latitude' => -8.047562,
                 'longitude' => -34.877001,
                 'distance' => 100,
@@ -182,7 +182,7 @@ class ListOptimizeTest extends TestCase
 
         $companies = array_values(
             $this->actingAs($user)
-                ->getJson('/api/lists/' . $list->id)
+                ->getJson('/api/lists/'.$list->id)
                 ->assertOk()
                 ->json('list.companies')
         );
@@ -233,7 +233,7 @@ class ListOptimizeTest extends TestCase
                     [$expensiveCompany, $expensiveCompanyProduct, $expensivePrice],
                 ] as [$company, $companyProduct, $price]
             ) {
-                UserAddedProducts::unguarded(fn() => UserAddedProducts::create([
+                UserAddedProducts::unguarded(fn () => UserAddedProducts::create([
                     'user_id' => $user->id,
                     'company_id' => $company->id,
                     'product_id' => $product->id,
@@ -252,7 +252,7 @@ class ListOptimizeTest extends TestCase
             $expectedCompanyProductIds[$product->id] = $cheapCompanyProduct->id;
         }
 
-        (new AveragePriceJob())->handle();
+        (new AveragePriceJob)->handle();
 
         foreach ($products as $product) {
             $this->assertEqualsWithDelta(
@@ -268,21 +268,21 @@ class ListOptimizeTest extends TestCase
         }
 
         $regularList = $this->actingAs($user)
-            ->getJson('/api/lists/' . $list->id)
+            ->getJson('/api/lists/'.$list->id)
             ->assertOk()
             ->json('list');
 
         $regularTotal = collect($regularList['products'])->sum(
-            fn(array $product) => $product['average_price'] * $product['quantity'],
+            fn (array $product) => $product['average_price'] * $product['quantity'],
         );
         $this->assertEqualsWithDelta(998.0, $regularTotal, 0.001);
 
         $this->actingAs($user)
-            ->postJson('/api/lists/' . $list->id . '/optimize')
+            ->postJson('/api/lists/'.$list->id.'/optimize')
             ->assertOk();
 
         $optimizedList = $this->actingAs($user)
-            ->getJson('/api/lists/' . $list->id)
+            ->getJson('/api/lists/'.$list->id)
             ->assertOk()
             ->assertJsonPath('optimized', true)
             ->json('list');
@@ -326,15 +326,15 @@ class ListOptimizeTest extends TestCase
         $cheapCompanyProduct = $this->createCompanyProduct($product, 10);
 
         $this->actingAs($user)
-            ->postJson('/api/lists/' . $list->id . '/optimize', [
+            ->postJson('/api/lists/'.$list->id.'/optimize', [
                 'latitude' => -9.391309,
-                'longitude' => -40.524186
+                'longitude' => -40.524186,
             ])
             ->assertOk();
 
         $this->actingAs($user)
-            ->get('/api/lists/' . $list->id)
-            ->assertJsonFragment(["distance" => 1528.792])
+            ->get('/api/lists/'.$list->id)
+            ->assertJsonFragment(['distance' => 1528.792])
             ->assertOk();
 
         $this->assertDatabaseHas('list_products', [
@@ -372,12 +372,12 @@ class ListOptimizeTest extends TestCase
         }
 
         $this->actingAs($user)
-            ->postJson('/api/lists/' . $list->id . '/optimize', $origin)
+            ->postJson('/api/lists/'.$list->id.'/optimize', $origin)
             ->assertOk();
 
         $companies = array_values(
             $this->actingAs($user)
-                ->getJson('/api/lists/' . $list->id)
+                ->getJson('/api/lists/'.$list->id)
                 ->assertOk()
                 ->json('list.companies')
         );
@@ -416,7 +416,7 @@ class ListOptimizeTest extends TestCase
 
     private function createListProduct(ItensList $list, Product $product, int $quantity): ListProducts
     {
-        return ListProducts::unguarded(fn() => ListProducts::create([
+        return ListProducts::unguarded(fn () => ListProducts::create([
             'list_id' => $list->id,
             'product_id' => $product->id,
             'quantity' => $quantity,
@@ -429,7 +429,7 @@ class ListOptimizeTest extends TestCase
 
         $address = Address::factory()->create([
             'latitude' => -22.847182,
-            'longitude' => -43.47096
+            'longitude' => -43.47096,
         ]);
 
         $company->address_id = $address->id;

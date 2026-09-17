@@ -48,7 +48,7 @@ class CompanyOwnerService
     private function normalizeForSync(User $user, array $companies, ?int $approvedBy): array
     {
         return collect($companies)
-            ->mapWithKeys(function (array $company) use ($user, $approvedBy) {
+            ->mapWithKeys(function (array $company) use ($approvedBy) {
                 $status = $company['status'] ?? 'active';
 
                 return [

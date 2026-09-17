@@ -3,7 +3,6 @@
 namespace App\Actions\Address;
 
 use App\Http\Requests\Address\AddressStoreRequest;
-use App\Models\Address;
 use App\Repositories\AddressRepository;
 
 class StoreAddressAction

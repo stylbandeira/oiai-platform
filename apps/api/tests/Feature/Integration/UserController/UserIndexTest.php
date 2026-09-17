@@ -18,7 +18,7 @@ class UserIndexTest extends TestCase
         $admin = User::factory()->admin()->create();
 
         $response = $this->actingAs($admin)
-            ->getJson('/api/admin/users?' . http_build_query($query));
+            ->getJson('/api/admin/users?'.http_build_query($query));
 
         $response
             ->assertStatus(422)

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Integration\InvoiceController;
 
-use App\Models\Invoice;
 use App\Models\User;
 use App\Services\NFCeScraperService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -126,7 +125,7 @@ class InvoiceProcessInvoiceTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonPath('invoice.access_key', 'NFCe' . $accessKey);
+            ->assertJsonPath('invoice.access_key', 'NFCe'.$accessKey);
     }
 
     public function invalidPayloadsProvider(): array

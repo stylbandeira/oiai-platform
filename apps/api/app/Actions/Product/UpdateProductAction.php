@@ -2,13 +2,9 @@
 
 namespace App\Actions\Product;
 
-use App\Http\Resources\AdminProductResource;
-use App\Http\Resources\ClientProductResource;
 use App\Models\Product;
-use App\Models\User;
 use App\Repositories\ProductRepository;
 use App\Services\Product\ProductImageService;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
 
 class UpdateProductAction

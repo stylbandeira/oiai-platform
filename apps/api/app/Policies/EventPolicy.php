@@ -4,8 +4,6 @@ namespace App\Policies;
 
 use App\Models\Event;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
-use Illuminate\Support\Facades\Log;
 
 class EventPolicy
 {
@@ -17,6 +15,7 @@ class EventPolicy
         if ($user->isAdmin()) {
             return true;
         }
+
         return false;
     }
 
@@ -27,9 +26,10 @@ class EventPolicy
     {
         if ($user->isAdmin()) {
             return true;
-        } else if ($user->visibleEvents()) {
+        } elseif ($user->visibleEvents()) {
             return true;
         }
+
         return false;
     }
 
@@ -48,9 +48,10 @@ class EventPolicy
     {
         if ($user->isAdmin()) {
             return true;
-        } else if ($user->visibleEvents()) {
+        } elseif ($user->visibleEvents()) {
             return true;
         }
+
         return false;
     }
 

@@ -11,16 +11,19 @@ class Company extends BaseModel
     use HasFactory, SoftDeletes;
 
     const STATUS_ACTIVE = 'active';
+
     const STATUS_INACTIVE = 'INACTIVE';
+
     const STATUS_PENDING = 'pending';
 
     const VALID_STATUSES = [
         self::STATUS_ACTIVE,
         self::STATUS_INACTIVE,
-        self::STATUS_PENDING
+        self::STATUS_PENDING,
     ];
 
     protected $table = 'company';
+
     protected $fillable = [
         'address_id',
         'name',
@@ -32,11 +35,12 @@ class Company extends BaseModel
         'phone',
         'description',
         'raw_address',
-        'ie'
+        'ie',
     ];
+
     protected $attributes = [
         'img' => './',
-        'status' => 'active'
+        'status' => 'active',
     ];
 
     public function products()
@@ -57,7 +61,7 @@ class Company extends BaseModel
 
     public function getImgUrlAttribute()
     {
-        if (!$this->img) {
+        if (! $this->img) {
             return null;
         }
 

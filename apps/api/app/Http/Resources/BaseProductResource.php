@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class BaseProductResource extends JsonResource
 {
-
     /**
      * Campos comuns para TODOS os tipos de usuário
      */
@@ -16,7 +17,7 @@ class BaseProductResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'sku' => $this->sku,
-            'img' => $this->img ? config('app.url') . '/storage/' . $this->img : null,
+            'img' => $this->img ? config('app.url').'/storage/'.$this->img : null,
             'ean' => $this->ean,
             'average_price' => floatval($this->average_price),
             'validated' => $this->validated,
@@ -43,8 +44,8 @@ class BaseProductResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @param  Request  $request
+     * @return array|Arrayable|\JsonSerializable
      */
     public function toArray($request)
     {

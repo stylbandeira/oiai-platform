@@ -95,7 +95,7 @@ class GeocodeScheduleJobTest extends TestCase
     public function test_marks_address_as_error_when_request_throws_exception(): void
     {
         Http::fake([
-            'nominatim.openstreetmap.org/search*' => fn() => throw new \RuntimeException('Provider unavailable'),
+            'nominatim.openstreetmap.org/search*' => fn () => throw new \RuntimeException('Provider unavailable'),
         ]);
 
         $address = $this->createPendingAddress();
@@ -162,7 +162,7 @@ class GeocodeScheduleJobTest extends TestCase
             ]),
         ]);
 
-        collect(range(1, 31))->each(fn() => $this->createPendingAddress());
+        collect(range(1, 31))->each(fn () => $this->createPendingAddress());
 
         $this->runJob();
 
@@ -190,7 +190,8 @@ class GeocodeScheduleJobTest extends TestCase
 
     private function runJob(): void
     {
-        (new class extends GeocodeScheduleJob {
+        (new class extends GeocodeScheduleJob
+        {
             protected function sleepSeconds(): int
             {
                 return 0;

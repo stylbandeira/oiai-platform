@@ -2,10 +2,8 @@
 
 namespace App\Services\User;
 
-use App\Models\CompanyOwners;
 use App\Models\User;
 use App\Services\CompanyOwners\CompanyOwnerService;
-use Illuminate\Support\Facades\Log;
 
 class UpdateUserService
 {
@@ -25,7 +23,6 @@ class UpdateUserService
         } else {
             $this->companyOwnerService->detach($user);
         }
-
 
         return $user->load('companies');
     }

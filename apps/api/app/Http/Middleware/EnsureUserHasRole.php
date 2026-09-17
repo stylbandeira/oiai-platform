@@ -4,15 +4,12 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserHasRole
 {
     /**
      * Handle an incoming request.
      *
-     * @param Request $request
-     * @param Closure $next
      * @param [type] ...$roles
      * @return void
      */

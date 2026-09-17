@@ -22,7 +22,7 @@ class ProductUpdateTest extends TestCase
         $product = Product::factory()->create();
 
         $response = $this->actingAs($admin)
-            ->putJson('/api/admin/products/' . $product->id, $payload);
+            ->putJson('/api/admin/products/'.$product->id, $payload);
 
         $response
             ->assertStatus(422)
@@ -37,7 +37,7 @@ class ProductUpdateTest extends TestCase
         ]);
 
         $response = $this->actingAs($client)
-            ->putJson('/api/products/' . $product->id, [
+            ->putJson('/api/products/'.$product->id, [
                 'name' => 'Tentativa',
             ]);
 
@@ -56,7 +56,7 @@ class ProductUpdateTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)
-            ->putJson('/api/admin/products/' . $product->id, [
+            ->putJson('/api/admin/products/'.$product->id, [
                 'name' => 'Produto Atualizado',
                 'sku' => 'SKU-NEW',
                 'quantity' => 7,
@@ -90,7 +90,7 @@ class ProductUpdateTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)
-            ->putJson('/api/admin/products/' . $product->id, [
+            ->putJson('/api/admin/products/'.$product->id, [
                 'name' => 'Produto Resource',
             ]);
 

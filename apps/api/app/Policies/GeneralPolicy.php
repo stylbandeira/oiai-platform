@@ -24,10 +24,9 @@ class GeneralPolicy
     /**
      * Verifica se um usuário pode efetuar uma determinada ação em uma determinada entidade
      *
-     * @param User $user
      * @param [type] $action
      * @param [type] $entity
-     * @return boolean
+     * @return bool
      */
     public function canPerformAction(User $user, $action, $entity)
     {
@@ -46,10 +45,9 @@ class GeneralPolicy
     /**
      * Define as ações que uma empresa pode fazer
      *
-     * @param User $user
      * @param [type] $action
      * @param [type] $entity
-     * @return boolean
+     * @return bool
      */
     protected function canPerfomActionAsCompany(User $user, $action, $entity)
     {
@@ -62,10 +60,9 @@ class GeneralPolicy
     /**
      * Define as ações que um cliente pode fazer
      *
-     * @param User $user
      * @param [type] $action
      * @param [type] $entity
-     * @return boolean
+     * @return bool
      */
     protected function canPerformActionAsClient(User $user, $action, $entity)
     {

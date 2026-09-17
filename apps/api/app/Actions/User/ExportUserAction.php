@@ -9,9 +9,7 @@ use App\Services\ExportService;
 
 class ExportUserAction
 {
-    public function __construct(private UserRepository $userRepository)
-    {
-    }
+    public function __construct(private UserRepository $userRepository) {}
 
     public function execute(IndexUserRequest $request, ExportService $exportService, UserExportMapper $mapper)
     {

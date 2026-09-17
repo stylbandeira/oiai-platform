@@ -27,7 +27,7 @@ class CompanyDashboardDataTest extends TestCase
         $company->products()->attach($products->pluck('id'));
 
         $response = $this->actingAs($companyUser)
-            ->getJson('/api/companies/' . $company->id . '/dashboard');
+            ->getJson('/api/companies/'.$company->id.'/dashboard');
 
         $response
             ->assertStatus(200)
@@ -49,7 +49,7 @@ class CompanyDashboardDataTest extends TestCase
         ]);
 
         $response = $this->actingAs($companyUser)
-            ->getJson('/api/companies/' . $company->id . '/dashboard');
+            ->getJson('/api/companies/'.$company->id.'/dashboard');
 
         $response
             ->assertStatus(403);
@@ -67,7 +67,7 @@ class CompanyDashboardDataTest extends TestCase
         ]);
 
         $response = $this->actingAs($companyUser)
-            ->getJson('/api/companies/' . $company->id . '/dashboard');
+            ->getJson('/api/companies/'.$company->id.'/dashboard');
 
         $response
             ->assertStatus(403);

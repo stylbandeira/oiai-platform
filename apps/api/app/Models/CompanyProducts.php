@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class CompanyProducts extends BaseModel
 {
     use HasFactory;
+
     protected $table = 'company_products';
 
     protected $fillable = [
         'product_id',
         'company_id',
-        'average_price'
+        'average_price',
     ];
 
     public function company()

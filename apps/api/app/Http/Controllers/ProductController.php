@@ -21,13 +21,14 @@ use App\Http\Resources\ClientProductResource;
 use App\Models\Product;
 use App\Services\ExportService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index(ProductIndexRequest $request, IndexProductAction $action)
     {
@@ -45,14 +46,14 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @return Response
      */
     public function store(ProductStoreRequest $request, StoreProductAction $action)
     {
         $user = $request->user();
 
-        if ($request->company_id && !$user->hasAccessToCompany($request->company_id)) {
+        if ($request->company_id && ! $user->hasAccessToCompany($request->company_id)) {
             return response([
                 'message' => 'Usuário company não possui empresa ativa.',
             ], 400);
@@ -70,8 +71,7 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  Product  $product
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function show(Request $request, Product $product, ShowProductAction $action)
     {
@@ -111,8 +111,6 @@ class ProductController extends Controller
     /**
      * Exports an CSV file of products
      *
-     * @param ProductExportRequest $request
-     * @param ExportService $exportService
      * @return void
      */
     public function export(ProductExportRequest $request, ExportService $exportService, ExportProductAction $action)
@@ -123,8 +121,6 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param integer $id
-     * @param DestroyProductAction $action
      * @return void
      */
     public function destroy(int $id, DestroyProductAction $action)

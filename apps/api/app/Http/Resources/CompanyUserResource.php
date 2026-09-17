@@ -2,13 +2,16 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request;
+
 class CompanyUserResource extends BaseUserResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @param  Request  $request
+     * @return array|Arrayable|\JsonSerializable
      */
     public function toArray($request)
     {
@@ -24,7 +27,7 @@ class CompanyUserResource extends BaseUserResource
             'activeCompanies' => $this->whenLoaded('activeCompanies', $this->activeCompanies),
             'pendingCompanies' => $this->whenLoaded('pendingCompanies', function () {
                 return CompanyResource::collection($this->pendingCompanies);
-            })
+            }),
         ];
     }
 }

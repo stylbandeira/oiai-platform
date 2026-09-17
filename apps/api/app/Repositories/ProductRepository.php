@@ -6,8 +6,6 @@ use App\Enums\ProductQuantitySource;
 use App\Enums\ProductRefinementStatus;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 class ProductRepository
@@ -55,7 +53,7 @@ class ProductRepository
             }
         }
 
-        if (isset($data['validated']) && !$user->isClient()) {
+        if (isset($data['validated']) && ! $user->isClient()) {
             if ($data['validated'] === 'pendentes') {
                 $query->where('validated', false);
             }
@@ -122,6 +120,7 @@ class ProductRepository
     {
         $record = $this->find($id);
         $record->update($data);
+
         return $record;
     }
 
@@ -150,6 +149,7 @@ class ProductRepository
     public function delete($id)
     {
         $product = $this->find($id);
+
         return $product->delete();
     }
 

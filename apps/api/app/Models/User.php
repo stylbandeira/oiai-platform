@@ -11,28 +11,32 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
-// implements MustVerifyEmail
+    // implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     const POINTS = 'points';
+
     const VALID_STATUSES = [
         'active',
         'inactive',
-        'suspended'
+        'suspended',
     ];
+
     const VALID_TYPES = [
         'admin',
         'client',
-        'company'
+        'company',
     ];
 
     const TYPE_ADMIN = 'admin';
+
     const TYPE_CLIENT = 'client';
+
     const TYPE_COMPANY = 'company';
 
     const ALLOWED_ACTIVITY_TYPE = [
-        Event::TYPE_PRODUCT_INSERT
+        Event::TYPE_PRODUCT_INSERT,
     ];
 
     /**
@@ -48,7 +52,7 @@ class User extends Authenticatable
         'cpf',
         'status',
         'points',
-        'hasNotification'
+        'hasNotification',
     ];
 
     protected $attributes = [
@@ -113,7 +117,6 @@ class User extends Authenticatable
             ->withPivot(['status', 'message', 'approved_at', 'approved_by'])
             ->wherePivot('status', 'pending');
     }
-
 
     public function favoriteProducts()
     {
