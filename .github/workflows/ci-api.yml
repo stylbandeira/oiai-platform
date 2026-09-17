@@ -1,0 +1,93 @@
+name: API CI
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'apps/api/**'
+      - 'docker/api/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/ci-api.yml'
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'apps/api/**'
+      - 'docker/api/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/ci-api.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Backend tests and quality
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: oiai-testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    defaults:
+      run:
+        working-directory: apps/api
+
+    env:
+      APP_ENV: testing
+      APP_KEY: base64:ci-test-key-ci-test-key-ci-test-key-ci-test-key=
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: oiai-testing
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      CACHE_DRIVER: array
+      QUEUE_CONNECTION: sync
+      SCOUT_DRIVER: collection
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_mysql, dom, xml, xmlwriter, gd, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate Composer configuration
+        run: composer validate --strict --no-check-publish
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
+
+      - name: Prepare Laravel
+        run: |
+          php artisan key:generate --force
+          php artisan migrate --force
+          php artisan storage:link --force
+
+      - name: Check code style
+        run: vendor/bin/pint --test
+
+      - name: Run static analysis
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress
+
+      - name: Run automated tests
+        run: php artisan test
