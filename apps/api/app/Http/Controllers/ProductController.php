@@ -22,15 +22,16 @@ use App\Models\Product;
 use App\Services\ExportService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return Response
+     * @return JsonResource
      */
-    public function index(ProductIndexRequest $request, IndexProductAction $action)
+    public function index(ProductIndexRequest $request, IndexProductAction $action): JsonResource
     {
         $user = $request->user();
 
@@ -46,8 +47,8 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  Request  $request
-     * @return Response
+     * @param  ProductStoreRequest  $request
+     * @return JsonResource|Response
      */
     public function store(ProductStoreRequest $request, StoreProductAction $action)
     {
@@ -71,9 +72,10 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      *
-     * @return Response
+     * @return AdminProductResource|ClientProductResource
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function show(Request $request, Product $product, ShowProductAction $action)
+    public function show(Request $request, Product $product, ShowProductAction $action): AdminProductResource|ClientProductResource
     {
         $user = $request->user();
 
@@ -111,7 +113,7 @@ class ProductController extends Controller
     /**
      * Exports an CSV file of products
      *
-     * @return void
+     * @return mixed
      */
     public function export(ProductExportRequest $request, ExportService $exportService, ExportProductAction $action)
     {
@@ -121,9 +123,9 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @return void
+     * @return Response
      */
-    public function destroy(int $id, DestroyProductAction $action)
+    public function destroy(int $id, DestroyProductAction $action): Response
     {
         $action->execute($id);
 

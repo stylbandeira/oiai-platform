@@ -14,15 +14,14 @@ use App\Exports\Mappers\UserExportMapper;
 use App\Http\Requests\User\IndexUserRequest;
 use App\Http\Requests\User\UserStoreRequest;
 use App\Http\Requests\User\UserUpdateRequest;
-use App\Http\Resources\AdminUserResource;
 use App\Http\Resources\ClientDashboardResource;
-use App\Http\Resources\ClientUserResource;
-use App\Http\Resources\CompanyUserResource;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\CompanyOwners\CompanyOwnerService;
 use App\Services\ExportService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserController extends Controller
 {
@@ -44,9 +43,9 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return void
+     * @return JsonResource
      */
-    public function index(IndexUserRequest $request, IndexUserAction $action)
+    public function index(IndexUserRequest $request, IndexUserAction $action): JsonResource
     {
         $data = $request->validated();
 
@@ -54,7 +53,7 @@ class UserController extends Controller
 
         $users = $action->execute($data);
 
-        return AdminUserResource::collection($users);
+        return UserResource::collection($users);
     }
 
     /**
@@ -75,34 +74,24 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return void
+     * @param  User  $user
+     * @return JsonResource
      */
-    public function show(Request $request, User $user, ShowUserAction $action)
+    public function show(Request $request, User $user, ShowUserAction $action): JsonResource
     {
-        $currentUser = $request->user();
+        $this->authorize('view', $user);
 
         $user = $action->execute($user->id);
 
-        if ($currentUser->isAdmin()) {
-            return new AdminUserResource($user);
-        } elseif ($currentUser->isClient() && $user->id === $currentUser->id) {
-            return new ClientUserResource($user);
-        } elseif ($currentUser->isCompany() && $user->id === $currentUser->id) {
-            return new CompanyUserResource($user);
-        }
-
-        return response([
-            'message' => 'Não autorizado',
-        ], 403);
+        return new UserResource($user);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @return void
+     * @return Response
      */
-    public function update(UserUpdateRequest $request, User $user, UpdateUserAction $action)
+    public function update(UserUpdateRequest $request, User $user, UpdateUserAction $action): Response
     {
         $companies = $request->companies ?? [];
 
@@ -118,16 +107,16 @@ class UserController extends Controller
 
         return response([
             'message' => 'Usuário editado com sucesso!',
-            'user' => new AdminUserResource($updatedUser),
+            'user' => new UserResource($updatedUser),
         ]);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @return void
+     * @return Response
      */
-    public function destroy(User $user, DestroyUserAction $action)
+    public function destroy(User $user, DestroyUserAction $action): Response
     {
         if (count($user->companies)) {
             return response([
@@ -151,9 +140,9 @@ class UserController extends Controller
     /**
      * Função para reverter deleção de usuário
      *
-     * @return void
+     * @return Response
      */
-    public function revertDestroy(User $user, RevertDestroyUserAction $action)
+    public function revertDestroy(User $user, RevertDestroyUserAction $action): Response
     {
         if (! $user->deleted_at) {
             return response([
@@ -165,7 +154,7 @@ class UserController extends Controller
 
         return response([
             'message' => 'Usuário revertido',
-            'user' => new AdminUserResource($revertedUser),
+            'user' => new UserResource($revertedUser),
         ]);
     }
 
