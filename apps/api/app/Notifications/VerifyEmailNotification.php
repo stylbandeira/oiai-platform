@@ -46,7 +46,7 @@ class VerifyEmailNotification extends Notification
 
     protected function verificationUrl($notifiable)
     {
-        $frontendUrl = env('FRONTEND_URL').'/verify-email';
+        $frontendUrl = config('cors.allowed_origins.0').'/verify-email';
 
         $verifyUrl = URL::temporarySignedRoute(
             'api.verification.verify',

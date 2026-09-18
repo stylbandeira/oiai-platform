@@ -24,8 +24,8 @@ class GeneralPolicy
     /**
      * Verifica se um usuário pode efetuar uma determinada ação em uma determinada entidade
      *
-     * @param [type] $action
-     * @param [type] $entity
+     * @param string $action
+     * @param object $entity
      * @return bool
      */
     public function canPerformAction(User $user, $action, $entity)
@@ -45,30 +45,28 @@ class GeneralPolicy
     /**
      * Define as ações que uma empresa pode fazer
      *
-     * @param [type] $action
-     * @param [type] $entity
+     * @param string $action
+     * @param object $entity
      * @return bool
      */
     protected function canPerfomActionAsCompany(User $user, $action, $entity)
     {
         // Exemplo: empresa só pode editar seus próprios produtos
-        if ($entity instanceof Product) {
-            return $user->id === $entity->company->user_id && in_array($action, ['view', 'update', 'create']);
-        }
+        return $entity instanceof Product
+            && $user->id === $entity->company->user_id
+            && in_array($action, ['view', 'update', 'create']);
     }
 
     /**
      * Define as ações que um cliente pode fazer
      *
-     * @param [type] $action
-     * @param [type] $entity
+     * @param string $action
+     * @param object $entity
      * @return bool
      */
     protected function canPerformActionAsClient(User $user, $action, $entity)
     {
         // Exemplo: cliente só pode visualizar produtos e empresas
-        if ($entity instanceof Product) {
-            return in_array($action, ['view']);
-        }
+        return $entity instanceof Product && in_array($action, ['view']);
     }
 }

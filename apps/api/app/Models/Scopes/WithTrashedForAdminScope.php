@@ -20,6 +20,7 @@ class WithTrashedForAdminScope implements Scope
             $user?->isAdmin() &&
             in_array(SoftDeletes::class, class_uses_recursive($model))
         ) {
+            /** @var \Illuminate\Database\Eloquent\Builder<\Illuminate\Database\Eloquent\Model&SoftDeletes> $builder */
             $builder->withTrashed();
         }
     }

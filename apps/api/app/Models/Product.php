@@ -6,6 +6,9 @@ use App\Enums\ProductQuantitySource;
 use App\Enums\ProductRefinementStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Scout\Searchable;
 
 class Product extends BaseModel
@@ -55,33 +58,33 @@ class Product extends BaseModel
         'refined' => ProductRefinementStatus::class,
     ];
 
-    public function companies()
+    public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_products')
             ->withPivot(['average_price']);
     }
 
-    public function userAddedProducts()
+    public function userAddedProducts(): HasMany
     {
         return $this->hasMany(UserAddedProducts::class, 'product_id');
     }
 
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 
-    public function unity()
+    public function unity(): BelongsTo
     {
         return $this->belongsTo(Unity::class, 'unit_id');
     }
 
-    public function providerAttempts()
+    public function providerAttempts(): HasMany
     {
         return $this->hasMany(ProductDataProviderAttempt::class);
     }
 
-    public function userFavorites()
+    public function userFavorites(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'favorite_products', 'product_id', 'user_id');
     }

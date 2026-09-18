@@ -28,9 +28,7 @@ class ProductPolicy
      */
     public function view(User $user, Product $product)
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin();
     }
 
     /**
@@ -40,9 +38,7 @@ class ProductPolicy
      */
     public function create(User $user)
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin();
     }
 
     /**
@@ -68,11 +64,7 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product)
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
-
-        return false;
+        return $user->isAdmin();
     }
 
     /**
@@ -82,9 +74,7 @@ class ProductPolicy
      */
     public function restore(User $user, Product $product)
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin();
     }
 
     /**
@@ -94,8 +84,6 @@ class ProductPolicy
      */
     public function forceDelete(User $user, Product $product)
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin();
     }
 }

@@ -7,9 +7,14 @@ use App\Notifications\VerifyEmailNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @property int $reputation
+ * @property string|null $token
+ */
 class User extends Authenticatable
     // implements MustVerifyEmail
 {
@@ -42,7 +47,7 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -64,7 +69,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -91,7 +96,7 @@ class User extends Authenticatable
         $this->notify(new VerifyEmailNotification);
     }
 
-    public function companies()
+    public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_owners', 'user_id', 'company_id')
             ->withPivot(['status', 'message', 'approved_at', 'approved_by']);
@@ -136,9 +141,9 @@ class User extends Authenticatable
     /**
      * TODO EPIC 015
      *
-     * @return void
+     * @return int
      */
-    public function getMonthEconomyAttribute()
+    public function getMonthEconomyAttribute(): int
     {
         return 0;
     }

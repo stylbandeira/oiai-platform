@@ -4,7 +4,9 @@ namespace App\Http\Resources;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
+use App\Models\User;
 
+/** @mixin User */
 class ClientUserResource extends BaseUserResource
 {
     /**

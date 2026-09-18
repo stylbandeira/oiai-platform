@@ -5,6 +5,7 @@
 /storage/*.key
 /vendor
 /apps/api/vendor
+/apps/api/storage/framework/phpstan
 .env
 .env.backup
 .env.testing

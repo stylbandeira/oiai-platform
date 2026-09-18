@@ -26,7 +26,6 @@ class ProductObserver
     public function updating(Product $product)
     {
         if ($product->getOriginal('validated') === false && ! $product->validated_by) {
-            $this->userRepo = UserRepository::class;
             $this->userRepo->addPoints($product->created_by, 3);
         }
     }

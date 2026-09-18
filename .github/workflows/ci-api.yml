@@ -90,7 +90,7 @@ jobs:
         run: vendor/bin/pint --test
 
       - name: Run static analysis
-        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --memory-limit=512M
 
       - name: Run automated tests
         run: php artisan test

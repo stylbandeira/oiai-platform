@@ -28,9 +28,7 @@ abstract class AbstractProductDataProvider
             'url' => $url,
             'status' => $response->status(),
             'content_type' => $response->header('Content-Type'),
-            'request_id' => $response->header('X-Request-Id')
-                ?? $response->header('X-Correlation-Id')
-                ?? $response->header('Cf-Ray'),
+            'request_id' => $response->header('X-Request-Id') ?? $response->header('X-Correlation-Id') ?? $response->header('Cf-Ray'),
             'response_message' => $this->responseMessage($response),
         ];
     }
@@ -40,10 +38,10 @@ abstract class AbstractProductDataProvider
         $payload = $response->json();
         $message = is_array($payload)
             ? data_get($payload, 'message')
-                ?? data_get($payload, 'mensagem')
-                ?? data_get($payload, 'error_description')
-                ?? data_get($payload, 'error')
-                ?? data_get($payload, 'erro')
+            ?? data_get($payload, 'mensagem')
+            ?? data_get($payload, 'error_description')
+            ?? data_get($payload, 'error')
+            ?? data_get($payload, 'erro')
             : null;
         $message = is_scalar($message) ? (string) $message : $response->body();
         $message = trim(preg_replace('/\s+/', ' ', $message) ?? '');
@@ -65,7 +63,7 @@ abstract class AbstractProductDataProvider
             $unit = $unit === 'kg' ? 'g' : 'ml';
         }
 
-        return $this->formatNumber($value).' '.$unit;
+        return $this->formatNumber($value) . ' ' . $unit;
     }
 
     protected function normalizeText(string $value): string

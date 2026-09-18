@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Models\Unity;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
@@ -53,32 +52,28 @@ class UsersPolicy
     /**
      * Determine whether the user can create models.
      *
-     * @return Response|bool
+     * @return bool
      */
-    public function create(User $user)
+    public function create(User $user): bool
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin();
     }
 
     /**
      * Determine whether the user can update the model.
      *
-     * @param  Unity  $unity
+     * @param  User  $affected
      * @return Response|bool
      */
     public function update(User $user, User $affected)
     {
-        if ($user->isAdmin() && ! $affected->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin() && ! $affected->isAdmin();
     }
 
     /**
      * Determine whether the user can delete the model.
      *
-     * @param  Unity  $unity
+     * @param  User  $affected
      * @return Response|bool
      */
     public function delete(User $user, User $affected)
@@ -93,26 +88,22 @@ class UsersPolicy
     /**
      * Determine whether the user can restore the model.
      *
-     * @param  Unity  $unity
+     * @param  User  $affected
      * @return Response|bool
      */
     public function restore(User $user, User $affected)
     {
-        if ($user->isAdmin() && $affected->type !== 'admin') {
-            return true;
-        }
+        return $user->isAdmin() && $affected->type !== 'admin';
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      *
-     * @param  Unity  $unity
+     * @param  User  $affected
      * @return Response|bool
      */
     public function forceDelete(User $user, User $affected)
     {
-        if ($user->isAdmin() && $affected->type !== 'admin') {
-            return true;
-        }
+        return $user->isAdmin() && $affected->type !== 'admin';
     }
 }

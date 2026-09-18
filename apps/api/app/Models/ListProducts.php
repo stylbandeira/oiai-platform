@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ListProducts extends BaseModel
 {
@@ -25,12 +26,12 @@ class ListProducts extends BaseModel
         return $this->belongsTo(ItensList::class, 'list_id');
     }
 
-    public function product()
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    public function companyProduct()
+    public function companyProduct(): BelongsTo
     {
         return $this->belongsTo(CompanyProducts::class, 'company_product_id');
     }

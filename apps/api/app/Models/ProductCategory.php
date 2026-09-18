@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/** @property string $name */
 class ProductCategory extends BaseModel
 {
     use HasFactory, SoftDeletes;

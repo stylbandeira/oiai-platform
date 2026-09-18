@@ -69,15 +69,15 @@ class UserRepository
     /**
      * Add points to an user
      *
-     * @param [type] $id
-     * @param [type] $points
+     * @param int|string $id
+     * @param int|float $points
      * @return void
      */
-    public function addPoints($id, $points)
+    public function addPoints(int|string $id, int|float $points): void
     {
         $user = $this->find($id);
 
-        return $this->update($id, [
+        $this->update($id, [
             User::POINTS => $user->points + $points,
         ]);
     }

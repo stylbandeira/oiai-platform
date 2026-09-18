@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ListProducts;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin ListProducts */
 class ListProductResource extends JsonResource
 {
     /**
@@ -16,27 +18,28 @@ class ListProductResource extends JsonResource
      */
     public function toArray($request)
     {
-        $productLoaded = $this->relationLoaded('product');
-        $unityLoaded = $productLoaded && $this->product->relationLoaded('unity');
-        $categoryLoaded = $productLoaded && $this->product->relationLoaded('category');
-        $companyProductLoaded = $this->relationLoaded('companyProduct');
+        /** @var ListProducts $resource */
+        $resource = $this->resource;
+        $productLoaded = $resource->relationLoaded('product');
+        $unityLoaded = $productLoaded && $resource->product->relationLoaded('unity');
+        $categoryLoaded = $productLoaded && $resource->product->relationLoaded('category');
+        $companyProductLoaded = $resource->relationLoaded('companyProduct');
 
         $data = [
-            'id' => $this->product_id ?? $this->product->id, // Use product_id se disponível
-            'name' => $productLoaded ? $this->product->name : null,
-            'sku' => $productLoaded ? $this->product->sku : null,
-            'img' => $productLoaded ? $this->product->img : null,
-            'ean' => $productLoaded ? $this->product->ean : null,
-            'ean' => $this->ean,
-            'completed' => $this->completed,
-            'average_price' => $productLoaded ? floatval($this->product->average_price) : 0,
-            'quantity' => $this->quantity,
+            'id' => $resource->product_id ?? $resource->product->id,
+            'name' => $productLoaded ? $resource->product->name : null,
+            'sku' => $productLoaded ? $resource->product->sku : null,
+            'img' => $productLoaded ? $resource->product->img : null,
+            'ean' => $productLoaded ? $resource->product->ean : null,
+            'completed' => $resource->completed,
+            'average_price' => $productLoaded ? (float) $resource->product->average_price : 0,
+            'quantity' => $resource->quantity,
         ];
 
         if ($unityLoaded) {
-            $data['unity'] = $this->product->unity->abbreviation;
-            $data['unity_id'] = $this->product->unity->id;
-            $data['unity_quantity'] = $this->product->quantity;
+            $data['unity'] = $resource->product->unity->abbreviation;
+            $data['unity_id'] = $resource->product->unity->id;
+            $data['unity_quantity'] = $resource->product->quantity;
         } else {
             $data['unity'] = null;
             $data['unity_id'] = null;
@@ -44,15 +47,15 @@ class ListProductResource extends JsonResource
         }
 
         if ($categoryLoaded) {
-            $data['category'] = $this->product->category->name;
+            $data['category'] = $resource->product->category->name;
         } else {
             $data['category'] = null;
         }
 
-        if ($companyProductLoaded && $this->companyProduct) {
-            $data['company_id'] = $this->companyProduct->company_id;
-            $data['company_name'] = $this->companyProduct->company->name ?? null;
-            $data['store_address'] = $this->companyProduct->company->address ?? null;
+        if ($companyProductLoaded && $resource->companyProduct) {
+            $data['company_id'] = $resource->companyProduct->company_id;
+            $data['company_name'] = $resource->companyProduct->company->name ?? null;
+            $data['store_address'] = $resource->companyProduct->company->address ?? null;
         }
 
         return $data;

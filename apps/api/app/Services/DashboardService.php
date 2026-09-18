@@ -32,7 +32,7 @@ class DashboardService
     /**
      * Função a ser finalizada
      *
-     * @return Collection
+     * @return array
      */
     public function getTopMentionedStores(): array
     {

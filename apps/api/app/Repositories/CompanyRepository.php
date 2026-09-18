@@ -113,6 +113,6 @@ class CompanyRepository
             )
             ->withOwnerRelationshipFor($user)
             ->withCount('products')
-            ->paginate($perPage ?? 10);
+            ->paginate($perPage);
     }
 }

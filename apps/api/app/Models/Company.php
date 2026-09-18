@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 class Company extends BaseModel
@@ -43,18 +45,18 @@ class Company extends BaseModel
         'status' => 'active',
     ];
 
-    public function products()
+    public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'company_products')
             ->withPivot(['average_price']);
     }
 
-    public function owners()
+    public function owners(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'company_owners', 'company_id', 'user_id');
     }
 
-    public function ownerRelationship()
+    public function ownerRelationship(): HasOne
     {
         return $this->hasOne(CompanyOwners::class, 'company_id', 'id');
     }
@@ -68,7 +70,7 @@ class Company extends BaseModel
         return Storage::url($this->img);
     }
 
-    public function address()
+    public function address(): HasOne
     {
         return $this->hasOne(Address::class, 'id', 'address_id');
     }

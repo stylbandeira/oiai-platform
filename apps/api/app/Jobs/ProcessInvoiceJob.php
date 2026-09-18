@@ -95,7 +95,7 @@ class ProcessInvoiceJob implements ShouldQueue
             ]
         );
 
-        if ($company->wasChanged || $company->wasRecentlyCreated) {
+        if ($company->wasChanged() || $company->wasRecentlyCreated) {
             $address = Address::firstOrCreate([
                 'area' => $company_data->bairro,
                 'city' => $company_data->municipio,
@@ -138,55 +138,52 @@ class ProcessInvoiceJob implements ShouldQueue
                 ],
             );
 
-            if (true) {
+            if (! $insertedProduct->wasRecentlyCreated) {
+                $insertedProduct->mentioned_quantity++;
+                $insertedProduct->save();
+            }
 
-                if (! $insertedProduct->wasRecentlyCreated) {
-                    $insertedProduct->mentioned_quantity++;
-                    $insertedProduct->save();
-                }
+            try {
+                $company_product = CompanyProducts::firstOrCreate(
+                    [
+                        'product_id' => $insertedProduct->id,
+                        'company_id' => $company->id,
+                    ],
+                    [
+                        'average_price' => null,
+                    ]
+                );
 
                 try {
-                    $company_product = CompanyProducts::firstOrCreate(
-                        [
-                            'product_id' => $insertedProduct->id,
-                            'company_id' => $company->id,
-                        ],
-                        [
-                            'average_price' => null,
-                        ]
-                    );
+                    $dataBruta = $invoice_data->dados_nota->data_emissao;
 
-                    try {
-                        $dataBruta = $invoice_data->dados_nota->data_emissao;
+                    $purchase_date = str_contains($dataBruta, '-03:00')
+                        ? Carbon::createFromFormat('d/m/Y H:i:sP', $dataBruta)
+                        : Carbon::createFromFormat('d/m/Y H:i:s', $dataBruta);
+                } catch (\Throwable $exception) {
+                    Log::warning('Não foi possível interpretar a data da NFCe', [
+                        'data' => $dataBruta ?? null,
+                        'error' => $exception->getMessage(),
+                    ]);
 
-                        $purchase_date = str_contains($dataBruta, '-03:00')
-                            ? Carbon::createFromFormat('d/m/Y H:i:sP', $dataBruta)
-                            : Carbon::createFromFormat('d/m/Y H:i:s', $dataBruta);
-                    } catch (\Throwable $exception) {
-                        Log::warning('Não foi possível interpretar a data da NFCe', [
-                            'data' => $dataBruta ?? null,
-                            'error' => $exception->getMessage(),
-                        ]);
-
-                        $purchase_date = Carbon::now();
-                    }
-
-                    $user_inserted_products[] = [
-                        'user_id' => $user->id,
-                        'price' => $productData->valor_unitario ?? 0,
-                        'company_id' => $company->id,
-                        'product_id' => $insertedProduct->id,
-                        'created_at' => Carbon::now(),
-                        'company_product_id' => $company_product->id,
-                        'purchase_date' => $purchase_date,
-                    ];
-                } catch (\Throwable $th) {
-                    $this->not_inserted_products[] = [
-                        'product_error',
-                        'product_data' => $productData,
-                        'company' => $company,
-                    ];
+                    $purchase_date = Carbon::now();
                 }
+
+                $user_inserted_products[] = [
+                    'user_id' => $user->id,
+                    'price' => $productData->valor_unitario ?? 0,
+                    'company_id' => $company->id,
+                    'product_id' => $insertedProduct->id,
+                    'created_at' => Carbon::now(),
+                    'company_product_id' => $company_product->id,
+                    'purchase_date' => $purchase_date,
+                ];
+            } catch (\Throwable $th) {
+                $this->not_inserted_products[] = [
+                    'product_error',
+                    'product_data' => $productData,
+                    'company' => $company,
+                ];
             }
         }
 

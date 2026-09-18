@@ -4,7 +4,9 @@ namespace App\Http\Resources;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
+use App\Models\Product;
 
+/** @mixin Product */
 class AdminProductResource extends BaseProductResource
 {
     protected function getUserSpecificFields(): array

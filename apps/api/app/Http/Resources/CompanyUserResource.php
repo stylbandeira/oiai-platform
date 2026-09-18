@@ -2,9 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\User;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 
+/** @mixin User */
 class CompanyUserResource extends BaseUserResource
 {
     /**

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CompanyProducts extends BaseModel
 {
@@ -16,17 +18,17 @@ class CompanyProducts extends BaseModel
         'average_price',
     ];
 
-    public function company()
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class, 'company_id');
     }
 
-    public function product()
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    public function userAddedProducts()
+    public function userAddedProducts(): HasMany
     {
         return $this->hasMany(UserAddedProducts::class, 'company_product_id');
     }

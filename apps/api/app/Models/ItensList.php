@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ItensList extends BaseModel
 {
@@ -31,12 +33,12 @@ class ItensList extends BaseModel
         'status',
     ];
 
-    public function products()
+    public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'list_products', 'list_id', 'product_id')->withPivot(['quantity', 'company_product_id']);
     }
 
-    public function listProducts()
+    public function listProducts(): HasMany
     {
         return $this->hasMany(ListProducts::class, 'list_id');
     }

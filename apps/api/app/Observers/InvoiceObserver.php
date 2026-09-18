@@ -11,6 +11,7 @@ class InvoiceObserver
      */
     public function created(Invoice $invoice): void
     {
+        /** @var \App\Models\User $user */
         $user = $invoice->user;
         $user->reputation++;
         $user->save();

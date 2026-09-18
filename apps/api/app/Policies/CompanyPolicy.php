@@ -47,9 +47,7 @@ class CompanyPolicy
      */
     public function create(User $user)
     {
-        if (in_array($user->type, ['admin', 'company'])) {
-            return true;
-        }
+        return in_array($user->type, ['admin', 'company']);
     }
 
     /**
@@ -59,9 +57,7 @@ class CompanyPolicy
      */
     public function update(User $user, Company $company)
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin();
     }
 
     /**
@@ -71,9 +67,7 @@ class CompanyPolicy
      */
     public function delete(User $user, Company $company)
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin();
     }
 
     /**
@@ -83,7 +77,7 @@ class CompanyPolicy
      */
     public function restore(User $user, Company $company)
     {
-        //
+        return false;
     }
 
     /**
@@ -93,6 +87,6 @@ class CompanyPolicy
      */
     public function forceDelete(User $user, Company $company)
     {
-        //
+        return false;
     }
 }
