@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property string|null $geocode_status
+ */
 class Company extends BaseModel
 {
     use HasFactory, SoftDeletes;
@@ -56,6 +59,7 @@ class Company extends BaseModel
         return $this->belongsToMany(User::class, 'company_owners', 'company_id', 'user_id');
     }
 
+    /** @return HasOne<CompanyOwners, $this> */
     public function ownerRelationship(): HasOne
     {
         return $this->hasOne(CompanyOwners::class, 'company_id', 'id');
@@ -70,6 +74,7 @@ class Company extends BaseModel
         return Storage::url($this->img);
     }
 
+    /** @return HasOne<Address, $this> */
     public function address(): HasOne
     {
         return $this->hasOne(Address::class, 'id', 'address_id');

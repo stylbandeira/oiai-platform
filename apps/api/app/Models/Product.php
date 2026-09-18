@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Scout\Searchable;
 
+/**
+ * @property int $registrations
+ */
 class Product extends BaseModel
 {
     use HasFactory, Searchable, SoftDeletes;
@@ -69,11 +72,13 @@ class Product extends BaseModel
         return $this->hasMany(UserAddedProducts::class, 'product_id');
     }
 
+    /** @return BelongsTo<ProductCategory, $this> */
     public function category(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 
+    /** @return BelongsTo<Unity, $this> */
     public function unity(): BelongsTo
     {
         return $this->belongsTo(Unity::class, 'unit_id');
@@ -91,7 +96,7 @@ class Product extends BaseModel
 
     public function searchableAs(): string
     {
-        return config('scout.prefix').'products';
+        return config('scout.prefix') . 'products';
     }
 
     public function toSearchableArray(): array
@@ -120,7 +125,7 @@ class Product extends BaseModel
             'popularity' => $attributes['popularity'] ?? 0,
             'offer_count' => $attributes['offer_count'] ?? 0,
             'updated_at' => $this->updated_at?->timestamp,
-        ], static fn ($value) => $value !== null);
+        ], static fn($value) => $value !== null);
     }
 
     public function getMentionedQuantityVariantAttribute()

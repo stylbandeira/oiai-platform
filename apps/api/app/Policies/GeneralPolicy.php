@@ -52,9 +52,13 @@ class GeneralPolicy
     protected function canPerfomActionAsCompany(User $user, $action, $entity)
     {
         // Exemplo: empresa só pode editar seus próprios produtos
-        return $entity instanceof Product
-            && $user->id === $entity->company->user_id
-            && in_array($action, ['view', 'update', 'create']);
+        if (! $entity instanceof Product || ! in_array($action, ['view', 'update', 'create'])) {
+            return false;
+        }
+
+        return $entity->companies()
+            ->whereHas('owners', fn ($query) => $query->whereKey($user->id))
+            ->exists();
     }
 
     /**

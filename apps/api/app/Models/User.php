@@ -7,6 +7,8 @@ use App\Notifications\VerifyEmailNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -15,10 +17,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int $reputation
  * @property string|null $token
  */
-class User extends Authenticatable
-    // implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, MustVerifyEmailTrait;
 
     const POINTS = 'points';
 
@@ -102,7 +103,8 @@ class User extends Authenticatable
             ->withPivot(['status', 'message', 'approved_at', 'approved_by']);
     }
 
-    public function activeCompanies()
+    /** @return BelongsToMany<Company, $this> */
+    public function activeCompanies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_owners', 'user_id', 'company_id')
             ->withPivot(['status', 'message', 'approved_at', 'approved_by'])
@@ -116,19 +118,22 @@ class User extends Authenticatable
             ->exists();
     }
 
-    public function pendingCompanies()
+    /** @return BelongsToMany<Company, $this> */
+    public function pendingCompanies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_owners', 'user_id', 'company_id')
             ->withPivot(['status', 'message', 'approved_at', 'approved_by'])
             ->wherePivot('status', 'pending');
     }
 
-    public function favoriteProducts()
+    /** @return BelongsToMany<Product, $this> */
+    public function favoriteProducts(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'favorite_products', 'user_id', 'product_id');
     }
 
-    public function lists()
+    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<ItensList, $this> */
+    public function lists(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(ItensList::class, 'user_id');
     }
@@ -148,12 +153,14 @@ class User extends Authenticatable
         return 0;
     }
 
-    public function recentActivity()
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Event, $this> */
+    public function recentActivity(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Event::class)->whereIn('title', $this::ALLOWED_ACTIVITY_TYPE)->orderBy('created_at', 'DESC')->take(5);
     }
 
-    public function events()
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Event, $this> */
+    public function events(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Event::class);
     }

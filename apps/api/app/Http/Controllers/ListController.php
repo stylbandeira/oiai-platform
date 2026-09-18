@@ -35,7 +35,7 @@ class ListController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  Request  $request
+     * @param  ListStoreRequest  $request
      * @return Response
      */
     public function store(ListStoreRequest $request, StoreListAction $action)
@@ -46,7 +46,7 @@ class ListController extends Controller
     /**
      * Display the specified resource.
      *
-     * @return void
+     * @return mixed
      */
     public function show(ItensList $list, ShowListAction $action)
     {
@@ -66,7 +66,7 @@ class ListController extends Controller
             $list->refresh();
         }
 
-        $optimizedList = $action->execute($list->id);
+        $optimizedList = $action->execute((string) $list->id);
 
         return response([
             'list' => $optimizedList,
@@ -76,7 +76,7 @@ class ListController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  Request  $request
+     * @param  ListUpdateRequest  $request
      * @return Response
      */
     public function update(ListUpdateRequest $request, ItensList $list, UpdateListAction $action)

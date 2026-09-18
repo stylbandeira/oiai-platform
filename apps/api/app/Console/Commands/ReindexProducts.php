@@ -14,7 +14,9 @@ class ReindexProducts extends Command
     public function handle(): int
     {
         if ($this->option('fresh')) {
-            Product::query()->unsearchable();
+            Product::query()->get()->each(
+                static fn (Product $product) => $product->unsearchable()
+            );
         }
 
         $count = 0;

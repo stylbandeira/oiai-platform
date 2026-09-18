@@ -18,7 +18,7 @@ class AddressController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return Response
+     * @return mixed
      */
     public function index()
     {
@@ -28,7 +28,7 @@ class AddressController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return Response
+     * @return mixed
      */
     public function create()
     {
@@ -38,7 +38,7 @@ class AddressController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @return void
+     * @return mixed
      */
     public function store(AddressStoreRequest $request, StoreAddressAction $action)
     {
@@ -48,7 +48,7 @@ class AddressController extends Controller
     /**
      * Display the specified resource.
      *
-     * @return Response
+     * @return mixed
      */
     public function show(Address $address)
     {
@@ -58,7 +58,7 @@ class AddressController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @return Response
+     * @return mixed
      */
     public function edit(Address $address)
     {
@@ -68,7 +68,7 @@ class AddressController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @return Response
+     * @return mixed
      */
     public function update(Request $request, Address $address)
     {
@@ -78,7 +78,7 @@ class AddressController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @return Response
+     * @return mixed
      */
     public function destroy(Address $address)
     {

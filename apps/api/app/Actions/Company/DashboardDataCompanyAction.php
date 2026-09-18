@@ -11,7 +11,7 @@ class DashboardDataCompanyAction
     {
         return response([
             'company' => new CompanyResource($company),
-            'totalProducts' => count($company->products) ?? 0,
+            'totalProducts' => $company->products->count(),
             'activeWebhooks' => 0,
             'monthlyUpdates' => 0,
             'userEngagement' => 0,

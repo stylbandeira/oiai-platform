@@ -12,7 +12,7 @@ class UpdateEventAction
 
     public function execute(EventUpdateRequest $request, Event $event)
     {
-        $this->eventRepository->update($event->id, $request->validated());
+        $this->eventRepository->update((string) $event->id, $request->validated());
 
         return response(['message' => 'Evento alterado com sucesso!']);
     }

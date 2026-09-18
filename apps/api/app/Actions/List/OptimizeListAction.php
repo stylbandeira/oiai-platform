@@ -38,7 +38,7 @@ class OptimizeListAction
 
             $optimizedList[$cheap->company->name][] = $product;
 
-            $this->listProductsRepository->updateProductsOnList([$cheap->product_id], $list->id, [
+            $this->listProductsRepository->updateProductsOnList([$cheap->product_id], (string) $list->id, [
                 'company_product_id' => $cheap->id,
             ]);
         }

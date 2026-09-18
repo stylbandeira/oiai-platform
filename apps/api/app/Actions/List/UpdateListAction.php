@@ -35,7 +35,7 @@ class UpdateListAction
 
                     $this->listProductsRepository->createProductOnList(
                         $item['product_id'],
-                        $list->id,
+                        (string) $list->id,
                         ['quantity' => $item['quantity']]
                     );
                 }

@@ -13,7 +13,7 @@ class DestroyListAction
 
     public function execute(ItensList $list)
     {
-        $this->listRepository->delete($list->id);
+        $this->listRepository->delete((string) $list->id);
 
         return response([
             'message' => 'Lista deletada com sucesso!',

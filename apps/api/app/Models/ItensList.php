@@ -38,6 +38,7 @@ class ItensList extends BaseModel
         return $this->belongsToMany(Product::class, 'list_products', 'list_id', 'product_id')->withPivot(['quantity', 'company_product_id']);
     }
 
+    /** @return HasMany<ListProducts, $this> */
     public function listProducts(): HasMany
     {
         return $this->hasMany(ListProducts::class, 'list_id');

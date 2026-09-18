@@ -28,7 +28,9 @@ abstract class AbstractProductDataProvider
             'url' => $url,
             'status' => $response->status(),
             'content_type' => $response->header('Content-Type'),
-            'request_id' => $response->header('X-Request-Id') ?? $response->header('X-Correlation-Id') ?? $response->header('Cf-Ray'),
+            'request_id' => $response->header('X-Request-Id')
+                ?: $response->header('X-Correlation-Id')
+                ?: $response->header('Cf-Ray'),
             'response_message' => $this->responseMessage($response),
         ];
     }

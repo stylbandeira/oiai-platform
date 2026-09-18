@@ -21,16 +21,19 @@ class ListProducts extends BaseModel
         'quantity',
     ];
 
-    public function list()
+    /** @return BelongsTo<ItensList, $this> */
+    public function list(): BelongsTo
     {
         return $this->belongsTo(ItensList::class, 'list_id');
     }
 
+    /** @return BelongsTo<Product, $this> */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    /** @return BelongsTo<CompanyProducts, $this> */
     public function companyProduct(): BelongsTo
     {
         return $this->belongsTo(CompanyProducts::class, 'company_product_id');

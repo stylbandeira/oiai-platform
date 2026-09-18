@@ -10,8 +10,8 @@ class EnsureUserHasRole
     /**
      * Handle an incoming request.
      *
-     * @param [type] ...$roles
-     * @return void
+     * @param string ...$roles
+     * @return mixed
      */
     public function handle(Request $request, Closure $next, ...$roles)
     {

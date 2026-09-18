@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class WithTrashedForAdminScope implements Scope
@@ -20,8 +21,7 @@ class WithTrashedForAdminScope implements Scope
             $user?->isAdmin() &&
             in_array(SoftDeletes::class, class_uses_recursive($model))
         ) {
-            /** @var \Illuminate\Database\Eloquent\Builder<\Illuminate\Database\Eloquent\Model&SoftDeletes> $builder */
-            $builder->withTrashed();
+            $builder->withoutGlobalScope(SoftDeletingScope::class);
         }
     }
 }

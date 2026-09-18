@@ -25,7 +25,7 @@ class InvoiceController extends Controller
     /**
      * Processa o QRCode usando scrapper para obter um JSON com os dados da nota fiscal
      *
-     * @return void
+     * @return mixed
      */
     public function processInvoice(ProcessInvoiceRequest $request, ProcessInvoiceAction $action)
     {

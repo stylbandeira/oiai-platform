@@ -12,7 +12,7 @@ abstract class AbstractNFCeProvider implements StateNFCeProvider
     public function __construct()
     {
         $this->client = new Client([
-            'connect_timeout' => 5,
+            'connect_timeout' => 15,
             'timeout' => 20,
             'verify' => false,
             'headers' => [

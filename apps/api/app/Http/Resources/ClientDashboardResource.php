@@ -18,12 +18,15 @@ class ClientDashboardResource extends JsonResource
      */
     public function toArray($request)
     {
+        /** @var User $user */
+        $user = $this->resource;
+
         return [
-            'activeLists' => $this->activeLists ? $this->activeLists->count() : 0,
-            'points' => $this->points,
-            'monthEconomy' => $this->monthEconomy,
-            'reputation' => $this->reputation,
-            'recentActivity' => $this->recentActivity,
+            'activeLists' => $user->activeLists()->count(),
+            'points' => $user->points,
+            'monthEconomy' => $user->monthEconomy,
+            'reputation' => $user->reputation,
+            'recentActivity' => $user->recentActivity,
         ];
     }
 }

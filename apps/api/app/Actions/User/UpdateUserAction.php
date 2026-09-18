@@ -4,13 +4,10 @@ namespace App\Actions\User;
 
 use App\Models\User;
 use App\Repositories\UserRepository;
-use App\Services\User\UpdateUserService;
-use Illuminate\Support\Facades\Auth;
 
 class UpdateUserAction
 {
     public function __construct(
-        private UpdateUserService $updateUserService,
         private UserRepository $user_repository,
     ) {}
 

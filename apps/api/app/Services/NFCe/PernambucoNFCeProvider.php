@@ -607,16 +607,14 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             foreach ($patterns as $pattern) {
                 if (preg_match_all($pattern, $pageText, $matches, PREG_SET_ORDER)) {
                     foreach ($matches as $match) {
-                        if (count($match) >= 3) {
-                            $forma = $this->limparTexto($match[1]);
-                            $valor = $this->parseValorMonetario($match[2]);
+                        $forma = $this->limparTexto($match[1]);
+                        $valor = $this->parseValorMonetario($match[2]);
 
-                            if ($valor > 0.01 && ! empty($forma)) {
-                                $pagamentos[] = [
-                                    'forma' => $forma,
-                                    'valor' => $valor,
-                                ];
-                            }
+                        if ($valor > 0.01 && ! empty($forma)) {
+                            $pagamentos[] = [
+                                'forma' => $forma,
+                                'valor' => $valor,
+                            ];
                         }
                     }
                 }
@@ -670,12 +668,12 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             $pageText = $crawler->text();
 
             // Extrair valor total
-            if ($total['valor_total'] <= 0 && preg_match('/Valor Total[:\s]*R?\$\s*([\d,\.]+)/i', $pageText, $matches)) {
+            if (preg_match('/Valor Total[:\s]*R?\$\s*([\d,\.]+)/i', $pageText, $matches)) {
                 $total['valor_total'] = $this->parseValorMonetario($matches[1]);
             }
 
             // Extrair desconto
-            if ($total['valor_desconto'] <= 0 && preg_match('/Desconto[:\s]*R?\$\s*([\d,\.]+)/i', $pageText, $matches)) {
+            if (preg_match('/Desconto[:\s]*R?\$\s*([\d,\.]+)/i', $pageText, $matches)) {
                 $total['valor_desconto'] = $this->parseValorMonetario($matches[1]);
             }
         } catch (Exception $e) {

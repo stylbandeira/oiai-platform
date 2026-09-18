@@ -15,7 +15,7 @@ class CompanyOwnersController extends Controller
     /**
      * Lista empresas dos usuários.
      *
-     * @return void
+     * @return mixed
      */
     public function index(Request $request, IndexCompanyOwnersAction $action)
     {
@@ -27,7 +27,7 @@ class CompanyOwnersController extends Controller
     /**
      * Request access to company data
      *
-     * @return void
+     * @return mixed
      */
     public function requestAccess(Request $request, Company $company, RequestCompanyAccessAction $action)
     {
@@ -39,8 +39,8 @@ class CompanyOwnersController extends Controller
     /**
      * Request access and create an company
      *
-     * @param  Request  $request
-     * @return void
+     * @param  StoreCompanyAndRequestRequest  $request
+     * @return mixed
      */
     public function storeCompanyAndRequest(StoreCompanyAndRequestRequest $request, StoreCompanyAndRequestAction $action)
     {

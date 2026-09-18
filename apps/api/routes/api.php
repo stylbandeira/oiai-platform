@@ -63,9 +63,11 @@ Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
 Route::put('/listItems/{list}', [ListItensController::class, 'update']);
 
 // Rotas autenticadas
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
+});
 
+Route::middleware(['auth:sanctum'])->group(function () {
     // ADDRESS
     Route::apiResource('/addresses', AddressController::class);
 

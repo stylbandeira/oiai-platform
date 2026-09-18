@@ -6,6 +6,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Models\ItensList;
+use App\Models\ListProducts;
 
 /** @mixin ItensList */
 class ClientListResource extends JsonResource
@@ -31,7 +32,10 @@ class ClientListResource extends JsonResource
                 return ListProductResource::collection($this->listProducts);
             }),
             'companyId' => $this->whenLoaded('listProducts.companyProduct.company', function () {
-                return $this->listProducts->company->id;
+                /** @var ListProducts|null $listProduct */
+                $listProduct = $this->listProducts->first();
+
+                return $listProduct?->companyProduct?->company?->id;
             }),
             'productsQuantity' => $this->whenLoaded('products', $this->products()->count()),
         ];
