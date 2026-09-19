@@ -4,7 +4,7 @@ import api from "@/lib/api";
 import { useEffect, useState } from "react";
 import { formatCNPJ } from "@/utils/formatters";
 import { getFullImageUrl } from "@/utils/urlUtils";
-import { ProductForm } from "@/components/forms/ProductForm";
+import { ProductForm, type ProductFormData } from "@/components/forms/ProductForm";
 
 export default function EditProduct() {
     const navigate = useNavigate();
@@ -41,7 +41,7 @@ export default function EditProduct() {
         return null;
     }
 
-    const handleSubmit = async (formData: any) => {
+    const handleSubmit = async (formData: ProductFormData) => {
         setIsSubmitting(true);
 
         try {

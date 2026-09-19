@@ -7,7 +7,7 @@ import { Building2, Globe, MapPin, Mail, Phone, FileText } from "lucide-react";
 import { formatCNPJ, removeFormatting } from "@/utils/formatters";
 import { ImageUpload } from "./ImageUpload";
 
-interface CompanyFormData {
+export interface CompanyFormData {
     name: string;
     email: string;
     cnpj: string;

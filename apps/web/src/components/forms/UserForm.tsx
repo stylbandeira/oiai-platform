@@ -26,7 +26,7 @@ interface CompanyOwnership {
     status: CompanyOwnershipStatus;
 }
 
-interface UserFormData {
+export interface UserFormData {
     name: string;
     type: "client" | "admin" | "company";
     email: string;

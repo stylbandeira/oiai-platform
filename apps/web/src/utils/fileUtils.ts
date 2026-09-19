@@ -22,7 +22,7 @@ export const readFileAsDataURL = (file: File): Promise<string> => {
     });
 };
 
-export const exportToCSV = (data: any[], filename: string = "export") => {
+export const exportToCSV = (data: CsvRow[], filename: string = "export") => {
     if (data.length === 0) return;
 
     // Define os cabeçalhos baseados nas chaves do primeiro item
@@ -105,3 +105,4 @@ export const compressImage = async (file: File, maxWidth = 800, quality = 0.8): 
         img.onerror = reject;
     });
 };
+import type { CsvRow } from "@/types/product";

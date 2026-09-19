@@ -3,7 +3,7 @@ import { useUser } from "@/contexts/UserContext";
 import api from "@/lib/api";
 import { useEffect, useState } from "react";
 import { ProductForm } from "@/components/forms/ProductForm";
-import { UserForm } from "@/components/forms/UserForm";
+import { UserForm, type UserFormData } from "@/components/forms/UserForm";
 
 export default function EditUser() {
     const navigate = useNavigate();
@@ -37,7 +37,7 @@ export default function EditUser() {
         return null;
     }
 
-    const handleSubmit = async (formData: any) => {
+    const handleSubmit = async (formData: UserFormData) => {
         setIsSubmitting(true);
 
         try {
