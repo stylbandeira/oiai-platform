@@ -45,6 +45,11 @@ O projeto está estruturado como monorepo, subdividindo-se em dois projetos. A A
 
 ## Como executar
 
+### Documentação da API
+
+- [Especificação OpenAPI](docs/openapi.yaml)
+- [Abrir no Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/stylbandeira/oiai-platform/main/docs/openapi.yaml)
+
 ### Pré-requisitos
 * Docker
 * Docker Compose

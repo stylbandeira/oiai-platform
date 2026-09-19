@@ -7,9 +7,10 @@ import { Building2 } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { FormSearchSelect } from "./FormSearchSelect";
 import api from "@/lib/api";
+import axios from "axios";
 import { useUser } from "@/contexts/UserContext";
 
-interface ProductFormData {
+export interface ProductFormData {
     name: string;
     quantity: string;
     unity: string;
@@ -119,9 +120,9 @@ export function ProductForm({
                 ...formData,
                 img: formData.img instanceof File ? formData.img : undefined,
             });
-        } catch (error: any) {
-            if (error.response?.data?.errors) {
-                setErrors(error.response.data.errors);
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error) && error.response?.data?.errors) {
+                setErrors(error.response.data.errors as Record<string, string[]>);
             }
         } finally {
             setIsSubmitting(false);

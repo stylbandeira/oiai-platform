@@ -16,6 +16,7 @@ import { InvoiceCodeModal } from "../modals/InvoiceCodeModal";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { components } from "@/types/api.generated";
 
 interface ItensList {
   id: number;
@@ -24,7 +25,7 @@ interface ItensList {
   status: string;
   total: string;
   productsQuantity: number;
-  products: any;
+  products: components["schemas"]["Product"][];
 }
 
 interface NotificationData {
@@ -106,7 +107,7 @@ export function ClientDashboard() {
   }, []);
 
   const fetchItensLists = async (page: number = 1) => {
-    const params: any = { page };
+    const params: { page: number } = { page };
     try {
       const response = await api.get("/lists", { params });
       setItensLists(response.data.data);
