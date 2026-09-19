@@ -1,34 +1,33 @@
 // src/components/admin/ResponsiveTable.tsx
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { ReactNode } from "react";
 
-interface Column {
+export interface Column<T extends object> {
     key: string;
     header: string;
     className?: string;
     mobileHidden?: boolean;
-    render?: (item: any) => ReactNode;
+    render?: (item: T) => ReactNode;
 }
 
-interface ResponsiveTableProps {
-    columns: Column[];
-    data: any[];
+interface ResponsiveTableProps<T extends object> {
+    columns: Column<T>[];
+    data: T[];
     loading?: boolean;
     emptyMessage?: string;
-    renderMobileCard: (item: any) => ReactNode;
-    onRowClick?: (item: any) => void;
+    renderMobileCard: (item: T) => ReactNode;
+    onRowClick?: (item: T) => void;
 }
 
-export function ResponsiveTable({
+export function ResponsiveTable<T extends object>({
     columns,
     data,
     loading = false,
     emptyMessage = "Nenhum item encontrado",
     renderMobileCard,
     onRowClick
-}: ResponsiveTableProps) {
+}: ResponsiveTableProps<T>) {
 
     if (loading) {
         return (
@@ -54,7 +53,7 @@ export function ResponsiveTable({
                     <TableHeader>
                         <TableRow>
                             {columns.map((column) => (
-                                <TableHead key={column.key} className={column.className}>
+                                        <TableHead key={column.key} className={column.className}>
                                     {column.header}
                                 </TableHead>
                             ))}
@@ -69,7 +68,9 @@ export function ResponsiveTable({
                             >
                                 {columns.map((column) => (
                                     <TableCell key={column.key} className={column.className}>
-                                        {column.render ? column.render(item) : item[column.key]}
+                                        {column.render
+                                            ? column.render(item)
+                                            : (item[column.key as keyof T] as ReactNode)}
                                     </TableCell>
                                 ))}
                             </TableRow>
