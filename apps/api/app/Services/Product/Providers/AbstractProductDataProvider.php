@@ -65,7 +65,7 @@ abstract class AbstractProductDataProvider
             $unit = $unit === 'kg' ? 'g' : 'ml';
         }
 
-        return $this->formatNumber($value) . ' ' . $unit;
+        return $this->formatNumber($value).' '.$unit;
     }
 
     protected function normalizeText(string $value): string

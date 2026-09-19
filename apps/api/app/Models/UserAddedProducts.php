@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class UserAddedProducts extends BaseModel
 {
@@ -24,20 +25,20 @@ class UserAddedProducts extends BaseModel
         'purchase_date',
     ];
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<Product, $this> */
-    public function product(): \Illuminate\Database\Eloquent\Relations\HasOne
+    /** @return HasOne<Product, $this> */
+    public function product(): HasOne
     {
         return $this->hasOne(Product::class, 'id', 'product_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<Company, $this> */
-    public function company(): \Illuminate\Database\Eloquent\Relations\HasOne
+    /** @return HasOne<Company, $this> */
+    public function company(): HasOne
     {
         return $this->hasOne(Company::class, 'id', 'company_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<User, $this> */
-    public function user(): \Illuminate\Database\Eloquent\Relations\HasOne
+    /** @return HasOne<User, $this> */
+    public function user(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'user_id');
     }

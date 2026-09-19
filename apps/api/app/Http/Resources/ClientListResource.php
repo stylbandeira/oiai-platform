@@ -2,11 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ItensList;
+use App\Models\ListProducts;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Models\ItensList;
-use App\Models\ListProducts;
 
 /** @mixin ItensList */
 class ClientListResource extends JsonResource

@@ -2,10 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Product;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Models\Product;
 
 /** @mixin Product */
 class BaseProductResource extends JsonResource

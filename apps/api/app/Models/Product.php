@@ -5,10 +5,10 @@ namespace App\Models;
 use App\Enums\ProductQuantitySource;
 use App\Enums\ProductRefinementStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable;
 
 /**
@@ -96,7 +96,7 @@ class Product extends BaseModel
 
     public function searchableAs(): string
     {
-        return config('scout.prefix') . 'products';
+        return config('scout.prefix').'products';
     }
 
     public function toSearchableArray(): array
@@ -125,7 +125,7 @@ class Product extends BaseModel
             'popularity' => $attributes['popularity'] ?? 0,
             'offer_count' => $attributes['offer_count'] ?? 0,
             'updated_at' => $this->updated_at?->timestamp,
-        ], static fn($value) => $value !== null);
+        ], static fn ($value) => $value !== null);
     }
 
     public function getMentionedQuantityVariantAttribute()

@@ -20,8 +20,8 @@ use App\Models\User;
 use App\Services\CompanyOwners\CompanyOwnerService;
 use App\Services\ExportService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
@@ -42,8 +42,6 @@ class UserController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @return JsonResource
      */
     public function index(IndexUserRequest $request, IndexUserAction $action): JsonResource
     {
@@ -73,9 +71,6 @@ class UserController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  User  $user
-     * @return JsonResource
      */
     public function show(Request $request, User $user, ShowUserAction $action): JsonResource
     {
@@ -88,8 +83,6 @@ class UserController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @return Response
      */
     public function update(UserUpdateRequest $request, User $user, UpdateUserAction $action): Response
     {
@@ -113,8 +106,6 @@ class UserController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @return Response
      */
     public function destroy(User $user, DestroyUserAction $action): Response
     {
@@ -139,8 +130,6 @@ class UserController extends Controller
 
     /**
      * Função para reverter deleção de usuário
-     *
-     * @return Response
      */
     public function revertDestroy(User $user, RevertDestroyUserAction $action): Response
     {

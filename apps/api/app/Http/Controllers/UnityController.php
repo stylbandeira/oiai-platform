@@ -6,15 +6,12 @@ use App\Actions\Unity\IndexUnityAction;
 use App\Http\Requests\Unity\UnityIndexRequest;
 use App\Http\Resources\UnityResource;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class UnityController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return JsonResource
      */
     public function index(UnityIndexRequest $request, IndexUnityAction $action): JsonResource
     {

@@ -4,12 +4,14 @@ namespace App\Models;
 
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -19,7 +21,7 @@ use Laravel\Sanctum\HasApiTokens;
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, MustVerifyEmailTrait;
+    use HasApiTokens, HasFactory, MustVerifyEmailTrait, Notifiable, SoftDeletes;
 
     const POINTS = 'points';
 
@@ -132,8 +134,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Product::class, 'favorite_products', 'user_id', 'product_id');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<ItensList, $this> */
-    public function lists(): \Illuminate\Database\Eloquent\Relations\HasOne
+    /** @return HasOne<ItensList, $this> */
+    public function lists(): HasOne
     {
         return $this->hasOne(ItensList::class, 'user_id');
     }
@@ -145,22 +147,20 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * TODO EPIC 015
-     *
-     * @return int
      */
     public function getMonthEconomyAttribute(): int
     {
         return 0;
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Event, $this> */
-    public function recentActivity(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /** @return HasMany<Event, $this> */
+    public function recentActivity(): HasMany
     {
         return $this->hasMany(Event::class)->whereIn('title', $this::ALLOWED_ACTIVITY_TYPE)->orderBy('created_at', 'DESC')->take(5);
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Event, $this> */
-    public function events(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /** @return HasMany<Event, $this> */
+    public function events(): HasMany
     {
         return $this->hasMany(Event::class);
     }

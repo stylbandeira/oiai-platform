@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Product;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
-use App\Models\Product;
 
 /** @mixin Product */
 class AdminProductResource extends BaseProductResource

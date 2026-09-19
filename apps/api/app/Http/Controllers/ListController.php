@@ -35,7 +35,6 @@ class ListController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  ListStoreRequest  $request
      * @return Response
      */
     public function store(ListStoreRequest $request, StoreListAction $action)
@@ -76,7 +75,6 @@ class ListController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  ListUpdateRequest  $request
      * @return Response
      */
     public function update(ListUpdateRequest $request, ItensList $list, UpdateListAction $action)

@@ -39,7 +39,6 @@ class CompanyOwnersController extends Controller
     /**
      * Request access and create an company
      *
-     * @param  StoreCompanyAndRequestRequest  $request
      * @return mixed
      */
     public function storeCompanyAndRequest(StoreCompanyAndRequestRequest $request, StoreCompanyAndRequestAction $action)

@@ -15,8 +15,8 @@ use App\Http\Resources\ClientCompanyResource;
 use App\Http\Resources\CompanyResource;
 use App\Models\Company;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
 
 class CompanyController extends Controller
 {
@@ -38,7 +38,6 @@ class CompanyController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  CompanyStoreRequest  $request
      * @return JsonResource
      */
     public function store(CompanyStoreRequest $request, StoreCompanyAction $action)
@@ -48,8 +47,6 @@ class CompanyController extends Controller
 
     /**
      * Display the specified company.
-     *
-     * @return JsonResource
      */
     public function show(Request $request, Company $company, ShowCompanyAction $action): JsonResource
     {
@@ -78,7 +75,6 @@ class CompanyController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  CompanyUpdateRequest  $request
      * @return Response
      */
     public function update(CompanyUpdateRequest $request, Company $company, UpdateCompanyAction $action)

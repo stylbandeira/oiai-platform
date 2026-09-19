@@ -6,8 +6,6 @@ class GlobalHelper
 {
     /**
      * Return numbers from any string
-     *
-     * @param string $string
      */
     public static function onlyNumbers(string $string): string
     {

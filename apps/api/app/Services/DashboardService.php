@@ -31,8 +31,6 @@ class DashboardService
 
     /**
      * Função a ser finalizada
-     *
-     * @return array
      */
     public function getTopMentionedStores(): array
     {

@@ -20,16 +20,15 @@ use App\Http\Resources\AdminProductResource;
 use App\Http\Resources\ClientProductResource;
 use App\Models\Product;
 use App\Services\ExportService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return JsonResource
      */
     public function index(ProductIndexRequest $request, IndexProductAction $action): JsonResource
     {
@@ -47,7 +46,6 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  ProductStoreRequest  $request
      * @return JsonResource|Response
      */
     public function store(ProductStoreRequest $request, StoreProductAction $action)
@@ -72,8 +70,7 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      *
-     * @return AdminProductResource|ClientProductResource
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws AuthorizationException
      */
     public function show(Request $request, Product $product, ShowProductAction $action): AdminProductResource|ClientProductResource
     {
@@ -122,8 +119,6 @@ class ProductController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @return Response
      */
     public function destroy(int $id, DestroyProductAction $action): Response
     {

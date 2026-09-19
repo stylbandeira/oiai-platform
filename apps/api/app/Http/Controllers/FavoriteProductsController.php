@@ -6,7 +6,6 @@ use App\Actions\FavoriteProducts\FavoriteProductAction;
 use App\Http\Requests\FavoriteProducts\FavoriteProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class FavoriteProductsController extends Controller
 {
@@ -52,7 +51,6 @@ class FavoriteProductsController extends Controller
     /**
      * Favorite or unfavorite a product from an user
      *
-     * @param  FavoriteProductRequest  $request
      * @return mixed
      */
     public function favorite(FavoriteProductRequest $request, Product $product, FavoriteProductAction $action)

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Actions\Admin\DashboardAdminAction;
 use App\Services\DashboardService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class AdminController extends Controller
 {

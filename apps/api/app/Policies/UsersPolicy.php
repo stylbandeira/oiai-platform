@@ -51,8 +51,6 @@ class UsersPolicy
 
     /**
      * Determine whether the user can create models.
-     *
-     * @return bool
      */
     public function create(User $user): bool
     {
@@ -62,7 +60,6 @@ class UsersPolicy
     /**
      * Determine whether the user can update the model.
      *
-     * @param  User  $affected
      * @return Response|bool
      */
     public function update(User $user, User $affected)
@@ -73,7 +70,6 @@ class UsersPolicy
     /**
      * Determine whether the user can delete the model.
      *
-     * @param  User  $affected
      * @return Response|bool
      */
     public function delete(User $user, User $affected)
@@ -88,7 +84,6 @@ class UsersPolicy
     /**
      * Determine whether the user can restore the model.
      *
-     * @param  User  $affected
      * @return Response|bool
      */
     public function restore(User $user, User $affected)
@@ -99,7 +94,6 @@ class UsersPolicy
     /**
      * Determine whether the user can permanently delete the model.
      *
-     * @param  User  $affected
      * @return Response|bool
      */
     public function forceDelete(User $user, User $affected)

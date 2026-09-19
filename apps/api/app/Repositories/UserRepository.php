@@ -68,10 +68,6 @@ class UserRepository
 
     /**
      * Add points to an user
-     *
-     * @param int|string $id
-     * @param int|float $points
-     * @return void
      */
     public function addPoints(int|string $id, int|float $points): void
     {
