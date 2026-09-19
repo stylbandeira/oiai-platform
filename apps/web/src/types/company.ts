@@ -1,9 +1,11 @@
-export interface Company {
+import type { components } from "./api.generated";
+
+export interface Company extends components["schemas"]["Company"] {
     id: number;
     name: string;
     email: string;
     cnpj: string;
-    img: string;
+    img: string | null;
     website?: string;
     full_address: string;
     total_products: number;

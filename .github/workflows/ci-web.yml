@@ -1,0 +1,63 @@
+name: Web CI
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'apps/web/**'
+      - 'docker/web/**'
+      - '.github/workflows/ci-web.yml'
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'apps/web/**'
+      - 'docker/web/**'
+      - '.github/workflows/ci-web.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Frontend quality and build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/web
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate API types
+        run: npm run generate:api
+
+      - name: Verify generated API types are committed
+        run: git diff --exit-code -- apps/web/src/types/api.generated.ts
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run automated tests
+        run: npm test --if-present
+
+      - name: Production build
+        run: npm run build

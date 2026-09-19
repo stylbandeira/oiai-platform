@@ -68,7 +68,6 @@ export function UserCompanyForm({
                 setCategories(categoriesRes.data.categories);
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
-            } finally {
             }
         };
 

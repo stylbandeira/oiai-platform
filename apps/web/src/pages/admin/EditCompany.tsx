@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { CompanyForm } from "@/components/forms/CompanyForm";
+import { CompanyForm, type CompanyFormData } from "@/components/forms/CompanyForm";
 import { useUser } from "@/contexts/UserContext";
 import api from "@/lib/api";
 import { useEffect, useState } from "react";
@@ -42,7 +42,7 @@ export default function EditCompany() {
         return null;
     }
 
-    const handleSubmit = async (formData: any) => {
+    const handleSubmit = async (formData: CompanyFormData) => {
         setIsSubmitting(true);
 
         try {

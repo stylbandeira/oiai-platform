@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import api from "@/lib/api";
 import { useState } from "react";
-import { ProductForm } from "@/components/forms/ProductForm";
+import { ProductForm, type ProductFormData } from "@/components/forms/ProductForm";
 import { useNotification } from "@/contexts/NotificationContext";
 
 
@@ -13,7 +13,7 @@ export default function AddProduct() {
     const { showNotification } = useNotification();
     const [formKey, setFormKey] = useState(0);
 
-    const handleSubmit = async (formData: any) => {
+    const handleSubmit = async (formData: ProductFormData) => {
         console.log('Dados do formulário:', formData);
         setIsSubmitting(true);
         try {

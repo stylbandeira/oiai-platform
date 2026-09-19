@@ -1,0 +1,275 @@
+openapi: 3.0.3
+info:
+  title: Oiaí API
+  version: 1.0.0
+  description: API HTTP da plataforma Oiaí.
+servers:
+  - url: http://localhost:8001/api
+    description: Desenvolvimento local
+paths:
+  /register:
+    post:
+      summary: Cadastra um usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201': { description: Usuário cadastrado }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /login:
+    post:
+      summary: Autentica um usuário
+      responses:
+        '200': { description: Token emitido }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /user:
+    get:
+      security: [{ sanctum: [] }]
+      summary: Retorna o usuário autenticado
+      responses:
+        '200':
+          description: Usuário autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /products:
+    get:
+      security: [{ sanctum: [] }]
+      summary: Lista e pesquisa produtos
+      parameters:
+        - { $ref: '#/components/parameters/Search' }
+        - { $ref: '#/components/parameters/Page' }
+      responses:
+        '200':
+          description: Lista paginada de produtos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaginatedProducts' }
+    post:
+      security: [{ sanctum: [] }]
+      summary: Cria um produto
+      responses: { '201': { description: Produto criado } }
+  /lists:
+    get:
+      security: [{ sanctum: [] }]
+      summary: Lista as listas do usuário autenticado
+      responses: { '200': { description: Listas paginadas } }
+    post:
+      security: [{ sanctum: [] }]
+      summary: Cria uma lista de compras
+      responses: { '201': { description: Lista criada } }
+  /lists/{list}/optimize:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Otimiza uma lista de compras
+      parameters:
+        - { $ref: '#/components/parameters/ListId' }
+      responses: { '200': { description: Lista otimizada } }
+  /logout:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Encerra a sessão atual
+      responses: { '204': { description: Sessão encerrada } }
+  /email/verify/{id}/{hash}:
+    get:
+      summary: Confirma o endereço de e-mail
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+        - { name: hash, in: path, required: true, schema: { type: string } }
+      responses: { '302': { description: Redirecionamento após confirmação } }
+  /email/verify:
+    get:
+      security: [{ sanctum: [] }]
+      summary: Exibe o aviso de verificação
+      responses: { '200': { description: Aviso de verificação } }
+  /email/resend:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Reenvia o e-mail de verificação
+      responses: { '202': { description: E-mail enviado } }
+  /addresses:
+    get: { security: [{ sanctum: [] }], summary: Lista endereços, responses: { '200': { description: Endereços } } }
+    post: { security: [{ sanctum: [] }], summary: Cria um endereço, responses: { '201': { description: Endereço criado } } }
+  /addresses/{address}:
+    get: { security: [{ sanctum: [] }], summary: Exibe um endereço, parameters: [{ $ref: '#/components/parameters/AddressId' }], responses: { '200': { description: Endereço } } }
+    put: { security: [{ sanctum: [] }], summary: Atualiza um endereço, parameters: [{ $ref: '#/components/parameters/AddressId' }], responses: { '200': { description: Endereço atualizado } } }
+    delete: { security: [{ sanctum: [] }], summary: Remove um endereço, parameters: [{ $ref: '#/components/parameters/AddressId' }], responses: { '204': { description: Endereço removido } } }
+  /products/{product}:
+    get: { security: [{ sanctum: [] }], summary: Exibe um produto, parameters: [{ $ref: '#/components/parameters/ProductId' }], responses: { '200': { description: Produto } } }
+    put: { security: [{ sanctum: [] }], summary: Atualiza um produto, parameters: [{ $ref: '#/components/parameters/ProductId' }], responses: { '200': { description: Produto atualizado } } }
+    delete: { security: [{ sanctum: [] }], summary: Remove um produto, parameters: [{ $ref: '#/components/parameters/ProductId' }], responses: { '204': { description: Produto removido } } }
+  /products/{product}/favorite:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Adiciona ou remove um produto dos favoritos
+      parameters: [{ $ref: '#/components/parameters/ProductId' }]
+      responses: { '200': { description: Favorito atualizado } }
+  /listItems/{list}:
+    put:
+      security: [{ sanctum: [] }]
+      summary: Atualiza itens de uma lista
+      parameters: [{ $ref: '#/components/parameters/ListId' }]
+      responses: { '200': { description: Itens atualizados } }
+  /unities:
+    get: { security: [{ sanctum: [] }], summary: Lista unidades, responses: { '200': { description: Unidades } } }
+    post: { security: [{ sanctum: [] }], summary: Cria unidade, responses: { '201': { description: Unidade criada } } }
+  /categories:
+    get: { security: [{ sanctum: [] }], summary: Lista categorias, responses: { '200': { description: Categorias } } }
+  /invoice/process:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Processa uma NFC-e
+      responses: { '202': { description: Processamento iniciado } }
+  /invoice/processXML:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Processa uma NFC-e em XML
+      responses: { '202': { description: Processamento iniciado } }
+  /events:
+    get: { security: [{ sanctum: [] }], summary: Lista eventos, responses: { '200': { description: Eventos } } }
+    post: { security: [{ sanctum: [] }], summary: Cria evento, responses: { '201': { description: Evento criado } } }
+  /events/check-all:
+    post: { security: [{ sanctum: [] }], summary: Marca todos os eventos como lidos, responses: { '200': { description: Eventos atualizados } } }
+  /companies:
+    get: { security: [{ sanctum: [] }], summary: Lista empresas, responses: { '200': { description: Empresas } } }
+    post: { security: [{ sanctum: [] }], summary: Cria empresa, responses: { '201': { description: Empresa criada } } }
+  /companies/{company}/dashboard:
+    get: { security: [{ sanctum: [] }], summary: Retorna dashboard da empresa, parameters: [{ $ref: '#/components/parameters/CompanyId' }], responses: { '200': { description: Dados do dashboard } } }
+  /companies/submit:
+    post: { security: [{ sanctum: [] }], summary: Envia empresa para análise, responses: { '202': { description: Solicitação enviada } } }
+  /companies/{company}/request-access:
+    post: { security: [{ sanctum: [] }], summary: Solicita acesso a uma empresa, parameters: [{ $ref: '#/components/parameters/CompanyId' }], responses: { '201': { description: Solicitação criada } } }
+  /companies/request-with-new-company:
+    post: { security: [{ sanctum: [] }], summary: Cria empresa e solicita acesso, responses: { '201': { description: Empresa e solicitação criadas } } }
+  /user/company-requests:
+    get: { security: [{ sanctum: [] }], summary: Lista solicitações de acesso, responses: { '200': { description: Solicitações } } }
+  /dashboard-data:
+    get: { security: [{ sanctum: [] }], summary: Retorna dashboard do usuário, responses: { '200': { description: Dados do dashboard } } }
+  /users/{user}:
+    get: { security: [{ sanctum: [] }], summary: Exibe usuário, parameters: [{ $ref: '#/components/parameters/UserId' }], responses: { '200': { description: Usuário } } }
+    put: { security: [{ sanctum: [] }], summary: Atualiza usuário, parameters: [{ $ref: '#/components/parameters/UserId' }], responses: { '200': { description: Usuário atualizado } } }
+  /admin/dashboard:
+    get: { security: [{ sanctum: [] }], summary: Dashboard administrativo, responses: { '200': { description: Dados administrativos } } }
+  /admin/users/export:
+    get: { security: [{ sanctum: [] }], summary: Exporta usuários, responses: { '200': { description: Arquivo CSV } } }
+  /admin/products/import:
+    post: { security: [{ sanctum: [] }], summary: Importa produtos, responses: { '202': { description: Importação iniciada } } }
+  /admin/products/export:
+    get: { security: [{ sanctum: [] }], summary: Exporta produtos, responses: { '200': { description: Arquivo CSV } } }
+  /admin/products/bulk-validate:
+    post: { security: [{ sanctum: [] }], summary: Valida produtos em lote, responses: { '200': { description: Produtos validados } } }
+components:
+  securitySchemes:
+    sanctum:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+  parameters:
+    Search:
+      name: search
+      in: query
+      schema: { type: string }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1 }
+    ListId:
+      name: list
+      in: path
+      required: true
+      schema: { type: integer }
+    AddressId: { name: address, in: path, required: true, schema: { type: integer } }
+    ProductId: { name: product, in: path, required: true, schema: { type: integer } }
+    CompanyId: { name: company, in: path, required: true, schema: { type: integer } }
+    UserId: { name: user, in: path, required: true, schema: { type: integer } }
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        cpf: { type: string, nullable: true }
+        status: { type: string }
+        type: { type: string, enum: [admin, company, client] }
+        email: { type: string, format: email }
+        points: { type: integer }
+        token: { type: string, nullable: true }
+        email_verified: { type: boolean }
+    Product:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        sku: { type: string, nullable: true }
+        img: { type: string, format: uri, nullable: true }
+        ean: { type: string, nullable: true }
+        average_price: { type: number, format: float, nullable: true }
+        validated: { type: boolean }
+        mentioned_quantity: { type: number, nullable: true }
+        mentioned_quantity_variant: { type: string, nullable: true }
+        unity: { type: string, nullable: true }
+        unity_id: { type: integer, nullable: true }
+        unity_quantity: { type: number, nullable: true }
+        category: { type: string, nullable: true }
+        companies_count: { type: integer, nullable: true }
+    Company:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string, format: email, nullable: true }
+        cnpj: { type: string, nullable: true }
+        img: { type: string, format: uri, nullable: true }
+        website: { type: string, nullable: true }
+        status: { type: string }
+        phone: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        raw_address: { type: string, nullable: true }
+        geocode_status: { type: string, nullable: true }
+    Category:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: string, nullable: true }
+    Unity:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        abbreviation: { type: string }
+    PaginationMeta:
+      type: object
+      properties:
+        current_page: { type: integer }
+        last_page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+        from: { type: integer, nullable: true }
+        to: { type: integer, nullable: true }
+    PaginatedProducts:
+      type: object
+      properties:
+        data: { type: array, items: { $ref: '#/components/schemas/Product' } }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+    ApiError:
+      type: object
+      properties:
+        message: { type: string }
+        errors: { type: object, additionalProperties: { type: array, items: { type: string } } }
+    RegisterRequest:
+      type: object
+      required: [name, email, password, password_confirmation]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+        password_confirmation: { type: string, format: password }
+  responses:
+    Unauthorized:
+      description: Não autenticado
+    ValidationError:
+      description: Dados inválidos

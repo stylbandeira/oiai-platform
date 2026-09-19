@@ -28,20 +28,9 @@ import { TableFilters } from "@/components/admin/TableFilters";
 import { BulkActionsBar } from "@/components/admin/BulkActionsBar";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { StandardDialog } from "@/components/ui/standard-dialog";
+import type { ProductExportRow } from "@/types/product";
 
-interface Product {
-  id: number;
-  name: string;
-  sku: string;
-  category: string;
-  brand?: string;
-  description?: string;
-  average_price: number;
-  img?: string;
-  validated: boolean;
-  created_at: string;
-  updated_at: string;
-}
+type Product = ProductExportRow;
 
 interface Category {
   id: number;

@@ -1,6 +1,6 @@
 // pages/admin/AddCompany.tsx
 import { useNavigate } from "react-router-dom";
-import { CompanyForm } from "@/components/forms/CompanyForm";
+import { CompanyForm, type CompanyFormData } from "@/components/forms/CompanyForm";
 import { useUser } from "@/contexts/UserContext";
 import api from "@/lib/api";
 import { useState } from "react";
@@ -15,7 +15,7 @@ export default function AddCompany() {
         return null;
     }
 
-    const handleSubmit = async (formData: any) => {
+    const handleSubmit = async (formData: CompanyFormData) => {
         console.log('Dados do formulário:', formData);
         setIsSubmitting(true);
         try {
