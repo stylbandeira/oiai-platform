@@ -23,8 +23,8 @@ class UpdateListItensAction
 
             $completedItems = $request->validated()['completed_items'];
 
-            if (!empty($completedItems)) {
-                $this->listProductsRepository->updateProductsOnList($completedItems, $list->id, ['completed' => true]);
+            if (! empty($completedItems)) {
+                $this->listProductsRepository->updateProductsOnList($completedItems, (string) $list->id, ['completed' => true]);
             }
 
             return response([

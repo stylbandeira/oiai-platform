@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
@@ -47,7 +46,7 @@ class VerifyEmailNotification extends Notification
 
     protected function verificationUrl($notifiable)
     {
-        $frontendUrl = env('FRONTEND_URL') . '/verify-email';
+        $frontendUrl = config('cors.allowed_origins.0').'/verify-email';
 
         $verifyUrl = URL::temporarySignedRoute(
             'api.verification.verify',

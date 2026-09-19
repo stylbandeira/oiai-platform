@@ -40,6 +40,7 @@ class CompanyProductsRepository
     {
         $record = $this->find($id);
         $record->update($data);
+
         return $record;
     }
 

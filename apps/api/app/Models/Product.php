@@ -5,14 +5,23 @@ namespace App\Models;
 use App\Enums\ProductQuantitySource;
 use App\Enums\ProductRefinementStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable;
 
+/**
+ * @property int $registrations
+ */
 class Product extends BaseModel
 {
-    use HasFactory, SoftDeletes, Searchable;
+    use HasFactory, Searchable, SoftDeletes;
+
     protected $table = 'products';
+
     const AVERAGE_PRICE_JOB_CONSTANCY_DAYS = 1;
+
     const AVERAGE_PRICE_PURCHASE_DATE_LIMIT_WEEKS = 4;
 
     protected $fillable = [
@@ -42,7 +51,7 @@ class Product extends BaseModel
         'category_id' => 1,
         'listAdded' => 0,
         'description' => '',
-        'average_price' => NULL
+        'average_price' => null,
     ];
 
     protected $casts = [
@@ -52,33 +61,35 @@ class Product extends BaseModel
         'refined' => ProductRefinementStatus::class,
     ];
 
-    public function companies()
+    public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_products')
             ->withPivot(['average_price']);
     }
 
-    public function userAddedProducts()
+    public function userAddedProducts(): HasMany
     {
         return $this->hasMany(UserAddedProducts::class, 'product_id');
     }
 
-    public function category()
+    /** @return BelongsTo<ProductCategory, $this> */
+    public function category(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 
-    public function unity()
+    /** @return BelongsTo<Unity, $this> */
+    public function unity(): BelongsTo
     {
         return $this->belongsTo(Unity::class, 'unit_id');
     }
 
-    public function providerAttempts()
+    public function providerAttempts(): HasMany
     {
         return $this->hasMany(ProductDataProviderAttempt::class);
     }
 
-    public function userFavorites()
+    public function userFavorites(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'favorite_products', 'product_id', 'user_id');
     }
@@ -121,7 +132,7 @@ class Product extends BaseModel
     {
         if ($this->mentioned_quantity > 100) {
             return 'perfect';
-        } else if ($this->mentioned_quantity > 50) {
+        } elseif ($this->mentioned_quantity > 50) {
             return 'secondary';
         } else {
             return 'destructive';

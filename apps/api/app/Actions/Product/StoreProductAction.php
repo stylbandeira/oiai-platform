@@ -3,9 +3,6 @@
 namespace App\Actions\Product;
 
 use App\Http\Requests\Product\ProductStoreRequest;
-use App\Http\Resources\AdminProductResource;
-use App\Http\Resources\ClientProductResource;
-use App\Models\CompanyProducts;
 use App\Models\Product;
 use App\Models\User;
 use App\Repositories\CompanyProductsRepository;

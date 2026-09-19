@@ -4,6 +4,7 @@ namespace App\Http\Requests\User;
 
 use App\Models\User;
 use App\Rulesets\UserCompaniesRules;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserStoreRequest extends FormRequest
@@ -19,7 +20,7 @@ class UserStoreRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -28,8 +29,8 @@ class UserStoreRequest extends FormRequest
             'type' => 'required|in:client,admin,company',
             'email' => 'email|required',
             'cpf' => 'string|required',
-            'status' => 'sometimes|in:' . implode(',', User::VALID_STATUSES),
-            ...UserCompaniesRules::companies()
+            'status' => 'sometimes|in:'.implode(',', User::VALID_STATUSES),
+            ...UserCompaniesRules::companies(),
         ];
     }
 }

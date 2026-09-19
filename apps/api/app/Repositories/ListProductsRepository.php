@@ -33,7 +33,7 @@ class ListProductsRepository
         ListProducts::create([
             'product_id' => $product_id,
             'list_id' => $list_id,
-            ...$data
+            ...$data,
         ]);
     }
 
@@ -41,6 +41,7 @@ class ListProductsRepository
     {
         $record = $this->find($id);
         $record->update($data);
+
         return $record;
     }
 

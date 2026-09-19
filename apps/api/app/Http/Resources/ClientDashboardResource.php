@@ -2,25 +2,31 @@
 
 namespace App\Http\Resources;
 
+use App\Models\User;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Log;
 
+/** @mixin User */
 class ClientDashboardResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @param  Request  $request
+     * @return array|Arrayable|\JsonSerializable
      */
     public function toArray($request)
     {
+        /** @var User $user */
+        $user = $this->resource;
+
         return [
-            'activeLists' => $this->activeLists ? $this->activeLists->count() : 0,
-            'points' => $this->points,
-            'monthEconomy' => $this->monthEconomy,
-            'reputation' => $this->reputation,
-            'recentActivity' => $this->recentActivity,
+            'activeLists' => $user->activeLists()->count(),
+            'points' => $user->points,
+            'monthEconomy' => $user->monthEconomy,
+            'reputation' => $user->reputation,
+            'recentActivity' => $user->recentActivity,
         ];
     }
 }

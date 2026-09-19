@@ -21,7 +21,7 @@ class ImageFromUrlTest extends TestCase
             ),
         ]);
 
-        $path = (new ImageFromUrl())->saveImageFromUrl(
+        $path = (new ImageFromUrl)->saveImageFromUrl(
             'https://oscbr.test/product/image',
             ['Authorization' => 'Bearer short-lived-token'],
         );

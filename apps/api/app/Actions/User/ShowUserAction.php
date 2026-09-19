@@ -2,12 +2,7 @@
 
 namespace App\Actions\User;
 
-use App\Http\Resources\AdminUserResource;
-use App\Http\Resources\ClientUserResource;
-use App\Http\Resources\CompanyUserResource;
-use App\Models\User;
 use App\Repositories\UserRepository;
-use Illuminate\Support\Facades\Auth;
 
 class ShowUserAction
 {
@@ -23,7 +18,7 @@ class ShowUserAction
                 'companies',
                 'pendingCompanies',
                 'activeCompanies',
-                'events'
+                'events',
             ]
         );
     }

@@ -2,15 +2,19 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Company;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Company */
 class CompanyResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @param  Request  $request
+     * @return array|Arrayable|\JsonSerializable
      */
     public function toArray($request)
     {
@@ -31,7 +35,7 @@ class CompanyResource extends JsonResource
             'total_products' => $this->whenLoaded('products', $this->products->count()),
             'ownership_status' => $this->whenLoaded(
                 'ownerRelationship',
-                fn() => $this->ownerRelationship?->status
+                fn () => $this->ownerRelationship?->status
             ),
         ];
     }

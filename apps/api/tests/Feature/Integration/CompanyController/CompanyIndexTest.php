@@ -7,7 +7,6 @@ use App\Models\CompanyOwners;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class CompanyIndexTest extends TestCase
@@ -24,7 +23,7 @@ class CompanyIndexTest extends TestCase
     public function test_admin_authorized(): void
     {
         $admin = User::factory()->make([
-            'type' => 'admin'
+            'type' => 'admin',
         ]);
 
         $response = $this->actingAs($admin)->getJson('/api/admin/companies');
@@ -35,7 +34,7 @@ class CompanyIndexTest extends TestCase
     public function test_client_authorized(): void
     {
         $client = User::factory()->make([
-            'type' => 'client'
+            'type' => 'client',
         ]);
 
         $response = $this->actingAs($client)->getJson('/api/companies');
@@ -46,7 +45,7 @@ class CompanyIndexTest extends TestCase
     public function test_company_authorized(): void
     {
         $company_user = User::factory()->make([
-            'type' => 'company'
+            'type' => 'company',
         ]);
 
         $response = $this->actingAs($company_user)->getJson('/api/companies');
@@ -57,11 +56,11 @@ class CompanyIndexTest extends TestCase
     public function test_admin_can_see_soft_deleted_companies(): void
     {
         $admin = User::factory()->make([
-            'type' => 'admin'
+            'type' => 'admin',
         ]);
 
         $soft_deleted_company = Company::factory()->create([
-            'deleted_at' => now()
+            'deleted_at' => now(),
         ]);
 
         $response = $this->actingAs($admin)->getJson('/api/admin/companies');
@@ -75,11 +74,11 @@ class CompanyIndexTest extends TestCase
     public function test_client_cant_see_soft_deleted_companies(): void
     {
         $client = User::factory()->make([
-            'type' => 'client'
+            'type' => 'client',
         ]);
 
         $soft_deleted_company = Company::factory()->create([
-            'deleted_at' => now()
+            'deleted_at' => now(),
         ]);
 
         $response = $this->actingAs($client)->getJson('/api/companies');
@@ -93,20 +92,20 @@ class CompanyIndexTest extends TestCase
     public function test_search_company_returns_company()
     {
         $client = User::factory()->make([
-            'type' => 'client'
+            'type' => 'client',
         ]);
 
         Company::factory(20)->create();
         $company = Company::factory()->create([
-            'cnpj' => '1283728392'
+            'cnpj' => '1283728392',
         ]);
 
-        $response = $this->actingAs($client)->getJson('/api/companies?search=' . '1283728392');
+        $response = $this->actingAs($client)->getJson('/api/companies?search='.'1283728392');
 
         $this->assertDatabaseCount('company', 21);
 
         $response->assertJsonFragment([
-            'name' => $company->name
+            'name' => $company->name,
         ])
             ->assertJsonCount(1, 'data')
             ->assertStatus(200);
@@ -115,12 +114,12 @@ class CompanyIndexTest extends TestCase
     public function test_owners_dont_return_for_client()
     {
         $client = User::factory()->make([
-            'type' => 'client'
+            'type' => 'client',
         ]);
 
         $company = Company::factory()->create();
         $company_owner = User::factory()->create([
-            'type' => 'company'
+            'type' => 'company',
         ]);
 
         $company_owner->companies()->attach($company->id);
@@ -138,13 +137,13 @@ class CompanyIndexTest extends TestCase
     public function test_owners_return_for_owner()
     {
         $client = User::factory()->create([
-            'type' => 'company'
+            'type' => 'company',
         ]);
 
         $company = Company::factory()->create();
 
         $client->companies()->attach($company->id, [
-            'status' => CompanyOwners::STATUS_ACTIVE
+            'status' => CompanyOwners::STATUS_ACTIVE,
         ]);
 
         $response = $this->actingAs($client)->getJson('/api/companies');
@@ -159,17 +158,17 @@ class CompanyIndexTest extends TestCase
     public function test_owners_dont_return_for_others_company_owners()
     {
         $client = User::factory()->create([
-            'type' => 'company'
+            'type' => 'company',
         ]);
 
         $company = Company::factory()->create();
 
         $client->companies()->attach($company->id, [
-            'status' => CompanyOwners::STATUS_ACTIVE
+            'status' => CompanyOwners::STATUS_ACTIVE,
         ]);
 
         $not_owner_user = User::factory()->create([
-            'type' => 'company'
+            'type' => 'company',
         ]);
 
         $response = $this->actingAs($not_owner_user)->getJson('/api/companies');
@@ -183,12 +182,12 @@ class CompanyIndexTest extends TestCase
     {
         $products = Product::factory()->count(10)->create();
         $company_user = User::factory()->create([
-            'type' => 'company'
+            'type' => 'company',
         ]);
         $company = Company::factory()->create();
 
         $company_user->companies()->attach($company->id, [
-            'status' => CompanyOwners::STATUS_ACTIVE
+            'status' => CompanyOwners::STATUS_ACTIVE,
         ]);
 
         $company->products()->attach($products->pluck('id'));
@@ -196,7 +195,7 @@ class CompanyIndexTest extends TestCase
         $response = $this->actingAs($company_user)->getJson('/api/companies');
 
         $response->assertJsonFragment([
-            'total_products' => 10
+            'total_products' => 10,
         ])
             ->assertStatus(200);
     }

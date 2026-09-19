@@ -3,24 +3,32 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property string|null $geocode_status
+ */
 class Company extends BaseModel
 {
     use HasFactory, SoftDeletes;
 
     const STATUS_ACTIVE = 'active';
+
     const STATUS_INACTIVE = 'INACTIVE';
+
     const STATUS_PENDING = 'pending';
 
     const VALID_STATUSES = [
         self::STATUS_ACTIVE,
         self::STATUS_INACTIVE,
-        self::STATUS_PENDING
+        self::STATUS_PENDING,
     ];
 
     protected $table = 'company';
+
     protected $fillable = [
         'address_id',
         'name',
@@ -32,39 +40,42 @@ class Company extends BaseModel
         'phone',
         'description',
         'raw_address',
-        'ie'
-    ];
-    protected $attributes = [
-        'img' => './',
-        'status' => 'active'
+        'ie',
     ];
 
-    public function products()
+    protected $attributes = [
+        'img' => './',
+        'status' => 'active',
+    ];
+
+    public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'company_products')
             ->withPivot(['average_price']);
     }
 
-    public function owners()
+    public function owners(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'company_owners', 'company_id', 'user_id');
     }
 
-    public function ownerRelationship()
+    /** @return HasOne<CompanyOwners, $this> */
+    public function ownerRelationship(): HasOne
     {
         return $this->hasOne(CompanyOwners::class, 'company_id', 'id');
     }
 
     public function getImgUrlAttribute()
     {
-        if (!$this->img) {
+        if (! $this->img) {
             return null;
         }
 
         return Storage::url($this->img);
     }
 
-    public function address()
+    /** @return HasOne<Address, $this> */
+    public function address(): HasOne
     {
         return $this->hasOne(Address::class, 'id', 'address_id');
     }

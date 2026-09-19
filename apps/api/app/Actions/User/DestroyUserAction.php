@@ -14,6 +14,6 @@ class DestroyUserAction
     {
         $this->user_repository->find($userId);
 
-        return  $this->user_repository->delete($userId);
+        return $this->user_repository->delete($userId);
     }
 }

@@ -22,7 +22,7 @@ class CompanyOwnersRequestAccessTest extends TestCase
         $company = Company::factory()->create();
 
         $response = $this->actingAs($user)
-            ->postJson('/api/companies/' . $company->id . '/request-access');
+            ->postJson('/api/companies/'.$company->id.'/request-access');
 
         $response
             ->assertStatus(403);
@@ -41,7 +41,7 @@ class CompanyOwnersRequestAccessTest extends TestCase
         ]);
 
         $response = $this->actingAs($companyUser)
-            ->postJson('/api/companies/' . $company->id . '/request-access');
+            ->postJson('/api/companies/'.$company->id.'/request-access');
 
         $response
             ->assertStatus(400)
@@ -60,7 +60,7 @@ class CompanyOwnersRequestAccessTest extends TestCase
         ]);
 
         $response = $this->actingAs($companyUser)
-            ->postJson('/api/companies/' . $company->id . '/request-access');
+            ->postJson('/api/companies/'.$company->id.'/request-access');
 
         $response
             ->assertStatus(200)

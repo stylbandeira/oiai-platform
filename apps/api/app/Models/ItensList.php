@@ -3,13 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ItensList extends BaseModel
 {
     use HasFactory;
 
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_INACTIVE = 'inactive';
 
     public const VALID_STATUSES = [
@@ -18,7 +22,7 @@ class ItensList extends BaseModel
         self::STATUS_INACTIVE,
     ];
 
-    protected $table = "list";
+    protected $table = 'list';
 
     public $fillable = [
         'user_id',
@@ -26,15 +30,16 @@ class ItensList extends BaseModel
         'favorite',
         'total',
         'optimized',
-        'status'
+        'status',
     ];
 
-    public function products()
+    public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'list_products', 'list_id', 'product_id')->withPivot(['quantity', 'company_product_id']);
     }
 
-    public function listProducts()
+    /** @return HasMany<ListProducts, $this> */
+    public function listProducts(): HasMany
     {
         return $this->hasMany(ListProducts::class, 'list_id');
     }

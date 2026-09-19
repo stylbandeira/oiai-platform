@@ -32,6 +32,7 @@ class EventRepository
     {
         $record = $this->find($id);
         $record->update($data);
+
         return $record;
     }
 

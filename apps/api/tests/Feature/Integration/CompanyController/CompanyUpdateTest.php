@@ -23,7 +23,7 @@ class CompanyUpdateTest extends TestCase
         $payload[$field] = $value;
 
         $response = $this->actingAs($admin)
-            ->putJson('/api/admin/companies/' . $company->id, $payload);
+            ->putJson('/api/admin/companies/'.$company->id, $payload);
 
         $response
             ->assertStatus(400)
@@ -41,7 +41,7 @@ class CompanyUpdateTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)
-            ->putJson('/api/admin/companies/' . $company->id, $this->validPayload([
+            ->putJson('/api/admin/companies/'.$company->id, $this->validPayload([
                 'cnpj' => '12345678000190',
             ]));
 
@@ -69,7 +69,7 @@ class CompanyUpdateTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)
-            ->putJson('/api/admin/companies/' . $company->id, $payload);
+            ->putJson('/api/admin/companies/'.$company->id, $payload);
 
         $response
             ->assertStatus(200)

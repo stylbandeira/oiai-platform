@@ -19,6 +19,7 @@ class OptimizeListAction
         private ListRepository $listRepository,
         private GeolocationService $geolocationService,
     ) {}
+
     public function execute(string $list_id)
     {
         $list = ItensList::with('products')->find($list_id);
@@ -28,7 +29,7 @@ class OptimizeListAction
         $companyProducts = $this->companyProductsRepository->getByProductIdsWithPivots($list->products->pluck('id')->toArray());
 
         $cheapest = $companyProducts->groupBy('product_id')
-            ->map(fn(Collection $items) => $this->selectBestOffer($items, $list))
+            ->map(fn (Collection $items) => $this->selectBestOffer($items, $list))
             ->filter();
 
         foreach ($cheapest as $cheap) {
@@ -37,7 +38,7 @@ class OptimizeListAction
 
             $optimizedList[$cheap->company->name][] = $product;
 
-            $this->listProductsRepository->updateProductsOnList([$cheap->product_id], $list->id, [
+            $this->listProductsRepository->updateProductsOnList([$cheap->product_id], (string) $list->id, [
                 'company_product_id' => $cheap->id,
             ]);
         }
@@ -51,7 +52,7 @@ class OptimizeListAction
     {
         $validOffers = $offers
             ->filter(
-                fn(CompanyProducts $offer) => $offer->average_price !== null
+                fn (CompanyProducts $offer) => $offer->average_price !== null
                     && (float) $offer->average_price > 0
             );
 
@@ -65,7 +66,7 @@ class OptimizeListAction
             && $list->longitude !== null
         ) {
             $offersWithinDistance = $validOffers->filter(
-                fn(CompanyProducts $offer) => $this->isWithinDistance($offer, $list)
+                fn (CompanyProducts $offer) => $this->isWithinDistance($offer, $list)
             );
 
             if ($offersWithinDistance->isNotEmpty()) {
@@ -74,7 +75,7 @@ class OptimizeListAction
         }
 
         return $validOffers
-            ->sortBy(fn(CompanyProducts $offer) => (float) $offer->average_price)
+            ->sortBy(fn (CompanyProducts $offer) => (float) $offer->average_price)
             ->first();
     }
 

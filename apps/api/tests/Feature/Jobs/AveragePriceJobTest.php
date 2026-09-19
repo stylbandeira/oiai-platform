@@ -34,7 +34,7 @@ class AveragePriceJobTest extends TestCase
         $this->createUserAddedProduct($user, $company, $product, $companyProduct, 10);
         $this->createUserAddedProduct($user, $company, $product, $companyProduct, 20);
 
-        (new AveragePriceJob())->handle();
+        (new AveragePriceJob)->handle();
 
         $this->assertEquals(15, $product->fresh()->average_price);
     }
@@ -55,7 +55,7 @@ class AveragePriceJobTest extends TestCase
         $this->createUserAddedProduct($user, $company, $product, $companyProduct, 10);
         $this->createUserAddedProduct($user, $company, $product, $companyProduct, 20);
 
-        (new AveragePriceJob())->handle();
+        (new AveragePriceJob)->handle();
 
         $this->assertEquals(15, $product->fresh()->average_price);
     }
@@ -73,7 +73,7 @@ class AveragePriceJobTest extends TestCase
 
         $this->createUserAddedProduct($user, $company, $product, $companyProduct, 27.99);
 
-        (new AveragePriceJob())->handle();
+        (new AveragePriceJob)->handle();
 
         $this->assertEquals(27.99, $product->fresh()->average_price);
         $this->assertEquals(27.99, $companyProduct->fresh()->average_price);
@@ -95,7 +95,7 @@ class AveragePriceJobTest extends TestCase
         ]);
         $this->createUserAddedProduct($user, $company, $product, $companyProduct, 20);
 
-        (new AveragePriceJob())->handle();
+        (new AveragePriceJob)->handle();
 
         $this->assertEquals(15, $product->fresh()->average_price);
         $this->assertEquals(15, $companyProduct->fresh()->average_price);
@@ -124,7 +124,7 @@ class AveragePriceJobTest extends TestCase
         $this->createUserAddedProduct($user, $firstCompany, $product, $firstCompanyProduct, 20);
         $this->createUserAddedProduct($user, $secondCompany, $product, $secondCompanyProduct, 40);
 
-        (new AveragePriceJob())->handle();
+        (new AveragePriceJob)->handle();
 
         $this->assertEqualsWithDelta(23.33, $product->fresh()->average_price, 0.001);
 
@@ -151,7 +151,7 @@ class AveragePriceJobTest extends TestCase
         $first = $this->createUserAddedProduct($user, $company, $product, $companyProduct, 10);
         $second = $this->createUserAddedProduct($user, $company, $product, $companyProduct, 20);
 
-        (new AveragePriceJob())->handle();
+        (new AveragePriceJob)->handle();
 
         $this->assertDatabaseHas('user_added_products', [
             'id' => $first->id,
@@ -181,7 +181,7 @@ class AveragePriceJobTest extends TestCase
         ]);
         $this->createUserAddedProduct($user, $company, $product, $companyProduct, 0);
 
-        (new AveragePriceJob())->handle();
+        (new AveragePriceJob)->handle();
 
         $this->assertEquals(100, $product->fresh()->average_price);
         $this->assertEquals(50, $companyProduct->fresh()->average_price);
@@ -189,7 +189,7 @@ class AveragePriceJobTest extends TestCase
 
     public function test_set_average_price_returns_average_for_grouped_products(): void
     {
-        $result = (new AveragePriceJob())->setAveragePrice([
+        $result = (new AveragePriceJob)->setAveragePrice([
             [
                 ['id' => 1, 'average_price' => 10],
                 ['id' => 1, 'average_price' => 20],
@@ -213,7 +213,7 @@ class AveragePriceJobTest extends TestCase
         float $price,
         array $overrides = []
     ): UserAddedProducts {
-        return UserAddedProducts::unguarded(fn() => UserAddedProducts::create(array_merge([
+        return UserAddedProducts::unguarded(fn () => UserAddedProducts::create(array_merge([
             'user_id' => $user->id,
             'company_id' => $company->id,
             'product_id' => $product->id,

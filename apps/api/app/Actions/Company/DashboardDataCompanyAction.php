@@ -4,7 +4,6 @@ namespace App\Actions\Company;
 
 use App\Http\Resources\CompanyResource;
 use App\Models\Company;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardDataCompanyAction
 {
@@ -12,7 +11,7 @@ class DashboardDataCompanyAction
     {
         return response([
             'company' => new CompanyResource($company),
-            'totalProducts' => count($company->products) ?? 0,
+            'totalProducts' => $company->products->count(),
             'activeWebhooks' => 0,
             'monthlyUpdates' => 0,
             'userEngagement' => 0,

@@ -55,6 +55,7 @@ class ProductDataSearchJobTest extends TestCase
             'refined' => ProductRefinementStatus::OscbrValidated->value,
         ];
 
+        /** @var ProductDataService&Mockery\MockInterface $productDataService */
         $productDataService = Mockery::mock(ProductDataService::class);
         $productDataService->shouldReceive('startRun')->once();
         $productDataService->shouldReceive('hasAvailableProvider')->times(3)->andReturnTrue();
@@ -70,9 +71,10 @@ class ProductDataSearchJobTest extends TestCase
         $productDataService->shouldReceive('getSupplementalProductData')
             ->once()
             ->andReturn($oscbrResult);
+        /** @var ProductCategoryRepository&Mockery\MockInterface $categoryRepository */
         $categoryRepository = Mockery::mock(ProductCategoryRepository::class);
 
-        (new ProductDataSearchJob())->handle($productDataService, $categoryRepository);
+        (new ProductDataSearchJob)->handle($productDataService, $categoryRepository);
 
         $this->assertSame('Produto validado pelo admin', $adminProduct->fresh()->name);
         $this->assertSame('Produto validado pela Cosmos', $cosmosProduct->fresh()->name);
@@ -112,6 +114,7 @@ class ProductDataSearchJobTest extends TestCase
             ],
         ];
 
+        /** @var ProductDataService&Mockery\MockInterface $productDataService */
         $productDataService = Mockery::mock(ProductDataService::class);
         $productDataService->shouldReceive('startRun')->once();
         $productDataService->shouldReceive('hasAvailableProvider')
@@ -127,9 +130,12 @@ class ProductDataSearchJobTest extends TestCase
             ->with(ProductRefinementStatus::Unrefined, ['cosmos', 'oscbr'])
             ->andReturnFalse();
 
-        (new ProductDataSearchJob())->handle(
+        /** @var ProductCategoryRepository&Mockery\MockInterface $categoryRepository */
+        $categoryRepository = Mockery::mock(ProductCategoryRepository::class);
+
+        (new ProductDataSearchJob)->handle(
             $productDataService,
-            Mockery::mock(ProductCategoryRepository::class),
+            $categoryRepository,
         );
 
         $this->assertSame(ProductRefinementStatus::NotFound, $product->fresh()->refined);

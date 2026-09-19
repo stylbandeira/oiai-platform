@@ -2,7 +2,6 @@
 
 namespace App\Actions\Product;
 
-
 use App\Models\User;
 use App\Repositories\ProductRepository;
 use App\Repositories\UserRepository;

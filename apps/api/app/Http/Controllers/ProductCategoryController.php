@@ -9,7 +9,7 @@ class ProductCategoryController extends Controller
     /**
      * Return all categories
      *
-     * @return void
+     * @return mixed
      */
     public function index(IndexProductCategoryAction $action)
     {

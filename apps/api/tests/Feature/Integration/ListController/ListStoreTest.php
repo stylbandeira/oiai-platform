@@ -5,7 +5,6 @@ namespace Tests\Feature\Integration\ListController;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ListStoreTest extends TestCase

@@ -3,9 +3,9 @@
 
 use App\Helpers\GlobalHelper;
 
-if (!function_exists('only_numbers')) {
-    function only_numbers($date, $includeTime = false)
+if (! function_exists('only_numbers')) {
+    function only_numbers(string $date): string
     {
-        return GlobalHelper::onlyNumbers($date, $includeTime);
+        return GlobalHelper::onlyNumbers($date);
     }
 }

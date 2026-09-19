@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ListDataAssembler::class, EloquentListDataAssembler::class);
 
         $this->app->singleton(ExportService::class, function () {
-            return new ExportService();
+            return new ExportService;
         });
 
         $this->app->bind(ProductDataService::class, function ($app) {
@@ -38,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(NFCeXMLParserService::class, function ($app) {
-            return new NFCeXMLParserService();
+            return new NFCeXMLParserService;
         });
 
         $this->app->singleton(NFCeScraperService::class, function ($app) {

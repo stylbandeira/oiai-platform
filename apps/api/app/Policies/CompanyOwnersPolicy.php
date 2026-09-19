@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\CompanyOwners;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class CompanyOwnersPolicy
 {
@@ -15,9 +14,10 @@ class CompanyOwnersPolicy
     {
         if ($user->isAdmin()) {
             return true;
-        } else if ($user->isCompany()) {
+        } elseif ($user->isCompany()) {
             return true;
         }
+
         return false;
     }
 
@@ -28,9 +28,10 @@ class CompanyOwnersPolicy
     {
         if ($user->isAdmin()) {
             return true;
-        } else if ($user->isCompany() && $companyOwners->user_id === $user->id) {
+        } elseif ($user->isCompany() && $companyOwners->user_id === $user->id) {
             return true;
         }
+
         return false;
     }
 
@@ -41,7 +42,7 @@ class CompanyOwnersPolicy
     {
         if ($user->isAdmin()) {
             return true;
-        } else if ($user->isCompany()) {
+        } elseif ($user->isCompany()) {
             return true;
         }
 

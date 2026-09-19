@@ -23,7 +23,7 @@ return [
 
     'nominatim' => [
         'email' => env('APP_MAIL'),
-        'url' => env('NOMINATIM_URL', 'https://nominatim.openstreetmap.org/search')
+        'url' => env('NOMINATIM_URL', 'https://nominatim.openstreetmap.org/search'),
     ],
 
     'cosmos' => [

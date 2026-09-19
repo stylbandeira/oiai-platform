@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Address extends BaseModel
 {
     use HasFactory;
+
     protected $table = 'address';
+
     protected $fillable = [
         'country',
         'area',
@@ -21,19 +23,19 @@ class Address extends BaseModel
         'longitude',
         'geocode_status',
         'geocode_error',
-        'geocoded_at'
+        'geocoded_at',
     ];
 
     protected $attributes = [
-        'country' => 'Brasil'
+        'country' => 'Brasil',
     ];
 
     public function getFullAddressAttribute()
     {
-        return str_replace(',,', ',', $this->street .
-            ',' . $this->number .
-            ', ' . $this->area .
-            ', ' . $this->city  .
-            ', ' . $this->state);
+        return str_replace(',,', ',', $this->street.
+            ','.$this->number.
+            ', '.$this->area.
+            ', '.$this->city.
+            ', '.$this->state);
     }
 }

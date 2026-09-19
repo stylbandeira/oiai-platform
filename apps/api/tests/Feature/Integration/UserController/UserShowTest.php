@@ -27,7 +27,7 @@ class UserShowTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->getJson('/api/admin/users/' . $user->id)
+            ->getJson('/api/admin/users/'.$user->id)
             ->assertStatus(200)
             ->assertJsonPath('data.name', 'Visible User');
     }
@@ -39,11 +39,11 @@ class UserShowTest extends TestCase
         $company = User::factory()->company()->create();
 
         $this->actingAs($admin)
-            ->getJson('/api/admin/users/' . $client->id)
+            ->getJson('/api/admin/users/'.$client->id)
             ->assertStatus(200);
 
         $this->actingAs($admin)
-            ->getJson('/api/admin/users/' . $company->id)
+            ->getJson('/api/admin/users/'.$company->id)
             ->assertStatus(200);
     }
 
@@ -56,11 +56,11 @@ class UserShowTest extends TestCase
         $otherUser = User::factory()->client()->create();
 
         $this->actingAs($user)
-            ->getJson('/api/users/' . $user->id)
+            ->getJson('/api/users/'.$user->id)
             ->assertStatus(200);
 
         $this->actingAs($user)
-            ->getJson('/api/users/' . $otherUser->id)
+            ->getJson('/api/users/'.$otherUser->id)
             ->assertStatus(403);
     }
 

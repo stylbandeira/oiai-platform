@@ -2,15 +2,19 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Address;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Address */
 class AddressResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @param  Request  $request
+     * @return array|Arrayable|\JsonSerializable
      */
     public function toArray($request)
     {
@@ -28,7 +32,7 @@ class AddressResource extends JsonResource
             'geocode_status' => $this->geocode_status,
             'geocode_error' => $this->geocode_error,
             'geocoded_at' => $this->geocoded_at,
-            'full_address' => $this->full_address
+            'full_address' => $this->full_address,
         ];
     }
 }

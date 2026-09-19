@@ -3,14 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Event extends BaseModel
 {
     const TYPE_PRODUCT_INSERT = 'product_insert';
+
     const TYPE_COMPANY_OWNER_REQUEST = 'company_ownership_request';
+
     const TYPE_COMPANY_OWNER_ALLOWED = 'company_ownership_allowed';
 
     use HasFactory;
+
     protected $table = 'event';
 
     protected $fillable = [
@@ -24,10 +28,11 @@ class Event extends BaseModel
         'checked',
         'target_type',
         'entity_type',
-        'entity_id'
+        'entity_id',
     ];
 
-    public function user()
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

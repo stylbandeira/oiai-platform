@@ -2,13 +2,9 @@
 
 namespace App\Actions\Company;
 
-use App\Http\Resources\AdminCompanyResource;
-use App\Http\Resources\ClientCompanyResource;
-use App\Http\Resources\CompanyResource;
 use App\Models\Company;
 use App\Models\User;
 use App\Repositories\CompanyRepository;
-use Illuminate\Support\Facades\Auth;
 
 class ShowCompanyAction
 {

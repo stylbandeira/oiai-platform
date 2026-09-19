@@ -19,7 +19,7 @@ class ListUpdateRequest extends FormRequest
         return [
             'name' => 'sometimes|string',
             'favorite' => 'sometimes|boolean',
-            'status' => 'sometimes|in:' . implode(',', ItensList::VALID_STATUSES),
+            'status' => 'sometimes|in:'.implode(',', ItensList::VALID_STATUSES),
             'items' => 'sometimes|array',
             'items.*.product_id' => 'required_with:items|integer|exists:products,id',
             'items.*.quantity' => 'required_with:items|numeric|min:0.01',

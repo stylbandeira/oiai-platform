@@ -87,8 +87,6 @@ class AddressTest extends TestCase
 
     /**
      * @dataProvider invalidFieldsProvider
-     *
-     * @return void
      */
     public function test_invalid_fields(string $field, mixed $value): void
     {

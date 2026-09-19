@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 class ExistsOr implements Rule
 {
     protected string $table;
+
     protected array $columns;
 
     public function __construct(string $table, array $columns)

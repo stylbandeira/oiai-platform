@@ -17,7 +17,7 @@ class NFCeScraperService
         // Normalize it and reuse a recent successful lookup instead of hitting
         // the SEFAZ portal once per frame/request.
         $qrData = trim(preg_replace('/\s+/', '', $qrData) ?? $qrData);
-        $cacheKey = 'nfce:qr:' . hash('sha256', $qrData);
+        $cacheKey = 'nfce:qr:'.hash('sha256', $qrData);
         $cached = Cache::get($cacheKey);
 
         if (is_array($cached)) {

@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Invoice extends BaseModel
 {
     use HasFactory;
+
     const VALID_AREA_CODES = [
         'PE' => '26',
         'SP' => '35',
@@ -20,15 +22,15 @@ class Invoice extends BaseModel
         'company_id',
         'receipt_data',
         'invoice_data',
-        'pending'
+        'pending',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function company()
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }

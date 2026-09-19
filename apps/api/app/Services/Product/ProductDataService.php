@@ -4,17 +4,17 @@ namespace App\Services\Product;
 
 use App\Contracts\Product\ProductDataProvider;
 use App\Enums\ProductRefinementStatus;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 class ProductDataService
 {
     private array $runUsage = [];
+
     private array $unavailableProviders = [];
 
     /** @param iterable<ProductDataProvider> $providers */
-    public function __construct(private iterable $providers)
-    {
-    }
+    public function __construct(private iterable $providers) {}
 
     public function startRun(): void
     {
@@ -38,6 +38,7 @@ class ProductDataService
         foreach ($this->providers as $provider) {
             if ($provider->refinementStatus() === $currentStatus) {
                 $currentProviderReached = true;
+
                 continue;
             }
 
@@ -198,7 +199,7 @@ class ProductDataService
 
                 if (
                     $lastRun !== null
-                    && \Carbon\Carbon::createFromTimestamp((int) $lastRun)
+                    && Carbon::createFromTimestamp((int) $lastRun)
                         ->diffInMinutes(now(), true) < $provider->recurrenceMinutes()
                 ) {
                     return false;

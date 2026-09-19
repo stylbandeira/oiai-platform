@@ -23,7 +23,7 @@ class EventUpdateTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)
-            ->putJson('/api/events/' . $event->id, [
+            ->putJson('/api/events/'.$event->id, [
                 'title' => 'new_title',
                 'description' => 'Descricao atualizada.',
                 'checked' => true,
@@ -52,7 +52,7 @@ class EventUpdateTest extends TestCase
         $event = $this->createEvent();
 
         $response = $this->actingAs($user)
-            ->putJson('/api/events/' . $event->id, [
+            ->putJson('/api/events/'.$event->id, [
                 $field => $value,
             ]);
 

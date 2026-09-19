@@ -4,41 +4,53 @@ namespace App\Models;
 
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
-// implements MustVerifyEmail
+/**
+ * @property int $reputation
+ * @property string|null $token
+ */
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, MustVerifyEmailTrait, Notifiable, SoftDeletes;
 
     const POINTS = 'points';
+
     const VALID_STATUSES = [
         'active',
         'inactive',
-        'suspended'
+        'suspended',
     ];
+
     const VALID_TYPES = [
         'admin',
         'client',
-        'company'
+        'company',
     ];
 
     const TYPE_ADMIN = 'admin';
+
     const TYPE_CLIENT = 'client';
+
     const TYPE_COMPANY = 'company';
 
     const ALLOWED_ACTIVITY_TYPE = [
-        Event::TYPE_PRODUCT_INSERT
+        Event::TYPE_PRODUCT_INSERT,
     ];
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -48,7 +60,7 @@ class User extends Authenticatable
         'cpf',
         'status',
         'points',
-        'hasNotification'
+        'hasNotification',
     ];
 
     protected $attributes = [
@@ -60,7 +72,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -87,13 +99,14 @@ class User extends Authenticatable
         $this->notify(new VerifyEmailNotification);
     }
 
-    public function companies()
+    public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_owners', 'user_id', 'company_id')
             ->withPivot(['status', 'message', 'approved_at', 'approved_by']);
     }
 
-    public function activeCompanies()
+    /** @return BelongsToMany<Company, $this> */
+    public function activeCompanies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_owners', 'user_id', 'company_id')
             ->withPivot(['status', 'message', 'approved_at', 'approved_by'])
@@ -107,20 +120,22 @@ class User extends Authenticatable
             ->exists();
     }
 
-    public function pendingCompanies()
+    /** @return BelongsToMany<Company, $this> */
+    public function pendingCompanies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_owners', 'user_id', 'company_id')
             ->withPivot(['status', 'message', 'approved_at', 'approved_by'])
             ->wherePivot('status', 'pending');
     }
 
-
-    public function favoriteProducts()
+    /** @return BelongsToMany<Product, $this> */
+    public function favoriteProducts(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'favorite_products', 'user_id', 'product_id');
     }
 
-    public function lists()
+    /** @return HasOne<ItensList, $this> */
+    public function lists(): HasOne
     {
         return $this->hasOne(ItensList::class, 'user_id');
     }
@@ -132,20 +147,20 @@ class User extends Authenticatable
 
     /**
      * TODO EPIC 015
-     *
-     * @return void
      */
-    public function getMonthEconomyAttribute()
+    public function getMonthEconomyAttribute(): int
     {
         return 0;
     }
 
-    public function recentActivity()
+    /** @return HasMany<Event, $this> */
+    public function recentActivity(): HasMany
     {
         return $this->hasMany(Event::class)->whereIn('title', $this::ALLOWED_ACTIVITY_TYPE)->orderBy('created_at', 'DESC')->take(5);
     }
 
-    public function events()
+    /** @return HasMany<Event, $this> */
+    public function events(): HasMany
     {
         return $this->hasMany(Event::class);
     }

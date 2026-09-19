@@ -5,7 +5,6 @@ namespace Tests\Feature\Integration\CompanyOwnersController;
 use App\Models\CompanyOwners;
 use App\Models\Event;
 use App\Models\User;
-use App\Repositories\EventRepository;
 use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;

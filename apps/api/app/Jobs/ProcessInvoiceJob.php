@@ -11,7 +11,6 @@ use App\Models\Product;
 use App\Models\Unity;
 use App\Models\User;
 use App\Models\UserAddedProducts;
-use App\Repositories\EventRepository;
 use App\Repositories\UserRepository;
 use App\Services\NotificationService;
 use Carbon\Carbon;
@@ -25,7 +24,9 @@ use Illuminate\Support\Facades\Log;
 class ProcessInvoiceJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     protected $unities;
+
     protected $not_inserted_products = [];
 
     /**
@@ -72,29 +73,29 @@ class ProcessInvoiceJob implements ShouldQueue
             'invoice_id' => $invoice->id,
             'user_id' => $user->id,
             'products_count' => count($products_data),
-            'invoice_data' => $invoice_data
+            'invoice_data' => $invoice_data,
         ]);
 
-        //FIRST OR CREATE DE COMPANY
+        // FIRST OR CREATE DE COMPANY
         $company_data = $invoice_data->emitente;
         $company = Company::updateOrCreate(
             [
                 'cnpj' => $company_data->cnpj,
-                'ie' => $company_data->ie
+                'ie' => $company_data->ie,
             ],
             [
                 'name' => $company_data->razao_social,
                 'cnpj' => $company_data->cnpj,
                 'raw_address' => $company_data->endereco
-                    . ' - ' . ($company_data->numero ?? '')
-                    . ', ' . $company_data->bairro
-                    . ', ' . $company_data->municipio
-                    . ', ' . $company_data->uf,
+                    .' - '.($company_data->numero ?? '')
+                    .', '.$company_data->bairro
+                    .', '.$company_data->municipio
+                    .', '.$company_data->uf,
                 'phone' => ($company_data->telefone ?? ''),
             ]
         );
 
-        if ($company->wasChanged  || $company->wasRecentlyCreated) {
+        if ($company->wasChanged() || $company->wasRecentlyCreated) {
             $address = Address::firstOrCreate([
                 'area' => $company_data->bairro,
                 'city' => $company_data->municipio,
@@ -110,8 +111,8 @@ class ProcessInvoiceJob implements ShouldQueue
         }
 
         foreach ($products_data as $productData) {
-            //VERIFICA SE É PRODUTO SEM EAN
-            $insert = !is_numeric($productData->ean) ?
+            // VERIFICA SE É PRODUTO SEM EAN
+            $insert = ! is_numeric($productData->ean) ?
                 ['sku' => $productData->codigo] :
                 ['ean' => $productData->ean];
 
@@ -127,65 +128,62 @@ class ProcessInvoiceJob implements ShouldQueue
                     'raw_name' => $productData->descricao,
                     'normalized_name' => $productData->descricao,
                     'search_description' => $productData->descricao,
-                    'normalized_quantity' => ($productData->quantidade ?? 1) . ' ' . $productData->unidade,
+                    'normalized_quantity' => ($productData->quantidade ?? 1).' '.$productData->unidade,
                     'quantity_source' => $quantitySource->value,
                     'quantity_dimension' => $unity->dimension ?? 'unit',
                     'quantity_confidence' => $quantitySource->confidence(),
                     'unit_id' => $unity->id,
                     'quantity' => 1,
-                    'created_by' => $user->id
+                    'created_by' => $user->id,
                 ],
             );
 
-            if (true) {
+            if (! $insertedProduct->wasRecentlyCreated) {
+                $insertedProduct->mentioned_quantity++;
+                $insertedProduct->save();
+            }
 
-                if (!$insertedProduct->wasRecentlyCreated) {
-                    $insertedProduct->mentioned_quantity++;
-                    $insertedProduct->save();
-                }
+            try {
+                $company_product = CompanyProducts::firstOrCreate(
+                    [
+                        'product_id' => $insertedProduct->id,
+                        'company_id' => $company->id,
+                    ],
+                    [
+                        'average_price' => null,
+                    ]
+                );
 
                 try {
-                    $company_product = CompanyProducts::firstOrCreate(
-                        [
-                            'product_id' => $insertedProduct->id,
-                            'company_id' => $company->id,
-                        ],
-                        [
-                            'average_price' => null
-                        ]
-                    );
+                    $dataBruta = $invoice_data->dados_nota->data_emissao;
 
-                    try {
-                        $dataBruta = $invoice_data->dados_nota->data_emissao;
+                    $purchase_date = str_contains($dataBruta, '-03:00')
+                        ? Carbon::createFromFormat('d/m/Y H:i:sP', $dataBruta)
+                        : Carbon::createFromFormat('d/m/Y H:i:s', $dataBruta);
+                } catch (\Throwable $exception) {
+                    Log::warning('Não foi possível interpretar a data da NFCe', [
+                        'data' => $dataBruta ?? null,
+                        'error' => $exception->getMessage(),
+                    ]);
 
-                        $purchase_date = str_contains($dataBruta, '-03:00')
-                            ? Carbon::createFromFormat('d/m/Y H:i:sP', $dataBruta)
-                            : Carbon::createFromFormat('d/m/Y H:i:s', $dataBruta);
-                    } catch (\Throwable $exception) {
-                        Log::warning('Não foi possível interpretar a data da NFCe', [
-                            'data' => $dataBruta ?? null,
-                            'error' => $exception->getMessage(),
-                        ]);
-
-                        $purchase_date = Carbon::now();
-                    }
-
-                    $user_inserted_products[] = [
-                        'user_id' => $user->id,
-                        'price' => $productData->valor_unitario ?? 0,
-                        'company_id' => $company->id,
-                        'product_id' => $insertedProduct->id,
-                        'created_at' => Carbon::now(),
-                        'company_product_id' => $company_product->id,
-                        'purchase_date' => $purchase_date
-                    ];
-                } catch (\Throwable $th) {
-                    $this->not_inserted_products[] = [
-                        'product_error',
-                        'product_data' => $productData,
-                        'company' => $company
-                    ];
+                    $purchase_date = Carbon::now();
                 }
+
+                $user_inserted_products[] = [
+                    'user_id' => $user->id,
+                    'price' => $productData->valor_unitario ?? 0,
+                    'company_id' => $company->id,
+                    'product_id' => $insertedProduct->id,
+                    'created_at' => Carbon::now(),
+                    'company_product_id' => $company_product->id,
+                    'purchase_date' => $purchase_date,
+                ];
+            } catch (\Throwable $th) {
+                $this->not_inserted_products[] = [
+                    'product_error',
+                    'product_data' => $productData,
+                    'company' => $company,
+                ];
             }
         }
 
@@ -194,7 +192,7 @@ class ProcessInvoiceJob implements ShouldQueue
         } catch (\Throwable $th) {
             Log::alert([
                 'error' => 'UserAddedProducts not working',
-                'message' => $th->getMessage()
+                'message' => $th->getMessage(),
             ]);
         }
 
@@ -213,7 +211,7 @@ class ProcessInvoiceJob implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::error('Falha ao processar pedido: ' . $exception->getMessage(), $this->not_inserted_products);
+        Log::error('Falha ao processar pedido: '.$exception->getMessage(), $this->not_inserted_products);
     }
 
     private function firstOrNewUnity(string $abbreviation): Unity
@@ -221,8 +219,8 @@ class ProcessInvoiceJob implements ShouldQueue
         $abbreviation = strtolower(trim($abbreviation));
         $unity = Unity::where('abbreviation', $abbreviation)->first();
 
-        if (!$unity) {
-            $unity = new Unity();
+        if (! $unity) {
+            $unity = new Unity;
             $unity->abbreviation = $abbreviation;
             $unity->name = $abbreviation;
             $unity->save();

@@ -9,9 +9,9 @@ use App\Services\Product\ProductDataService;
 use App\Services\Product\Providers\CosmosProductDataProvider;
 use App\Services\Product\Providers\OscbrProductDataProvider;
 use Illuminate\Http\Client\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Mockery;
 use Tests\TestCase;
 
@@ -31,7 +31,7 @@ class ProductDataServiceTest extends TestCase
 
     public function test_cosmos_provider_normalizes_product_enrichment_fields(): void
     {
-        $data = (new CosmosProductDataProvider())->normalize([
+        $data = (new CosmosProductDataProvider)->normalize([
             'description' => 'AÇÚCAR REFINADO UNIÃO 1KG',
             'brand' => ['name' => 'UNIÃO'],
             'gpc' => ['description' => 'Açúcar'],
@@ -183,7 +183,7 @@ class ProductDataServiceTest extends TestCase
             ]),
         ]);
 
-        $provider = new OscbrProductDataProvider();
+        $provider = new OscbrProductDataProvider;
         $firstResult = $provider->getProductData('7896116900029');
         $secondResult = $provider->getProductData('7896116900029');
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -35,43 +35,37 @@ class UserFactory extends Factory
      */
     public function unverified()
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
     }
 
     /**
      * Indicate that the user is admin.
-     *
-     * @return static
      */
     public function admin(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'type' => 'admin',
         ]);
     }
 
     /**
      * Indicate that the user is client.
-     *
-     * @return static
      */
     public function client(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'type' => 'client',
         ]);
     }
 
     /**
      * Indicate that the user is company.
-     *
-     * @return static
      */
     public function company(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'type' => 'company',
         ]);
     }

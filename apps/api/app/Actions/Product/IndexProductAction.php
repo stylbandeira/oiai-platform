@@ -2,7 +2,6 @@
 
 namespace App\Actions\Product;
 
-use App\Http\Requests\Product\ProductIndexRequest;
 use App\Models\User;
 use App\Repositories\ProductRepository;
 

@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Invoice;
+use App\Models\User;
 
 class InvoiceObserver
 {
@@ -11,6 +12,7 @@ class InvoiceObserver
      */
     public function created(Invoice $invoice): void
     {
+        /** @var User $user */
         $user = $invoice->user;
         $user->reputation++;
         $user->save();

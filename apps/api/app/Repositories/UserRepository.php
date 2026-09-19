@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 class UserRepository
 {
@@ -21,7 +20,6 @@ class UserRepository
     {
         return $this->model->all();
     }
-
 
     public function paginate(array $filters, array $options = []): LengthAwarePaginator
     {
@@ -59,6 +57,7 @@ class UserRepository
     {
         $record = $this->find($id);
         $record->update($data);
+
         return $record;
     }
 
@@ -69,16 +68,13 @@ class UserRepository
 
     /**
      * Add points to an user
-     *
-     * @param [type] $id
-     * @param [type] $points
-     * @return void
      */
-    public function addPoints($id, $points)
+    public function addPoints(int|string $id, int|float $points): void
     {
         $user = $this->find($id);
-        return $this->update($id, [
-            User::POINTS => $user->points + $points
+
+        $this->update($id, [
+            User::POINTS => $user->points + $points,
         ]);
     }
 
@@ -88,8 +84,8 @@ class UserRepository
 
         $filter = collect($filters);
 
-        if ($filter->has('search') && !empty($filter->get('search'))) {
-            $searchTerm = '%' . $filter->get('search') . '%';
+        if ($filter->has('search') && ! empty($filter->get('search'))) {
+            $searchTerm = '%'.$filter->get('search').'%';
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', $searchTerm)
                     ->orWhere('email', 'like', $searchTerm)

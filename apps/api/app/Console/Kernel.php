@@ -15,7 +15,6 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
     protected function schedule(Schedule $schedule)
@@ -27,7 +26,7 @@ class Kernel extends ConsoleKernel
                 Log::error(' ## JOB FAILED - AveragePriceJob ##');
             });
 
-        $schedule->job(new AveragePriceJob())
+        $schedule->job(new AveragePriceJob)
             ->everyMinute()
             ->onFailure(function () {
                 Log::error(' ## JOB FAILED - AveragePriceJob ##');
@@ -37,13 +36,13 @@ class Kernel extends ConsoleKernel
         //     Log::info('Scheduler heartbeat: ' . now());
         // })->everyMinute();
 
-        $schedule->job(new GeocodeScheduleJob())
+        $schedule->job(new GeocodeScheduleJob)
             ->everySixHours()
             ->onFailure(function () {
                 Log::error(' ## JOB FAILED - GeocodeScheduleJob ##');
             });
 
-        $schedule->job(new ProductDataSearchJob())
+        $schedule->job(new ProductDataSearchJob)
             ->everyFiveMinutes()
             ->withoutOverlapping()
             ->onFailure(function () {
@@ -58,7 +57,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__ . '/Commands');
+        $this->load(__DIR__.'/Commands');
 
         require base_path('routes/console.php');
     }

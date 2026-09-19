@@ -4,18 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/** @property string $name */
 class ProductCategory extends BaseModel
 {
     use HasFactory, SoftDeletes;
 
     protected $table = 'product_category';
+
     protected $fillable = [
-        'name'
+        'name',
     ];
 
-    public function products()
+    /** @return HasMany<Product, $this> */
+    public function products(): HasMany
     {
         return $this->hasMany(Product::class, 'category_id');
     }
@@ -23,8 +27,8 @@ class ProductCategory extends BaseModel
     public function name(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => ucfirst($value),
-            set: fn($value) => ucfirst($value)
+            get: fn ($value) => ucfirst($value),
+            set: fn ($value) => ucfirst($value)
         );
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Actions\User;
 
-use App\Http\Resources\AdminUserResource;
 use App\Models\User;
 use App\Repositories\UserRepository;
 

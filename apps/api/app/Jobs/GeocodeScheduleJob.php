@@ -6,7 +6,6 @@ use App\Models\Address;
 use App\Services\Geolocation\GeolocationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class GeocodeScheduleJob implements ShouldQueue
@@ -46,7 +45,7 @@ class GeocodeScheduleJob implements ShouldQueue
                 'Brasil',
             ])->filter()->implode(', ');
 
-            $geolocation_service = new GeolocationService();
+            $geolocation_service = new GeolocationService;
             $address_data = $geolocation_service->search($full_address);
 
             $address->update($address_data);
@@ -55,7 +54,7 @@ class GeocodeScheduleJob implements ShouldQueue
         }
 
         Log::alert([
-            'Message' => count($addresses) . ' endereços processados'
+            'Message' => count($addresses).' endereços processados',
         ]);
     }
 

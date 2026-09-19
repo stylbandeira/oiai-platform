@@ -14,12 +14,12 @@ class VerifyEmailAction
 
         $expectedHash = sha1($user->getEmailForVerification());
 
-        if (!hash_equals($expectedHash, $hash)) {
+        if (! hash_equals($expectedHash, $hash)) {
             Log::error("Hash inválido. Esperado: $expectedHash, recebido: $hash");
             abort(403, 'Hash inválido');
         }
 
-        if (!$user->hasVerifiedEmail()) {
+        if (! $user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
             event(new Verified($user));
         }

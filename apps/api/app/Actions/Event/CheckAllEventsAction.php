@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 class CheckAllEventsAction
 {
     public function __construct(private EventRepository $eventRepository) {}
+
     public function execute(EventCheckAllRequest $request)
     {
         $notificationsIds = collect($request->validated()['notifications'])

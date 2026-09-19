@@ -38,7 +38,7 @@ class FavoriteProductsRepository
         return $this->model->create([
             'user_id' => $user->id,
             'product_id' => $product->id,
-            ...$data
+            ...$data,
         ]);
     }
 
@@ -46,6 +46,7 @@ class FavoriteProductsRepository
     {
         $record = $this->find($id);
         $record->update($data);
+
         return $record;
     }
 

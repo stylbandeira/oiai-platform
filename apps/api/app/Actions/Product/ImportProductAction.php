@@ -6,10 +6,8 @@ use App\Http\Requests\Product\ProductImportRequest;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Unity;
-use App\Rules\ExistsOr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 class ImportProductAction
 {
@@ -25,27 +23,27 @@ class ImportProductAction
 
             $productCollection = collect($products);
             $categoryNames = $productCollection->pluck('category')
-                ->filter(fn($c) => !is_numeric($c))
-                ->map(fn($c) => mb_strtolower($c))
+                ->filter(fn ($c) => ! is_numeric($c))
+                ->map(fn ($c) => mb_strtolower($c))
                 ->unique()
                 ->values();
             $categories = ProductCategory::whereIn('name', $categoryNames)
                 ->pluck('id', 'name');
 
             $unityNames = $productCollection->pluck('unity')
-                ->filter(fn($u) => !is_numeric($u))
-                ->map(fn($u) => mb_strtolower($u))
+                ->filter(fn ($u) => ! is_numeric($u))
+                ->map(fn ($u) => mb_strtolower($u))
                 ->unique()
                 ->values();
             $unities = Unity::whereIn('name', $unityNames)
                 ->pluck('id', 'name');
 
             $products = $productCollection->map(function ($product) use ($categories, $unities) {
-                if (!is_numeric($product['category'])) {
+                if (! is_numeric($product['category'])) {
                     $product['category'] = $categories[$product['category']] ?? null;
                 }
 
-                if (!is_numeric($product['unity'])) {
+                if (! is_numeric($product['unity'])) {
                     $product['unity'] = $unities[$product['unity']] ?? null;
                 }
 
@@ -67,8 +65,9 @@ class ImportProductAction
             ]);
         } catch (\Throwable $th) {
             Log::alert(['Catch' => $th->getMessage()]);
+
             return response([
-                'message' => 'Erro ao processar CSV: ' . $th->getMessage(),
+                'message' => 'Erro ao processar CSV: '.$th->getMessage(),
             ]);
         }
     }
@@ -89,7 +88,8 @@ class ImportProductAction
             $rowCount++;
 
             if (count($row) !== $headerCount) {
-                $errors[] = "Linha $rowCount: Esperado $headerCount colunas, encontrado " . count($row);
+                $errors[] = "Linha $rowCount: Esperado $headerCount colunas, encontrado ".count($row);
+
                 continue;
             }
 

@@ -13,10 +13,11 @@ class AddressController extends Controller
     {
         $this->authorizeResource(Address::class, 'address');
     }
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
     public function index()
     {
@@ -26,7 +27,7 @@ class AddressController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
     public function create()
     {
@@ -36,8 +37,7 @@ class AddressController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param AddressStoreRequest $request
-     * @return void
+     * @return mixed
      */
     public function store(AddressStoreRequest $request, StoreAddressAction $action)
     {
@@ -47,8 +47,7 @@ class AddressController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Address  $address
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
     public function show(Address $address)
     {
@@ -58,8 +57,7 @@ class AddressController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Address  $address
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
     public function edit(Address $address)
     {
@@ -69,9 +67,7 @@ class AddressController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Address  $address
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
     public function update(Request $request, Address $address)
     {
@@ -81,8 +77,7 @@ class AddressController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Address  $address
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
     public function destroy(Address $address)
     {

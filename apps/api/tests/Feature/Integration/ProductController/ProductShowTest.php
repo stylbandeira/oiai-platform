@@ -29,7 +29,7 @@ class ProductShowTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)
-            ->getJson('/api/admin/products/' . $product->id);
+            ->getJson('/api/admin/products/'.$product->id);
 
         $response
             ->assertStatus(200)

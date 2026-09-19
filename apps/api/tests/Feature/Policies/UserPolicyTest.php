@@ -15,7 +15,7 @@ class UserPolicyTest extends TestCase
 
         $target = User::factory()->client()->create();
 
-        $policy = new UsersPolicy();
+        $policy = new UsersPolicy;
 
         $this->assertTrue($policy->delete($admin, $target));
     }
@@ -24,7 +24,7 @@ class UserPolicyTest extends TestCase
     {
         $client = User::factory()->client()->create();
 
-        $policy = new UsersPolicy();
+        $policy = new UsersPolicy;
 
         $this->assertTrue($policy->dashboardData($client));
     }
@@ -35,7 +35,7 @@ class UserPolicyTest extends TestCase
 
         $target = User::factory()->client()->create();
 
-        $policy = new UsersPolicy();
+        $policy = new UsersPolicy;
 
         $this->assertFalse($policy->delete($client, $target));
     }

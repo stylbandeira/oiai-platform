@@ -40,7 +40,7 @@ class ImageFromUrl
         $mimeType = $finfo->buffer($content);
 
         if (! str_starts_with($mimeType, 'image/')) {
-            throw new \Exception('A URL não retornou uma imagem válida.');
+            throw new Exception('A URL não retornou uma imagem válida.');
         }
 
         $extension = match ($mimeType) {
@@ -51,7 +51,7 @@ class ImageFromUrl
             default => 'jpg',
         };
 
-        $path = 'products/images/' . Str::uuid() . '.' . $extension;
+        $path = 'products/images/'.Str::uuid().'.'.$extension;
 
         Storage::disk('public')->put($path, $content);
 

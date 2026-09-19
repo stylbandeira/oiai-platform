@@ -5,12 +5,13 @@ namespace App\Services\NFCe;
 use App\Services\NFCeXMLParserService;
 use Exception;
 use GuzzleHttp\Cookie\CookieJar;
-use Symfony\Component\DomCrawler\Crawler;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\DomCrawler\Crawler;
 
 class PernambucoNFCeProvider extends AbstractNFCeProvider
 {
     private const BASE_URL = 'https://nfce.sefaz.pe.gov.br/nfce/consulta';
+
     private const DFE_PORTAL_URL = 'https://dfe-portal.svrs.rs.gov.br/Dfe/ConsultaPublicaDfe';
 
     private NFCeXMLParserService $xmlParser;
@@ -29,12 +30,13 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
     {
         try {
             $response = $this->client->get($shortUrl, [
-                'allow_redirects' => false // Não seguir redirecionamentos automaticamente
+                'allow_redirects' => false, // Não seguir redirecionamentos automaticamente
             ]);
 
             // Verifica se tem cabeçalho de localização
             if ($response->hasHeader('Location')) {
                 $location = $response->getHeader('Location')[0];
+
                 return $location;
             }
 
@@ -42,15 +44,15 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             $body = (string) $response->getBody();
             if (preg_match('/href=["\']([^"\']+)["\']/', $body, $matches)) {
                 $location = $matches[1];
+
                 return $location;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Erro ao resolver URL encurtada', ['url' => $shortUrl, 'error' => $e->getMessage()]);
         }
 
         return null;
     }
-
 
     public function supports(string $qrData): bool
     {
@@ -84,12 +86,12 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             return $this->resolveQRCodeFromAccessKey($qrData);
         }
 
-        return self::BASE_URL . '?p=' . rawurlencode($qrData);
+        return self::BASE_URL.'?p='.rawurlencode($qrData);
     }
 
     private function resolveQRCodeFromAccessKey(string $accessKey): ?string
     {
-        $cookies = new CookieJar();
+        $cookies = new CookieJar;
 
         $this->client->get(self::DFE_PORTAL_URL, [
             'cookies' => $cookies,
@@ -114,7 +116,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
 
     private function extractQRCodeUrlFromDfeHtml(string $html, string $accessKey): ?string
     {
-        if (!preg_match(
+        if (! preg_match(
             '/<label>\s*QR-Code\s*<\/label>\s*<span[^>]*>\s*(https?:\/\/[^<\s]+)\s*<\/span>/iu',
             $html,
             $matches,
@@ -125,7 +127,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
         $url = html_entity_decode($matches[1], ENT_QUOTES | ENT_HTML5);
         $host = strtolower(parse_url($url, PHP_URL_HOST) ?? '');
 
-        if ($host !== 'nfce.sefaz.pe.gov.br' || !str_contains($url, $accessKey . '|')) {
+        if ($host !== 'nfce.sefaz.pe.gov.br' || ! str_contains($url, $accessKey.'|')) {
             return null;
         }
 
@@ -137,11 +139,11 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
         try {
             $url = $this->getRealNFCeUrl($qrData);
 
-            if (!$url) {
+            if (! $url) {
                 return [
                     'status' => 'error',
                     'error' => 'Não foi possível obter URL válida',
-                    'qr_data' => $qrData
+                    'qr_data' => $qrData,
                 ];
             }
 
@@ -179,17 +181,17 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             } else {
                 return $this->parseHTML($content, $url);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Erro ao scrapear NFCe:', [
                 'error' => $e->getMessage(),
                 'qr_data' => $qrData,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [
                 'status' => 'error',
                 'error' => $e->getMessage(),
-                'qr_data' => $qrData
+                'qr_data' => $qrData,
             ];
         }
     }
@@ -255,7 +257,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
                 'produtos_count' => count($dados['produtos']),
                 'valor_total' => $dados['total']['valor_total'] ?? 0,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
 
             throw $e;
         }
@@ -299,7 +301,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
                 if ($crawler->filter($selector)->count() > 0) {
                     $text = $crawler->filter($selector)->text();
                     $emitente = $this->parseEmitenteFromText($text, $emitente);
-                    if (!empty($emitente['razao_social']) && !empty($emitente['cnpj'])) {
+                    if (! empty($emitente['razao_social']) && ! empty($emitente['cnpj'])) {
                         return $emitente;
                     }
                 }
@@ -308,7 +310,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             // Método 2: Procurar em toda a página
             $pageText = $crawler->text();
             $emitente = $this->parseEmitenteFromText($pageText, $emitente);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Erro ao extrair emitente', ['error' => $e->getMessage()]);
         }
 
@@ -331,16 +333,18 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
         $lines = explode("\n", $text);
         foreach ($lines as $i => $line) {
             $line = trim($line);
-            if (empty($line)) continue;
+            if (empty($line)) {
+                continue;
+            }
 
             // Razão social geralmente é a primeira linha significativa
             if (
                 empty($emitente['razao_social']) &&
-                !str_contains($line, 'CNPJ') &&
-                !str_contains($line, 'IE') &&
-                !str_contains($line, 'End:') &&
-                !str_contains($line, 'Fone:') &&
-                !str_contains($line, 'CEP:') &&
+                ! str_contains($line, 'CNPJ') &&
+                ! str_contains($line, 'IE') &&
+                ! str_contains($line, 'End:') &&
+                ! str_contains($line, 'Fone:') &&
+                ! str_contains($line, 'CEP:') &&
                 strlen($line) > 5
             ) {
                 $emitente['razao_social'] = $line;
@@ -391,7 +395,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             elseif (preg_match('/(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/', $pageText, $matches)) {
                 $destinatario['cpf_cnpj'] = $matches[1];
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Erro ao extrair destinatário', ['error' => $e->getMessage()]);
         }
 
@@ -447,7 +451,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             } elseif (preg_match('/(?:\d\s*){44}/', $pageText, $matches)) {
                 $nota['chave_acesso'] = preg_replace('/\D/', '', $matches[0]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Erro ao extrair dados da nota', ['error' => $e->getMessage()]);
         }
 
@@ -468,7 +472,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
                 // Se não encontrou tabela específica, tenta extrair de qualquer tabela
                 $this->extractProductsFromAllTables($crawler, $produtos);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Erro ao extrair produtos', ['error' => $e->getMessage()]);
         }
 
@@ -496,7 +500,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             }
         }
 
-        return new Crawler();
+        return new Crawler;
     }
 
     private function extractProductsFromTable(Crawler $table, array &$produtos)
@@ -519,9 +523,9 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
                     }
                 }
 
-                if (!$isHeader) {
+                if (! $isHeader) {
                     $produto = $this->extractProductFromRow($row);
-                    if ($produto && (!empty($produto['descricao']) || !empty($produto['codigo']))) {
+                    if ($produto && (! empty($produto['descricao']) || ! empty($produto['codigo']))) {
                         $produtos[] = $produto;
                     }
                 }
@@ -603,16 +607,14 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             foreach ($patterns as $pattern) {
                 if (preg_match_all($pattern, $pageText, $matches, PREG_SET_ORDER)) {
                     foreach ($matches as $match) {
-                        if (count($match) >= 3) {
-                            $forma = $this->limparTexto($match[1]);
-                            $valor = $this->parseValorMonetario($match[2]);
+                        $forma = $this->limparTexto($match[1]);
+                        $valor = $this->parseValorMonetario($match[2]);
 
-                            if ($valor > 0.01 && !empty($forma)) {
-                                $pagamentos[] = [
-                                    'forma' => $forma,
-                                    'valor' => $valor,
-                                ];
-                            }
+                        if ($valor > 0.01 && ! empty($forma)) {
+                            $pagamentos[] = [
+                                'forma' => $forma,
+                                'valor' => $valor,
+                            ];
                         }
                     }
                 }
@@ -631,9 +633,9 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
                             // Verifica se parece ser um pagamento
                             $isPayment = (
                                 (stripos($text2, 'R$') !== false || is_numeric(str_replace(',', '.', $text2))) &&
-                                !stripos($text1, 'total') &&
-                                !stripos($text1, 'troco') &&
-                                !stripos($text1, 'subtotal')
+                                ! stripos($text1, 'total') &&
+                                ! stripos($text1, 'troco') &&
+                                ! stripos($text1, 'subtotal')
                             );
 
                             if ($isPayment) {
@@ -646,7 +648,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
                     });
                 });
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Erro ao extrair pagamento', ['error' => $e->getMessage()]);
         }
 
@@ -666,15 +668,15 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
             $pageText = $crawler->text();
 
             // Extrair valor total
-            if ($total['valor_total'] <= 0 && preg_match('/Valor Total[:\s]*R?\$\s*([\d,\.]+)/i', $pageText, $matches)) {
+            if (preg_match('/Valor Total[:\s]*R?\$\s*([\d,\.]+)/i', $pageText, $matches)) {
                 $total['valor_total'] = $this->parseValorMonetario($matches[1]);
             }
 
             // Extrair desconto
-            if ($total['valor_desconto'] <= 0 && preg_match('/Desconto[:\s]*R?\$\s*([\d,\.]+)/i', $pageText, $matches)) {
+            if (preg_match('/Desconto[:\s]*R?\$\s*([\d,\.]+)/i', $pageText, $matches)) {
                 $total['valor_desconto'] = $this->parseValorMonetario($matches[1]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Erro ao extrair total', ['error' => $e->getMessage()]);
         }
 
@@ -724,7 +726,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
                         = $this->limparTexto($matches[1]);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::warning('Erro ao extrair info complementares', ['error' => $e->getMessage()]);
         }
 
@@ -764,6 +766,7 @@ class PernambucoNFCeProvider extends AbstractNFCeProvider
     {
         $text = $this->limparTexto($text);
         $text = str_replace(',', '.', $text);
+
         return floatval($text);
     }
 }

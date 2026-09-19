@@ -9,8 +9,9 @@ class FavoriteProducts extends BaseModel
     use HasFactory;
 
     protected $table = 'favorite_products';
+
     protected $fillable = [
         'user_id',
-        'product_id'
+        'product_id',
     ];
 }

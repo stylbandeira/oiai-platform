@@ -5,10 +5,8 @@ namespace App\Services;
 use App\Models\Company;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\UserAddedProducts;
 use App\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Log;
 
 class DashboardService
 {
@@ -22,7 +20,7 @@ class DashboardService
             'totalUsers' => User::count(),
             'totalCompanies' => Company::count(),
             'totalProducts' => Product::count(),
-            'systemHealth' => $this->calculateSystemHealth()
+            'systemHealth' => $this->calculateSystemHealth(),
         ];
     }
 
@@ -33,8 +31,6 @@ class DashboardService
 
     /**
      * Função a ser finalizada
-     *
-     * @return Collection
      */
     public function getTopMentionedStores(): array
     {
@@ -61,7 +57,7 @@ class DashboardService
 
     private function calculateSystemHealth(): float
     {
-        //INSERIR LÓGICA PARA CALCULAR A SAÚDE DO SISTEMA
+        // INSERIR LÓGICA PARA CALCULAR A SAÚDE DO SISTEMA
         return 99.5;
     }
 }

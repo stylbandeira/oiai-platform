@@ -4,7 +4,6 @@ namespace Tests\Feature\Integration\UserController;
 
 use App\Models\Company;
 use App\Models\CompanyOwners;
-use App\Models\Event;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -32,7 +31,7 @@ class UserUpdateTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->putJson('/api/admin/users/' . $user->id, [
+            ->putJson('/api/admin/users/'.$user->id, [
                 'name' => 'New Name',
             ])
             ->assertStatus(200)
@@ -56,7 +55,7 @@ class UserUpdateTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->putJson('/api/admin/users/' . $companyUser->id, [
+            ->putJson('/api/admin/users/'.$companyUser->id, [
                 'companies' => [
                     ['id' => $company->id, 'status' => CompanyOwners::STATUS_ACTIVE],
                 ],
@@ -86,7 +85,7 @@ class UserUpdateTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->putJson('/api/admin/users/' . $companyUser->id, [
+            ->putJson('/api/admin/users/'.$companyUser->id, [
                 'companies' => [
                     ['id' => $keptCompany->id, 'status' => CompanyOwners::STATUS_ACTIVE],
                 ],
@@ -113,7 +112,7 @@ class UserUpdateTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->putJson('/api/admin/users/' . $companyUser->id, [
+            ->putJson('/api/admin/users/'.$companyUser->id, [
                 'companies' => [
                     ['id' => $company->id, 'status' => CompanyOwners::STATUS_ACTIVE],
                 ],

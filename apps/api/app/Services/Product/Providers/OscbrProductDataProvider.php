@@ -189,5 +189,4 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
 
         return $data;
     }
-
 }

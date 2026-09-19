@@ -22,7 +22,7 @@ class ListUpdateTest extends TestCase
         $list = $this->createList($user);
 
         $response = $this->actingAs($user)
-            ->putJson('/api/lists/' . $list->id, $payload);
+            ->putJson('/api/lists/'.$list->id, $payload);
 
         $response
             ->assertStatus(422)
@@ -37,7 +37,7 @@ class ListUpdateTest extends TestCase
         $this->createListProduct($list, $product, 1, ['completed' => true]);
 
         $response = $this->actingAs($user)
-            ->putJson('/api/lists/' . $list->id, [
+            ->putJson('/api/lists/'.$list->id, [
                 'items' => [
                     ['product_id' => $product->id, 'quantity' => 10],
                 ],
@@ -62,7 +62,7 @@ class ListUpdateTest extends TestCase
         $this->createListProduct($list, $product, 1, ['completed' => false]);
 
         $response = $this->actingAs($user)
-            ->putJson('/api/lists/' . $list->id, [
+            ->putJson('/api/lists/'.$list->id, [
                 'items' => [
                     ['product_id' => $product->id, 'quantity' => 5],
                 ],
@@ -85,7 +85,7 @@ class ListUpdateTest extends TestCase
         $list = $this->createList($owner);
 
         $response = $this->actingAs($otherUser)
-            ->putJson('/api/lists/' . $list->id, [
+            ->putJson('/api/lists/'.$list->id, [
                 'name' => 'Nova lista',
             ]);
 
@@ -120,7 +120,7 @@ class ListUpdateTest extends TestCase
 
     private function createListProduct(ItensList $list, Product $product, int $quantity, array $overrides = []): ListProducts
     {
-        return ListProducts::unguarded(fn() => ListProducts::create(array_merge([
+        return ListProducts::unguarded(fn () => ListProducts::create(array_merge([
             'list_id' => $list->id,
             'product_id' => $product->id,
             'quantity' => $quantity,

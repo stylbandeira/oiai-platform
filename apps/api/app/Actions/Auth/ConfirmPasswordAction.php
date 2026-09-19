@@ -11,7 +11,7 @@ class ConfirmPasswordAction
 {
     public function execute(Request $request)
     {
-        if (!Auth::guard('web')->validate([
+        if (! Auth::guard('web')->validate([
             'email' => $request->user()->email,
             'password' => $request->password,
         ])) {

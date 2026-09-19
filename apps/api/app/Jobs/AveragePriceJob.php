@@ -7,7 +7,6 @@ use App\Models\Product;
 use App\Models\UserAddedProducts;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -81,7 +80,7 @@ class AveragePriceJob implements ShouldQueue
 
         UserAddedProducts::where('processed', false)
             ->update([
-                'processed' => true
+                'processed' => true,
             ]);
 
         Log::info('Average Price Job Proceeded With Sucess!');
@@ -100,14 +99,14 @@ class AveragePriceJob implements ShouldQueue
 
                 $product_ids[] = [
                     'id' => $products[0]['id'],
-                    'average_price' => $average
+                    'average_price' => $average,
                 ];
             } else {
                 $average = $products[0]['average_price'];
 
                 $product_ids[] = [
                     'id' => $products[0]['id'],
-                    'average_price' => $average
+                    'average_price' => $average,
                 ];
             }
         }

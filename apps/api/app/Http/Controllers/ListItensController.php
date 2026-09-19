@@ -11,9 +11,7 @@ class ListItensController extends Controller
     /**
      * Update list itens
      *
-     * @param ItensList $list
-     * @param ListItensUpdateRequest $request
-     * @return void
+     * @return mixed
      */
     public function update(ListItensUpdateRequest $request, ItensList $list, UpdateListItensAction $action)
     {

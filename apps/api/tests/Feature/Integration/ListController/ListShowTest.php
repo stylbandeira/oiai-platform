@@ -23,18 +23,18 @@ class ListShowTest extends TestCase
         $list = $this->createList($owner);
 
         $this->actingAs($admin)
-            ->getJson('/api/lists/' . $list->id)
+            ->getJson('/api/lists/'.$list->id)
             ->assertStatus(200);
 
         $this->actingAs($owner)
-            ->getJson('/api/lists/' . $list->id)
+            ->getJson('/api/lists/'.$list->id)
             ->assertStatus(200);
 
         $this->actingAs($otherClient)
-            ->getJson('/api/lists/' . $list->id)
+            ->getJson('/api/lists/'.$list->id)
             ->assertStatus(200);
 
-        $this->getJson('/api/lists/' . $list->id)
+        $this->getJson('/api/lists/'.$list->id)
             ->assertStatus(200);
     }
 
@@ -57,7 +57,7 @@ class ListShowTest extends TestCase
         $this->createListProduct($list, $product, 2);
 
         $response = $this->actingAs($owner)
-            ->getJson('/api/lists/' . $list->id);
+            ->getJson('/api/lists/'.$list->id);
 
         $response
             ->assertStatus(200)
@@ -82,7 +82,7 @@ class ListShowTest extends TestCase
         ]);
 
         $response = $this->actingAs($owner)
-            ->getJson('/api/lists/' . $list->id);
+            ->getJson('/api/lists/'.$list->id);
 
         $response
             ->assertStatus(200)
@@ -104,7 +104,7 @@ class ListShowTest extends TestCase
 
     private function createListProduct(ItensList $list, Product $product, int $quantity, array $overrides = []): ListProducts
     {
-        return ListProducts::unguarded(fn() => ListProducts::create(array_merge([
+        return ListProducts::unguarded(fn () => ListProducts::create(array_merge([
             'list_id' => $list->id,
             'product_id' => $product->id,
             'quantity' => $quantity,

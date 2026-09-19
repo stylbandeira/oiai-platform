@@ -32,13 +32,14 @@ class ProductCategoryRepository
     {
         $record = $this->find($id);
         $record->update($data);
+
         return $record;
     }
 
     public function firstOrNew(string $name)
     {
         ProductCategory::firstOrNew([
-            'name' => $name
+            'name' => $name,
         ]);
     }
 

@@ -57,7 +57,7 @@ class ProductIndexTest extends TestCase
         $admin = User::factory()->admin()->create();
 
         $response = $this->actingAs($admin)
-            ->getJson('/api/admin/products?' . http_build_query($query));
+            ->getJson('/api/admin/products?'.http_build_query($query));
 
         $response
             ->assertStatus(422)

@@ -3,7 +3,6 @@
 namespace Tests\Feature\Integration\ListController;
 
 use App\Models\ItensList;
-use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -19,11 +18,11 @@ class ListDestroyTest extends TestCase
         $list = $this->createList($owner);
 
         $this->actingAs($otherUser)
-            ->deleteJson('/api/lists/' . $list->id)
+            ->deleteJson('/api/lists/'.$list->id)
             ->assertStatus(403);
 
         $this->actingAs($owner)
-            ->deleteJson('/api/lists/' . $list->id)
+            ->deleteJson('/api/lists/'.$list->id)
             ->assertStatus(200)
             ->assertJsonFragment([
                 'message' => 'Lista deletada com sucesso!',

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\User;
 
 use App\Rulesets\UserCompaniesRules;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserUpdateRequest extends FormRequest
@@ -18,7 +19,7 @@ class UserUpdateRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -28,7 +29,7 @@ class UserUpdateRequest extends FormRequest
             'email' => 'sometimes|email',
             'cpf' => 'sometimes|string',
             'status' => 'sometimes|in:active,inactive,suspended',
-            ...UserCompaniesRules::companies()
+            ...UserCompaniesRules::companies(),
         ];
     }
 }

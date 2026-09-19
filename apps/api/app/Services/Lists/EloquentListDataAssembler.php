@@ -6,7 +6,9 @@ use App\Contracts\ListDataAssembler;
 use App\Http\Resources\ClientProductResource;
 use App\Http\Resources\CompanyResource;
 use App\Http\Resources\ListProductResource;
+use App\Models\Company;
 use App\Models\ItensList;
+use App\Models\ListProducts;
 use App\Repositories\ListRepository;
 use App\Services\Geolocation\GeolocationService;
 
@@ -40,6 +42,7 @@ class EloquentListDataAssembler implements ListDataAssembler
         }
 
         foreach ($list->listProducts as $listProduct) {
+            /** @var ListProducts $listProduct */
             $companyProduct = $listProduct->companyProduct;
 
             if (! $companyProduct?->company) {
@@ -47,13 +50,13 @@ class EloquentListDataAssembler implements ListDataAssembler
             }
 
             $company = $companyProduct->company;
-
+            /** @var Company $company */
             $distance = $this->geolocation_service->between([
-                'latitude' => $company->address?->latitude ?? null,
-                'longitude' => $company->address?->longitude ?? null
+                'latitude' => $company->address?->latitude,
+                'longitude' => $company->address?->longitude,
             ], [
                 'latitude' => $list->latitude,
-                'longitude' => $list->longitude
+                'longitude' => $list->longitude,
             ]);
 
             $isTooFar = $list->distance !== null
@@ -92,7 +95,7 @@ class EloquentListDataAssembler implements ListDataAssembler
 
     private function calculateTotal(ItensList $list): float
     {
-        return (float) $list->listProducts->sum(function ($listProduct) use ($list) {
+        return (float) $list->listProducts->sum(function (ListProducts $listProduct) use ($list) {
             $unitPrice = $list->optimized
                 ? $listProduct->companyProduct?->average_price
                 : $listProduct->product?->average_price;
