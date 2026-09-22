@@ -6,6 +6,7 @@ import { FormInput, FormTextarea, FormSelect } from "./FormFields";
 import { Building2, Globe, MapPin, Mail, Phone, FileText } from "lucide-react";
 import { formatCNPJ, removeFormatting } from "@/utils/formatters";
 import { ImageUpload } from "./ImageUpload";
+import { getApiErrorMessage } from "@/utils/apiError";
 
 export interface CompanyFormData {
     name: string;
@@ -84,10 +85,8 @@ export function CompanyForm({
                 cnpj: removeFormatting(formData.cnpj),
                 img: formData.img instanceof File ? formData.img : undefined
             });
-        } catch (error: any) {
-            if (error.response?.data?.errors) {
-                setErrors(error.response.data.errors);
-            }
+        } catch (error: unknown) {
+            setErrors({ general: [getApiErrorMessage(error, "Não foi possível salvar a empresa.")] });
         } finally {
             setIsSubmitting(false);
         }

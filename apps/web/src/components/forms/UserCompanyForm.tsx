@@ -8,6 +8,7 @@ import { ImageUpload } from "./ImageUpload";
 import { FormSearchSelect } from "./FormSearchSelect";
 import api from "@/lib/api";
 import { useUser } from "@/contexts/UserContext";
+import { getApiErrorMessage } from "@/utils/apiError";
 
 interface CompanyFormData {
     name: string;
@@ -110,9 +111,10 @@ export function UserCompanyForm({
                 ...formData,
                 img: formData.img instanceof File ? formData.img : undefined,
             });
-        } catch (error: any) {
-            if (error.response?.data?.errors) {
-                setErrors(error.response.data.errors);
+        } catch (error: unknown) {
+            const message = getApiErrorMessage(error);
+            if (message) {
+                setErrors({ general: [message] });
             }
         } finally {
             setIsSubmitting(false);

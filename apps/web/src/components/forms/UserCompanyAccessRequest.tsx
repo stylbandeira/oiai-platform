@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { debounce } from "lodash";
 import api from "@/lib/api";
-import { CompanyForm } from "./CompanyForm";
+import { CompanyForm, type CompanyFormData } from "./CompanyForm";
 import { Building2, Search, Loader2, Building, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
@@ -77,7 +77,7 @@ export function UserCompanyAccessRequest() {
   };
 
   // Criar empresa + solicitar vínculo
-  const handleCreateCompany = async (formData: any) => {
+  const handleCreateCompany = async (formData: CompanyFormData) => {
 
     try {
       console.log('Enviando para API...');

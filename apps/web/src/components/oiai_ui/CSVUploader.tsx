@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, Loader2 } from "lucide-react";
+import { getApiErrorMessage } from "@/utils/apiError";
 
 interface CSVUploaderProps {
     onFileSubmit: (file: File) => Promise<void>;
@@ -44,8 +45,8 @@ export function CSVUploader({
             const fileInput = document.getElementById("csv-file") as HTMLInputElement;
             if (fileInput) fileInput.value = "";
 
-        } catch (error: any) {
-            setMessage(`❌ Erro: ${error.response?.data?.message || error.message || "Falha no upload"}`);
+        } catch (error: unknown) {
+            setMessage(`❌ Erro: ${getApiErrorMessage(error, "Falha no upload")}`);
         } finally {
             setIsUploading(false);
         }

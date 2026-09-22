@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { getApiErrorMessage } from "@/utils/apiError";
 
 interface DashBoardData {
   systemStats: {
@@ -54,8 +55,8 @@ export function AdminDashboard() {
       setLoading(true);
       const response = await api.get('/admin/dashboard');
       setData(response.data);
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Erro ao carregar dashboard');
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error, 'Erro ao carregar dashboard'));
     } finally {
       setLoading(false);
     }
