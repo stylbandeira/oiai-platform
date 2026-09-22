@@ -1,0 +1,85 @@
+name: CI Gate
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'apps/api/**'
+      - 'apps/web/**'
+      - 'docker/**'
+      - 'docker-compose.yml'
+      - 'docs/openapi.yaml'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-gate-${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect impacted applications
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'docker/**'
+              - 'docker-compose.yml'
+              - 'docs/openapi.yaml'
+              - '.github/workflows/ci-api.yml'
+              - '.github/workflows/ci-gate.yml'
+            web:
+              - 'apps/web/**'
+              - 'docker/**'
+              - 'docker-compose.yml'
+              - 'docs/openapi.yaml'
+              - '.github/workflows/ci-web.yml'
+              - '.github/workflows/ci-gate.yml'
+
+  api:
+    name: Required API CI
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    uses: ./.github/workflows/ci-api.yml
+    secrets: inherit
+
+  web:
+    name: Required Web CI
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    uses: ./.github/workflows/ci-web.yml
+    secrets: inherit
+
+  result:
+    name: CI Gate result
+    if: always()
+    needs: [changes, api, web]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate required pipelines
+        env:
+          API_RESULT: ${{ needs.api.result }}
+          WEB_RESULT: ${{ needs.web.result }}
+        run: |
+          if [ "$API_RESULT" = "failure" ] || [ "$API_RESULT" = "cancelled" ]; then
+            echo "API CI failed or was cancelled."
+            exit 1
+          fi
+          if [ "$WEB_RESULT" = "failure" ] || [ "$WEB_RESULT" = "cancelled" ]; then
+            echo "Web CI failed or was cancelled."
+            exit 1
+          fi
+          echo "All required CI pipelines passed or were not needed."

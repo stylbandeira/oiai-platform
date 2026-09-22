@@ -1,15 +1,7 @@
 name: Web CI
 
 on:
-  pull_request:
-    branches: [main, master, develop]
-    paths:
-      - 'apps/web/**'
-      # Compartilhados: mudanças neles podem afetar o Web e o ambiente de CI.
-      - 'docker/**'
-      - '.github/workflows/ci-web.yml'
-      - 'docker-compose.yml'
-      - 'docs/openapi.yaml'
+  workflow_call:
   push:
     branches: [main, master, develop]
     paths:

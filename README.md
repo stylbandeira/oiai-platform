@@ -45,6 +45,8 @@ Os workflows da API e do Web usam filtros por caminho. Alterações somente em `
 - `docs/openapi.yaml`, que gera os tipos consumidos pelo frontend;
 - os próprios workflows quando alterados.
 
+O workflow `CI Gate` é o check global recomendado para proteção das branches principais. Ele detecta as aplicações impactadas, aguarda somente o CI da API e/ou do Web quando necessário e publica o resultado final em `CI Gate result`. Configure esse check como obrigatório nas regras de proteção da branch; não configure os checks individuais filtrados por caminho como obrigatórios.
+
 ## Fluxo principal da aplicação
 
 1. Usuário realiza cadastro de uma nota fiscal
