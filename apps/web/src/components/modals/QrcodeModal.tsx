@@ -100,7 +100,11 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
                 focusDistance?: { min?: number; max?: number };
                 zoom?: { max?: number };
             };
-            const advanced: MediaTrackConstraintSet = {};
+            const advanced = {} as MediaTrackConstraintSet & {
+                focusMode?: string;
+                focusDistance?: number;
+                zoom?: number;
+            };
             if (capabilities.focusMode?.includes('continuous')) advanced.focusMode = 'continuous';
             // Quando disponível, aproximar o plano focal da distância mínima
             // permite ler QR Codes pequenos sem depender de um modo "macro" proprietário.
@@ -112,7 +116,7 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             if (capabilities.zoom?.max && capabilities.zoom.max > 1) {
                 advanced.zoom = Math.min(2.5, capabilities.zoom.max);
             }
-            if (Object.keys(advanced).length) await track.applyConstraints({ advanced: [advanced] });
+            if (Object.keys(advanced).length) await track.applyConstraints({ advanced: [advanced as MediaTrackConstraintSet] });
 
             const NativeDetector = (window as typeof window & { BarcodeDetector?: new (options?: { formats: string[] }) => typeof detectorRef.current }).BarcodeDetector;
             if (NativeDetector) detectorRef.current = new NativeDetector({ formats: ['qr_code'] });

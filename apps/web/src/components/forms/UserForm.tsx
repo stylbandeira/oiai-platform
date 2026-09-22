@@ -81,7 +81,7 @@ const normalizeUserData = (data: UserFormInitialData): UserFormData => ({
     companies: Array.isArray(data.companies)
         ? data.companies.map(company => {
             if (typeof company === "number") {
-                return { id: company, status: "active" };
+                return { id: company, status: "active" as CompanyOwnershipStatus };
             }
 
             return {

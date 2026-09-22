@@ -170,7 +170,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
   const favoriteProducts = products.filter(product => product.isFavorite);
 
-  const addToList = (product: ProductSearchResult) => {
+  const addToList = (product: ShoppingListProduct) => {
     const existingItem = selectedItems.find(item => item.product.id === product.id);
     console.log(selectedItems);
     if (existingItem) {
@@ -184,7 +184,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
     }
   };
 
-  const setProductQuantity = (addQuantity: number, product: ProductSearchResult) => {
+  const setProductQuantity = (addQuantity: number, product: ShoppingListProduct) => {
     const existingItem = selectedItems.find(item => item.product.id === product.id);
     console.log(selectedItems);
     if (existingItem) {
