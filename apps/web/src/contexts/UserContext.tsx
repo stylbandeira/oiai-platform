@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
-import { Company } from '@/types/company';
+import { CompanySummary } from '@/types/company';
 import { User } from '@/types/user';
 
 interface UserContextType {
@@ -9,8 +9,8 @@ interface UserContextType {
     loading: boolean;
     login: (token: string, userData: User) => void;
     logout: () => void;
-    activeCompanies?: Company[];
-    pendingCompanies?: Company[];
+    activeCompanies?: CompanySummary[];
+    pendingCompanies?: CompanySummary[];
     refreshUser: () => Promise<void>;
 }
 
@@ -31,17 +31,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             }
 
             const response = await api.get('/user');
-            setUser({
-                type: response.data.user.type,
-                name: response.data.user.name,
-                email: response.data.user.email,
-                points: response.data.user.points,
-                activeCompanies: response.data.user.activeCompanies,
-                pendingCompanies: response.data.user.pendingCompanies,
-                token: token,
-                notifications: response.data.user.notifications,
-                notificationList: response.data.user.notificationList,
-            });
+            setUser({ ...response.data.user, token });
         } catch (error) {
             console.error('Failed to load user', error);
             localStorage.removeItem('token');

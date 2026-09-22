@@ -9,6 +9,7 @@ export interface Notification {
     'points': number,
     'link': string,
     'is_new': boolean,
+    'checked': boolean,
     'created_at': string,
 }
 

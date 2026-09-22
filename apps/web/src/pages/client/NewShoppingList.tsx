@@ -9,8 +9,9 @@ import { ArrowLeft, Search, Plus, Minus, Heart, MapPin, DollarSign } from "lucid
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
 import { CustomPagination } from "@/components/oiai_ui/CustomPagination";
+import type { QueryParams, PaginationMeta } from "@/types/api";
 
-interface Product {
+interface ProductSearchResult {
   id: number;
   name: string;
   img: string;
@@ -18,7 +19,7 @@ interface Product {
   category: string;
   mentioned_quantity: number;
   companies_count: number;
-  mentioned_quantity_variant: string;
+  mentioned_quantity_variant: "default" | "destructive" | "outline" | "secondary" | "perfect";
   isFavorite: boolean;
   unit: string;
   unity_quantity: number;
@@ -26,17 +27,32 @@ interface Product {
   unity_id: number;
 }
 
-interface PaginationMeta {
-  current_page: number;
-  per_page: number;
-  total: number;
-  last_page: number;
-  from: number;
-  to: number;
+interface ShoppingListProduct {
+  id: number;
+  name: string;
+  average_price: number;
+  category: string;
+  isFavorite: boolean;
+  unit: string;
+  unity_quantity: number;
+  unity: string;
+  unity_id: number;
+  img?: string;
+}
+
+interface ListProductRow {
+  id?: number;
+  name?: string;
+  price?: number;
+  quantity?: number;
+  unity?: string;
+  unity_id?: number;
+  product?: ProductSearchResult;
+  category?: string;
 }
 
 interface SelectedItem {
-  product: Product;
+  product: ShoppingListProduct;
   quantity: number;
   unity: string;
 }
@@ -59,8 +75,8 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   const [loading, setLoading] = useState(true);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [listProducts, setListProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductSearchResult[]>([]);
+  const [listProducts, setListProducts] = useState<ProductSearchResult[]>([]);
 
 
   useEffect(() => {
@@ -98,8 +114,8 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
       // Converter os itens da API para o formato SelectedItem
       if (listData && listData.length > 0) {
-        const formattedItems: SelectedItem[] = listData.map((item: any) => ({
-          product: {
+        const formattedItems: SelectedItem[] = (listData as ListProductRow[]).map((item) => ({
+            product: {
             id: item.id || item.product?.id,
             name: item.product?.name || item.name || "Produto",
             average_price: item.price || item.product?.average_price || 0,
@@ -129,7 +145,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   ) => {
     try {
       setLoading(true);
-      const params: any = { page };
+      const params: QueryParams = { page };
 
       if (searchTerm) params.search = searchTerm;
 
@@ -154,7 +170,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
   const favoriteProducts = products.filter(product => product.isFavorite);
 
-  const addToList = (product: Product) => {
+  const addToList = (product: ShoppingListProduct) => {
     const existingItem = selectedItems.find(item => item.product.id === product.id);
     console.log(selectedItems);
     if (existingItem) {
@@ -168,7 +184,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
     }
   };
 
-  const setProductQuantity = (addQuantity, product: Product) => {
+  const setProductQuantity = (addQuantity: number, product: ShoppingListProduct) => {
     const existingItem = selectedItems.find(item => item.product.id === product.id);
     console.log(selectedItems);
     if (existingItem) {
@@ -182,7 +198,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
     }
   };
 
-  const handleFavorite = async (product: Product) => {
+  const handleFavorite = async (product: ProductSearchResult) => {
     const favorite = product.isFavorite ? 'unfavorite' : 'favorite';
     try {
       await api.post(`/products/${product.id}/favorite`);

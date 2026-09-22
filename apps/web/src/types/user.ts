@@ -1,6 +1,8 @@
 import { Notification } from "./notification";
+import type { components } from "./api.generated";
+import type { CompanySummary } from "./company";
 
-export interface User {
+export interface User extends Omit<components["schemas"]["User"], "type" | "notifications"> {
     id: number;
     type: UserType;
     name: string;
@@ -9,11 +11,11 @@ export interface User {
     points?: number;
     reputation: number;
     cpf: string;
-    notifications: [];
+    notifications: Notification[];
     notificationList: Notification[];
     token?: string;
-    activeCompanies?: [];
-    pendingCompanies?: [];
+    activeCompanies?: CompanySummary[];
+    pendingCompanies?: CompanySummary[];
     created_at: string;
     deleted_at: string | null;
 }

@@ -2,14 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import api from "@/lib/api";
 import { useState } from "react";
-import { UserForm } from "@/components/forms/UserForm";
+import { UserForm, type UserFormData } from "@/components/forms/UserForm";
 
 export default function AddUser() {
     const navigate = useNavigate();
     const { user } = useUser();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async (formData: any) => {
+    const handleSubmit = async (formData: UserFormData) => {
         console.log('Dados do formulário:', formData);
         setIsSubmitting(true);
         try {

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { AlertTriangle, Building2, Check, ChevronDown } from "lucide-react";
-import { Company } from "@/types/company";
+import { CompanySummary } from "@/types/company";
 
 interface CompanySelectorProps {
-    companies: Company[];
+    companies: CompanySummary[];
     selectedCompanyId: number | null;
     onChange: (companyId: number) => void;
 }

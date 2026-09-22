@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ShoppingCart, Building2, Shield, UserPlus } from "lucide-react";
-import { UserType } from "./LoginForm";
+import { UserType } from "@/types/user";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext"; // Importe o hook
+import { getApiErrorMessage } from "@/utils/apiError";
+import axios from "axios";
 
 interface RegisterFormProps {
     onSwitchToLogin: () => void;
@@ -43,7 +45,6 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             const response = await api.post("/register", {
                 name,
                 cpf,
-                userType,
                 email,
                 password,
                 password_confirmation: confirmPassword,
@@ -53,20 +54,15 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             localStorage.setItem('token', response.data.access_token);
 
             // Use a função login do contexto em vez de onRegister
-            login(response.data.access_token, {
-                type: userType,
-                name: response.data.user.name,
-                email: response.data.user.email,
-                points: response.data.user.points || 0
-            });
+            login(response.data.access_token, response.data.user);
 
             navigate("/", { state: { fromRegister: true } });
 
-        } catch (error: any) {
-            if (error.response) {
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error) && error.response) {
                 setErrors(error.response.data.errors || {});
             } else {
-                alert("Erro inesperado. Tente novamente.");
+                alert(getApiErrorMessage(error, "Erro inesperado. Tente novamente."));
             }
         } finally {
             setIsLoading(false)

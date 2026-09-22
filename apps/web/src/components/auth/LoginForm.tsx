@@ -9,6 +9,7 @@ import api from "@/lib/api";
 import { useUser } from "@/contexts/UserContext";
 import { CustomLogo } from "../oiai_ui/CustomLogo";
 import { UserType } from "@/types/user";
+import { getApiErrorMessage } from "@/utils/apiError";
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -45,19 +46,11 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      login(response.data.token, {
-        type: response.data.user.type || userType,
-        name: response.data.user.name,
-        email: response.data.user.email,
-        points: response.data.user.points
-      });
+      login(response.data.token, response.data.user);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login error:", error);
-      setError(
-        error.response?.data?.message ||
-        "Erro ao fazer login. Verifique suas credenciais e tente novamente."
-      );
+      setError(getApiErrorMessage(error, "Erro ao fazer login. Verifique suas credenciais e tente novamente."));
     } finally {
       setIsLoading(false);
     }

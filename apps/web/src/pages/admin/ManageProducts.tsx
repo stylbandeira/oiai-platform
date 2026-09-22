@@ -28,20 +28,10 @@ import { TableFilters } from "@/components/admin/TableFilters";
 import { BulkActionsBar } from "@/components/admin/BulkActionsBar";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { StandardDialog } from "@/components/ui/standard-dialog";
+import type { ProductExportRow } from "@/types/product";
+import type { QueryParams } from "@/types/api";
 
-interface Product {
-  id: number;
-  name: string;
-  sku: string;
-  category: string;
-  brand?: string;
-  description?: string;
-  average_price: number;
-  img?: string;
-  validated: boolean;
-  created_at: string;
-  updated_at: string;
-}
+type Product = ProductExportRow;
 
 interface Category {
   id: number;
@@ -120,7 +110,7 @@ export default function ManageProducts() {
   ) => {
     try {
       setLoading(true);
-      const params: any = { page };
+      const params: QueryParams = { page };
 
       if (searchTerm) params.search = searchTerm;
       if (category !== "all") params.category = category;

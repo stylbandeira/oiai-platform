@@ -12,6 +12,7 @@ import { ResponsiveTable } from "@/components/admin/ResponsiveTable";
 import { StandardDialog } from "@/components/ui/standard-dialog";
 import { CustomPagination } from "@/components/oiai_ui/CustomPagination";
 import { User } from "@/types/user";
+import type { PaginationMeta, QueryParams } from "@/types/api";
 
 export default function ManageUsers() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function ManageUsers() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [paginationMeta, setPaginationMeta] = useState<any>(null);
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const typeOptions = [
@@ -51,7 +52,7 @@ export default function ManageUsers() {
   const fetchUsers = async (page = 1) => {
     try {
       setLoading(true);
-      const params: any = { page };
+      const params: QueryParams = { page };
       if (debouncedSearch) params.search = debouncedSearch;
       if (filterType !== "all") params.type = filterType;
       if (filterStatus !== "all") params.status = filterStatus;
