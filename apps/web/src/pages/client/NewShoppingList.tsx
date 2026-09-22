@@ -19,7 +19,7 @@ interface ProductSearchResult {
   category: string;
   mentioned_quantity: number;
   companies_count: number;
-  mentioned_quantity_variant: string;
+  mentioned_quantity_variant: "default" | "destructive" | "outline" | "secondary" | "perfect";
   isFavorite: boolean;
   unit: string;
   unity_quantity: number;

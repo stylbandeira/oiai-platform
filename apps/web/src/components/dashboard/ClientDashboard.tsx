@@ -30,7 +30,7 @@ interface ItensList {
 
 interface NotificationData {
   message: string;
-  type: string;
+  type: "success" | "error" | "warning" | "info";
 }
 
 interface DashboardData {
