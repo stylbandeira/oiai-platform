@@ -1,6 +1,6 @@
 import type { components } from "./api.generated";
 
-export interface Company extends components["schemas"]["Company"] {
+export type Company = components["schemas"]["Company"] & {
     id: number;
     name: string;
     email: string;
@@ -16,4 +16,4 @@ export interface Company extends components["schemas"]["Company"] {
     status: 'active' | 'inactive' | 'pending';
     ownership_status: 'active' | 'inactive' | 'pending';
     created_at: string;
-}
+};

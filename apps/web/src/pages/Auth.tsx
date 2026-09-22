@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { LoginForm, UserType } from "@/components/auth/LoginForm";
+import { LoginForm } from "@/components/auth/LoginForm";
+import type { UserType } from "@/types/user";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 
 export default function Auth() {

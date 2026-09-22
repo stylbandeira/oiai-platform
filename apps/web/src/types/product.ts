@@ -24,6 +24,9 @@ export interface ProductExportRow {
   unity_quantity: number | null;
   category: string | null;
   companies_count: number | null;
+  brand?: string | null;
+  description?: string | null;
+  updated_at?: string;
 }
 
 export type CsvValue = string | number | boolean | null;

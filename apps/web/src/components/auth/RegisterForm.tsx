@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ShoppingCart, Building2, Shield, UserPlus } from "lucide-react";
-import { UserType } from "./LoginForm";
+import { UserType } from "@/types/user";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext"; // Importe o hook
 import { getApiErrorMessage } from "@/utils/apiError";

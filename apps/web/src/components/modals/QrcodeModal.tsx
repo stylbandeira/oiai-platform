@@ -304,7 +304,7 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
                 errorMessage = 'Acesso à câmera bloqueado por questões de segurança.';
                 break;
             default:
-                errorMessage = `Erro ao acessar a câmera: ${err.message || 'Erro desconhecido'}`;
+                errorMessage = `Erro ao acessar a câmera: ${cameraError?.message || 'Erro desconhecido'}`;
         }
 
         setError(errorMessage);
@@ -313,7 +313,8 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
 
     const showPermissionDeniedError = () => {
         setError(
-            <div className="space-y-2">
+            'O acesso à câmera foi bloqueado. Verifique as permissões da câmera e recarregue a página.'
+        /* <div className="space-y-2">
                 <div className="flex items-center gap-2">
                     <AlertCircle className="h-5 w-5" />
                     <span className="font-medium">Permissão negada</span>
@@ -327,7 +328,7 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
                     <li>Altere para "Permitir"</li>
                     <li>Recarregue a página</li>
                 </ul>
-            </div>
+            </div> */
         );
     };
 
