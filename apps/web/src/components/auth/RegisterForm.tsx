@@ -45,7 +45,6 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             const response = await api.post("/register", {
                 name,
                 cpf,
-                userType,
                 email,
                 password,
                 password_confirmation: confirmPassword,
@@ -55,12 +54,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             localStorage.setItem('token', response.data.access_token);
 
             // Use a função login do contexto em vez de onRegister
-            login(response.data.access_token, {
-                type: userType,
-                name: response.data.user.name,
-                email: response.data.user.email,
-                points: response.data.user.points || 0
-            });
+            login(response.data.access_token, response.data.user);
 
             navigate("/", { state: { fromRegister: true } });
 

@@ -31,17 +31,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             }
 
             const response = await api.get('/user');
-            setUser({
-                type: response.data.user.type,
-                name: response.data.user.name,
-                email: response.data.user.email,
-                points: response.data.user.points,
-                activeCompanies: response.data.user.activeCompanies,
-                pendingCompanies: response.data.user.pendingCompanies,
-                token: token,
-                notifications: response.data.user.notifications,
-                notificationList: response.data.user.notificationList,
-            });
+            setUser({ ...response.data.user, token });
         } catch (error) {
             console.error('Failed to load user', error);
             localStorage.removeItem('token');
