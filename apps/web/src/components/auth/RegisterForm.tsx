@@ -9,6 +9,8 @@ import { ShoppingCart, Building2, Shield, UserPlus } from "lucide-react";
 import { UserType } from "./LoginForm";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext"; // Importe o hook
+import { getApiErrorMessage } from "@/utils/apiError";
+import axios from "axios";
 
 interface RegisterFormProps {
     onSwitchToLogin: () => void;
@@ -62,11 +64,11 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
             navigate("/", { state: { fromRegister: true } });
 
-        } catch (error: any) {
-            if (error.response) {
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error) && error.response) {
                 setErrors(error.response.data.errors || {});
             } else {
-                alert("Erro inesperado. Tente novamente.");
+                alert(getApiErrorMessage(error, "Erro inesperado. Tente novamente."));
             }
         } finally {
             setIsLoading(false)
