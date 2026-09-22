@@ -111,7 +111,7 @@ const NotificationsBell: React.FC<Props> = ({ notifications, unreadCount }) => {
                             notifications.map((notif) => (
                                 <div
                                     key={notif.id}
-                                    className={`p-4 border-b hover:bg-gray-50 cursor-pointer ${notif.read ? 'opacity-70' : 'bg-blue-50'}`}
+                                    className={`p-4 border-b hover:bg-gray-50 cursor-pointer ${notif.checked ? 'opacity-70' : 'bg-blue-50'}`}
                                     onClick={() => handleMarkAsRead(notif.id)}
                                 >
                                     <div className="flex gap-3">
