@@ -15,7 +15,7 @@ class InvoiceController extends Controller
     ) {}
 
     /**
-     * Endpoint específico para testar XML direto
+     * Endpoint específico para testar XML direto.
      */
     public function processXML(ProcessXMLRequest $request, ProcessXMLAction $action)
     {
