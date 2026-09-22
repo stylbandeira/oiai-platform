@@ -61,6 +61,10 @@ O workflow `CI Gate` é o check global recomendado para proteção das branches 
 - [Especificação OpenAPI](docs/openapi.yaml)
 - [Abrir no Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/stylbandeira/oiai-platform/main/docs/openapi.yaml)
 
+### Contribuição e commits
+
+Os commits seguem o padrão Conventional Commits, com scopes como `api`, `web`, `infra` e `ci`. Consulte o [guia de contribuição](docs/CONTRIBUTING.md) para tipos permitidos, breaking changes e exemplos.
+
 ### Pré-requisitos
 * Docker
 * Docker Compose
