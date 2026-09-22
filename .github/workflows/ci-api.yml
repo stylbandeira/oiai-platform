@@ -5,15 +5,18 @@ on:
     branches: [main, master, develop]
     paths:
       - 'apps/api/**'
-      - 'docker/api/**'
+      # Compartilhados: mudanças neles podem afetar a API e o ambiente de CI.
+      - 'docker/**'
       - 'docker-compose.yml'
+      - 'docs/openapi.yaml'
       - '.github/workflows/ci-api.yml'
   push:
     branches: [main, master, develop]
     paths:
       - 'apps/api/**'
-      - 'docker/api/**'
+      - 'docker/**'
       - 'docker-compose.yml'
+      - 'docs/openapi.yaml'
       - '.github/workflows/ci-api.yml'
 
 permissions:

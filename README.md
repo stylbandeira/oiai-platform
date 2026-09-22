@@ -36,6 +36,15 @@ Atualmente, a leitura de notas fiscais está disponível apenas para os estados:
 
 O projeto está estruturado como monorepo, subdividindo-se em dois projetos. A API em Laravel orientada a SOLID implementa serviços para capturar dados de notas fiscais através de scrapping e Jobs que chamam versões gratuitas de APIs externas para refinar os dados obtidos. O frontend, criado inicialmente utilizando lovable, utiliza Client-Server com frontend SPA.
 
+### Escopo dos CIs
+
+Os workflows da API e do Web usam filtros por caminho. Alterações somente em `apps/api/**` executam o CI da API; alterações somente em `apps/web/**` executam o CI do Web. Alterações em arquivos compartilhados executam ambos. Atualmente são considerados compartilhados:
+
+- `docker/**`;
+- `docker-compose.yml`;
+- `docs/openapi.yaml`, que gera os tipos consumidos pelo frontend;
+- os próprios workflows quando alterados.
+
 ## Fluxo principal da aplicação
 
 1. Usuário realiza cadastro de uma nota fiscal
