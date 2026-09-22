@@ -8,6 +8,7 @@ use App\Actions\Auth\GetAuthenticatedUserAction;
 use App\Actions\Auth\LogoutAction;
 use App\Actions\Auth\NoticeAction;
 use App\Actions\Auth\VerifyEmailAction;
+use App\Http\Resources\UserResource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ApiLoginRequest;
 use App\Http\Requests\Auth\ApiRegisterRequest;
@@ -45,7 +46,7 @@ class AuthController extends Controller
         $user = $action->execute($request->validated());
 
         return response([
-            'user' => $user,
+            'user' => (new UserResource($user))->withNotifications(),
             'access_token' => $user->createToken('auth_token', ['*'])->plainTextToken,
             'token_type' => 'Bearer',
         ], 201);

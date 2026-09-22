@@ -3,6 +3,7 @@
 namespace App\Actions\Auth;
 
 use App\Models\User;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 
 class ApiLoginAction
@@ -20,7 +21,7 @@ class ApiLoginAction
         }
 
         return response([
-            'user' => $user,
+            'user' => (new UserResource($user))->withNotifications(),
             'token' => $user->createToken('auth_token')->plainTextToken,
         ]);
     }
