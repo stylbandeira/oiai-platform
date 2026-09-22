@@ -21,7 +21,7 @@ interface CompanyOption {
 
 type CompanyOwnershipStatus = "active" | "inactive" | "pending";
 
-interface CompanyOwnership {
+export interface CompanyOwnership {
     id: number;
     status: CompanyOwnershipStatus;
 }
@@ -32,11 +32,15 @@ export interface UserFormData {
     email: string;
     cpf: string;
     status: "active" | "inactive" | "suspended";
-    companies: number[] | CompanyOption[] | CompanyOwnership[];
+    companies: CompanyOwnership[];
 }
 
+export type UserFormInitialData = Omit<UserFormData, "companies"> & {
+    companies: number[] | CompanyOption[] | CompanyOwnership[];
+};
+
 interface UserFormProps {
-    initialData?: UserFormData;
+    initialData?: UserFormInitialData;
     onSubmit: (data: UserFormData) => Promise<void>;
     onCancel?: () => void;
     isEditing?: boolean;
@@ -72,7 +76,7 @@ const getCompanyOwnershipStatus = (company: CompanyOption | CompanyOwnership): C
     return "active";
 };
 
-const normalizeUserData = (data: UserFormData): UserFormData => ({
+const normalizeUserData = (data: UserFormInitialData): UserFormData => ({
     ...data,
     companies: Array.isArray(data.companies)
         ? data.companies.map(company => {
@@ -138,15 +142,15 @@ export function UserForm({
 
         return {
             ...normalized,
-            companies: normalized.type === "company"
-                ? [...(normalized.companies as CompanyOwnership[])].sort((a, b) => a.id - b.id)
+                companies: normalized.type === "company"
+                ? [...normalized.companies].sort((a, b) => a.id - b.id)
                 : [],
         };
     }, [initialData]);
 
     const comparableFormData = useMemo(() => ({
         ...formData,
-        companies: isCompanyType ? [...(formData.companies as CompanyOwnership[])].sort((a, b) => a.id - b.id) : [],
+        companies: isCompanyType ? [...formData.companies].sort((a, b) => a.id - b.id) : [],
     }), [formData, isCompanyType]);
 
     const hasChanges = !isEditing || JSON.stringify(comparableFormData) !== JSON.stringify(initialComparableData);
@@ -221,7 +225,7 @@ export function UserForm({
         setErrors({});
 
         try {
-            const submitData = { ...formData, companies: formData.companies as CompanyOwnership[] };
+            const submitData = { ...formData };
             if (!isCompanyType) {
                 submitData.companies = [];
             }
