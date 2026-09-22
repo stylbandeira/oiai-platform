@@ -5,11 +5,14 @@ import { Label } from "@/components/ui/label";
 import { AlertCircle, QrCode } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import api from "@/lib/api";
+import { getApiErrorMessage } from "@/utils/apiError";
+
+export type InvoiceProcessResponse = Record<string, unknown>;
 
 interface InvoiceCodeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess?: (data: any) => void;
+    onSuccess?: (data: InvoiceProcessResponse) => void;
     onError?: (error: string) => void;
 }
 
@@ -42,10 +45,8 @@ export function InvoiceCodeModal({ isOpen, onClose, onSuccess, onError }: Invoic
             setCode('');
             onClose();
 
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.error ||
-                err.response?.data?.message ||
-                'Erro ao processar nota fiscal';
+        } catch (err: unknown) {
+            const errorMessage = getApiErrorMessage(err, 'Erro ao processar nota fiscal');
 
             setError(errorMessage);
 

@@ -4,11 +4,14 @@ import { Upload, Camera, AlertCircle, QrCode, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import jsQR from 'jsqr';
 import api from "@/lib/api";
+import axios from "axios";
+import { getApiErrorMessage } from "@/utils/apiError";
+import type { InvoiceProcessResponse } from "./InvoiceCodeModal";
 
 interface QRCodeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess?: (data: any) => void;
+    onSuccess?: (data: InvoiceProcessResponse) => void;
     onError?: (error: string) => void;
 }
 
@@ -140,7 +143,7 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
                 scanningRef.current = true;
                 startScanLoop();
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Erro ao acessar câmera:', err);
             handleCameraError(err);
         } finally {
@@ -271,22 +274,21 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             setTimeout(() => {
                 onClose();
             }, 500);
-        } catch (err: any) {
+        } catch (err: unknown) {
             setQrDetected(false);
             setScanning(false);
-            const errorMessage = err.response?.data?.error ||
-                err.response?.data?.message ||
-                'Erro ao processar QR Code. Tente novamente.';
+            const errorMessage = getApiErrorMessage(err, 'Erro ao processar QR Code. Tente novamente.');
             setError(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCameraError = (err: any) => {
+    const handleCameraError = (err: unknown) => {
         let errorMessage = 'Não foi possível acessar a câmera.';
+        const cameraError = err instanceof DOMException ? err : null;
 
-        switch (err.name) {
+        switch (cameraError?.name) {
             case 'NotAllowedError':
             case 'PermissionDeniedError':
                 errorMessage = 'Permissão para usar a câmera foi negada.';
@@ -409,11 +411,8 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             await sendQRCodeToBackend(qrData);
             onClose();
 
-        } catch (err: any) {
-            setError(err.response?.data?.error ||
-                err.response?.data?.message ||
-                err.message ||
-                'Não foi possível ler o QR Code da imagem.');
+        } catch (err: unknown) {
+            setError(getApiErrorMessage(err, 'Não foi possível ler o QR Code da imagem.'));
         } finally {
             setLoading(false);
             // Limpar o input file
@@ -434,13 +433,10 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
             }
             return response.data;
 
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.error ||
-                err.response?.data?.message ||
-                (err.response?.status === 409
-                    ? 'Este QR Code já foi cadastrado anteriormente.'
-                    : null) ||
-                'Erro ao processar nota fiscal';
+        } catch (err: unknown) {
+            const errorMessage = axios.isAxiosError(err) && err.response?.status === 409
+                ? 'Este QR Code já foi cadastrado anteriormente.'
+                : getApiErrorMessage(err, 'Erro ao processar nota fiscal');
             setError(errorMessage);
 
             if (onError) {
