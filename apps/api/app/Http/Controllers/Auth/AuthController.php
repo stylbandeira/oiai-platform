@@ -8,10 +8,10 @@ use App\Actions\Auth\GetAuthenticatedUserAction;
 use App\Actions\Auth\LogoutAction;
 use App\Actions\Auth\NoticeAction;
 use App\Actions\Auth\VerifyEmailAction;
-use App\Http\Resources\UserResource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ApiLoginRequest;
 use App\Http\Requests\Auth\ApiRegisterRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller

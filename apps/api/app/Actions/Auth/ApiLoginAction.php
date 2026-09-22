@@ -2,8 +2,8 @@
 
 namespace App\Actions\Auth;
 
-use App\Models\User;
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class ApiLoginAction
@@ -14,7 +14,7 @@ class ApiLoginAction
             ->where('type', $data['user_type'])
             ->first();
 
-        if (! Hash::check($data['password'], $user->password)) {
+        if (!Hash::check($data['password'], $user->password)) {
             return response()->json([
                 'message' => 'Credenciais inválidas',
             ], 401);
