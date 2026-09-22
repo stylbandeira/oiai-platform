@@ -1,0 +1,43 @@
+# Versionamento das aplicações
+
+API e Web possuem ciclos de release independentes. Uma release de uma aplicação não exige alteração de versão na outra.
+
+## Versões atuais
+
+- API: [`apps/api/VERSION`](../apps/api/VERSION)
+- Web: [`apps/web/package.json`](../apps/web/package.json)
+
+Ambas usam Semantic Versioning (`MAJOR.MINOR.PATCH`):
+
+- `PATCH`: correção compatível, como `1.2.0` → `1.2.1`;
+- `MINOR`: funcionalidade compatível, como `1.2.1` → `1.3.0`;
+- `MAJOR`: alteração incompatível, como `1.3.0` → `2.0.0`.
+
+## Tags
+
+As tags devem identificar explicitamente a aplicação:
+
+```text
+api-v1.0.0
+api-v1.1.0
+api-v1.1.1
+
+web-v1.0.0
+web-v1.1.0
+web-v2.0.0
+```
+
+Uma tag `api-v*` só deve ser criada quando houver release da API. Uma tag `web-v*` só deve ser criada quando houver release do Web.
+
+## Relação com commits
+
+Os scopes `api` e `web` dos Conventional Commits ajudam a identificar a aplicação afetada. O incremento da versão deve considerar somente os commits da aplicação que está sendo publicada.
+
+Exemplos:
+
+```text
+feat(api): add product ranking       # incrementa a API
+fix(web): correct mobile pagination  # incrementa o Web
+```
+
+Uma alteração compartilhada pode exigir duas releases, mas as versões continuam sendo calculadas e publicadas separadamente.

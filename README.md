@@ -65,6 +65,10 @@ O workflow `CI Gate` é o check global recomendado para proteção das branches 
 
 Os commits seguem o padrão Conventional Commits, com scopes como `api`, `web`, `infra` e `ci`. Consulte o [guia de contribuição](docs/CONTRIBUTING.md) para tipos permitidos, breaking changes e exemplos.
 
+### Versionamento
+
+API e Web são versionados independentemente com tags `api-vX.Y.Z` e `web-vX.Y.Z`. Consulte o [guia de versionamento](docs/VERSIONING.md).
+
 ### Pré-requisitos
 * Docker
 * Docker Compose
