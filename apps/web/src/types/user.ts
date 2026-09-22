@@ -1,5 +1,6 @@
 import { Notification } from "./notification";
 import type { components } from "./api.generated";
+import type { CompanySummary } from "./company";
 
 export interface User extends Omit<components["schemas"]["User"], "type" | "notifications"> {
     id: number;
@@ -13,8 +14,8 @@ export interface User extends Omit<components["schemas"]["User"], "type" | "noti
     notifications: Notification[];
     notificationList: Notification[];
     token?: string;
-    activeCompanies?: components["schemas"]["Company"][];
-    pendingCompanies?: components["schemas"]["Company"][];
+    activeCompanies?: CompanySummary[];
+    pendingCompanies?: CompanySummary[];
     created_at: string;
     deleted_at: string | null;
 }

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
-import { Company } from '@/types/company';
+import { CompanySummary } from '@/types/company';
 import { User } from '@/types/user';
 
 interface UserContextType {
@@ -9,8 +9,8 @@ interface UserContextType {
     loading: boolean;
     login: (token: string, userData: User) => void;
     logout: () => void;
-    activeCompanies?: Company[];
-    pendingCompanies?: Company[];
+    activeCompanies?: CompanySummary[];
+    pendingCompanies?: CompanySummary[];
     refreshUser: () => Promise<void>;
 }
 
