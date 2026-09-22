@@ -9,6 +9,7 @@ import { ArrowLeft, Search, Plus, Minus, Heart, MapPin, DollarSign } from "lucid
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
 import { CustomPagination } from "@/components/oiai_ui/CustomPagination";
+import type { QueryParams, PaginationMeta } from "@/types/api";
 
 interface Product {
   id: number;
@@ -26,13 +27,15 @@ interface Product {
   unity_id: number;
 }
 
-interface PaginationMeta {
-  current_page: number;
-  per_page: number;
-  total: number;
-  last_page: number;
-  from: number;
-  to: number;
+interface ListProductRow {
+  id?: number;
+  name?: string;
+  price?: number;
+  quantity?: number;
+  unity?: string;
+  unity_id?: number;
+  product?: Product;
+  category?: string;
 }
 
 interface SelectedItem {
@@ -98,7 +101,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
       // Converter os itens da API para o formato SelectedItem
       if (listData && listData.length > 0) {
-        const formattedItems: SelectedItem[] = listData.map((item: any) => ({
+        const formattedItems: SelectedItem[] = (listData as ListProductRow[]).map((item) => ({
           product: {
             id: item.id || item.product?.id,
             name: item.product?.name || item.name || "Produto",
@@ -129,7 +132,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   ) => {
     try {
       setLoading(true);
-      const params: any = { page };
+      const params: QueryParams = { page };
 
       if (searchTerm) params.search = searchTerm;
 

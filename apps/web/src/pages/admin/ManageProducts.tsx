@@ -29,6 +29,7 @@ import { BulkActionsBar } from "@/components/admin/BulkActionsBar";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { StandardDialog } from "@/components/ui/standard-dialog";
 import type { ProductExportRow } from "@/types/product";
+import type { QueryParams } from "@/types/api";
 
 type Product = ProductExportRow;
 
@@ -109,7 +110,7 @@ export default function ManageProducts() {
   ) => {
     try {
       setLoading(true);
-      const params: any = { page };
+      const params: QueryParams = { page };
 
       if (searchTerm) params.search = searchTerm;
       if (category !== "all") params.category = category;

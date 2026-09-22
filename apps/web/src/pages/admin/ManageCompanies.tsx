@@ -11,6 +11,7 @@ import api from "@/lib/api";
 import { CustomPagination } from "@/components/oiai_ui/CustomPagination";
 import { useUser } from "@/contexts/UserContext";
 import type { Company } from "@/types/company";
+import type { PaginationMeta, QueryParams } from "@/types/api";
 
 
 interface Props {
@@ -23,7 +24,7 @@ export default function ManageCompanies({ endpoint }: Props) {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [filterStatus, setFilterStatus] = useState<string>("all");
-    const [paginationMeta, setPaginationMeta] = useState<any>(null);
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
     const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
     const user = useUser();
 
@@ -56,7 +57,7 @@ export default function ManageCompanies({ endpoint }: Props) {
     const fetchCompanies = async (page: number = 1, searchTerm: string = search, status: string = filterStatus) => {
         try {
             setLoading(true);
-            const params: any = { page };
+            const params: QueryParams = { page };
 
             if (searchTerm) params.search = searchTerm;
             if (status !== "all") params.status = status;
@@ -97,7 +98,7 @@ export default function ManageCompanies({ endpoint }: Props) {
     });
 
     const getStatusBadge = (status: string) => {
-        const variants = {
+        const variants: Record<string, "default" | "secondary" | "outline"> = {
             'active': 'default',
             'inactive': 'secondary',
             'pending': 'outline'
@@ -109,7 +110,7 @@ export default function ManageCompanies({ endpoint }: Props) {
         };
 
         return (
-            <Badge variant={variants[status as keyof typeof variants] as any}>
+            <Badge variant={variants[status] ?? "default"}>
                 {labels[status as keyof typeof labels]}
             </Badge>
         );
