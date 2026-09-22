@@ -29,6 +29,12 @@ web-v2.0.0
 
 Uma tag `api-v*` só deve ser criada quando houver release da API. Uma tag `web-v*` só deve ser criada quando houver release do Web.
 
+## Releases automáticas
+
+O workflow `Release Please` acompanha a branch `main` e usa os Conventional Commits para criar Pull Requests de release independentes. O estado atual fica em `.release-please-manifest.json`.
+
+Depois do merge de um PR de release, a automação atualiza a versão do componente, o CHANGELOG, cria a tag (`api-vX.Y.Z` ou `web-vX.Y.Z`) e publica o GitHub Release correspondente.
+
 ## Relação com commits
 
 Os scopes `api` e `web` dos Conventional Commits ajudam a identificar a aplicação afetada. O incremento da versão deve considerar somente os commits da aplicação que está sendo publicada.
