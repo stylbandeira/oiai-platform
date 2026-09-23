@@ -109,6 +109,8 @@ API e Web usam Semantic Versioning independentemente:
 
 - API: [apps/api/VERSION](apps/api/VERSION);
 - Web: [apps/web/package.json](apps/web/package.json);
+- CHANGELOG da API: [apps/api/CHANGELOG.md](apps/api/CHANGELOG.md);
+- CHANGELOG do Web: [apps/web/CHANGELOG.md](apps/web/CHANGELOG.md);
 - guia: [docs/VERSIONING.md](docs/VERSIONING.md).
 
 Tags: `api-v1.0.0` e `web-v1.0.0`.
@@ -125,7 +127,7 @@ O [Release Please](.github/workflows/release.yml) interpreta Conventional Commit
 - [CI API](.github/workflows/ci-api.yml) · [CI Web](.github/workflows/ci-web.yml) · [CI Gate](.github/workflows/ci-gate.yml);
 - [GitHub Releases](https://github.com/stylbandeira/oiai-platform/releases).
 
-Changelogs são gerados pelo Release Please junto aos respectivos componentes.
+Os [releases da API](https://github.com/stylbandeira/oiai-platform/releases?q=api-) e os [releases do Web](https://github.com/stylbandeira/oiai-platform/releases?q=web-) são publicados separadamente. O Release Please atualiza os CHANGELOGs junto com os PRs de release.
 
 ## Contributing
 
