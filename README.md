@@ -119,6 +119,8 @@ Tags: `api-v1.0.0` e `web-v1.0.0`.
 
 O [Release Please](.github/workflows/release.yml) interpreta Conventional Commits, cria PRs de release separados, atualiza versões e changelogs, cria tags e publica GitHub Releases.
 
+GitHub Releases é o registro oficial das versões publicadas. Cada release identifica explicitamente o componente (`API` ou `Web`), aponta para a tag correspondente e contém notas agrupadas em Features, Bug Fixes, Performance, Documentation e demais categorias configuradas.
+
 ## Documentation
 
 - [OpenAPI/Swagger](docs/openapi.yaml) · [Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/stylbandeira/oiai-platform/main/docs/openapi.yaml);

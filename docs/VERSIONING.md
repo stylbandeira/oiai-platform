@@ -35,6 +35,17 @@ O workflow `Release Please` acompanha a branch `main` e usa os Conventional Comm
 
 Depois do merge de um PR de release, a automação atualiza a versão do componente, o CHANGELOG, cria a tag (`api-vX.Y.Z` ou `web-vX.Y.Z`) e publica o GitHub Release correspondente.
 
+## GitHub Releases como registro oficial
+
+Cada GitHub Release deve corresponder a uma única tag de componente:
+
+| Componente | Tag | Changelog |
+| --- | --- | --- |
+| API | `api-vX.Y.Z` | [`apps/api/CHANGELOG.md`](../apps/api/CHANGELOG.md) |
+| Web | `web-vX.Y.Z` | [`apps/web/CHANGELOG.md`](../apps/web/CHANGELOG.md) |
+
+As notas da release são geradas a partir dos Conventional Commits e organizadas por categoria. Assim, é possível rastrear a alteração desde o commit até a tag, a versão, o CHANGELOG e a release publicada.
+
 ## Relação com commits
 
 Os scopes `api` e `web` dos Conventional Commits ajudam a identificar a aplicação afetada. O incremento da versão deve considerar somente os commits da aplicação que está sendo publicada.
