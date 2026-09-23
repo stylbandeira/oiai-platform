@@ -130,6 +130,7 @@ GitHub Releases é o registro oficial das versões publicadas. Cada release iden
 - [GitHub Releases](https://github.com/stylbandeira/oiai-platform/releases).
 - [Guias de migração e breaking changes](docs/releases/README.md).
 - [Documentação arquitetural e ADRs](docs/architecture/overview.md).
+- [Fluxo de engenharia](docs/ENGINEERING_WORKFLOW.md).
 
 Os [releases da API](https://github.com/stylbandeira/oiai-platform/releases?q=api-) e os [releases do Web](https://github.com/stylbandeira/oiai-platform/releases?q=web-) são publicados separadamente. O Release Please atualiza os CHANGELOGs junto com os PRs de release.
 

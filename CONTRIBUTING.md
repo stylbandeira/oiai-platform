@@ -2,6 +2,8 @@
 
 Obrigado por contribuir. Este documento descreve o fluxo esperado para alterações no monorepo.
 
+Para uma visão ponta a ponta, consulte o [fluxo de engenharia](docs/ENGINEERING_WORKFLOW.md).
+
 ## Branch naming
 
 Crie branches a partir de `main` usando um prefixo que indique o trabalho:
