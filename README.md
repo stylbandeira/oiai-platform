@@ -1,83 +1,136 @@
-# Oiaí - Pesquisa de preços
+# Oiaí — Pesquisa colaborativa de preços
 
-O projeto busca criar uma plataforma colaborativa para pesquisa de preços, foi criado para
-auxiliar compradores que, além precisarem otimizar seus gastos, possuem pouco tempo disponível para
-pesquisar as melhores opções de compra.
+## Overview
 
-## Principais funcionalidades:
+Oiaí é uma plataforma colaborativa para pesquisa de preços. Usuários podem processar NFC-e, consultar produtos, criar listas de compras e encontrar opções considerando preço e distância.
 
-- Leitura de QRCode/inserção de código de notas fiscais(NFCe) para cadastro de itens
-- Criação de lista de compras
-- Otimização de lista de compras por preço/distância
+O monorepo contém uma API Laravel e uma aplicação Web React/TypeScript, versionadas e publicadas independentemente.
 
-### Disponibilidade
-Atualmente, a leitura de notas fiscais está disponível apenas para os estados:
-- Pernambuco
-- Rio de Janeiro
-- São Paulo
+## Architecture
 
-## Tecnologias utilizadas
+```text
+React/TypeScript Web (apps/web) ── HTTP/JSON + Sanctum ──> Laravel API (apps/api)
+                                                              ├─ MySQL
+                                                              ├─ Meilisearch
+                                                              └─ Jobs/Scheduler e serviços NFC-e
+```
 
-### Backend
-- PHP
-- Laravel
-- MySQL
+## Monorepo Structure
 
-### Frontend
-- React
-- TypeScript
-- Tailwind CSS
+```text
+apps/api/                  Backend Laravel
+apps/web/                  Frontend React/Vite
+docs/openapi.yaml          Contrato OpenAPI
+docs/CONTRIBUTING.md       Commits e contribuição
+docs/VERSIONING.md         Versões e tags
+.github/workflows/         CI, gate e releases
+docker-compose.yml         Ambiente local
+```
 
-### Infraestrutura
-- Docker
-- Docker Compose
+## Tech Stack
 
-## Arquitetura
+- PHP/Laravel, Sanctum, Scout e Meilisearch;
+- MySQL;
+- React, TypeScript, Vite e Tailwind CSS;
+- Docker Compose;
+- PHPUnit, Pint, PHPStan e ESLint;
+- OpenAPI, `openapi-typescript`, GitHub Actions e Release Please.
 
-O projeto está estruturado como monorepo, subdividindo-se em dois projetos. A API em Laravel orientada a SOLID implementa serviços para capturar dados de notas fiscais através de scrapping e Jobs que chamam versões gratuitas de APIs externas para refinar os dados obtidos. O frontend, criado inicialmente utilizando lovable, utiliza Client-Server com frontend SPA.
+## Requirements
 
-### Escopo dos CIs
+Docker, Docker Compose e Git. Para execução fora dos containers: PHP 8.2+, Composer 2 e Node.js 20+.
 
-Os workflows da API e do Web usam filtros por caminho. Alterações somente em `apps/api/**` executam o CI da API; alterações somente em `apps/web/**` executam o CI do Web. Alterações em arquivos compartilhados executam ambos. Atualmente são considerados compartilhados:
+## Getting Started
 
-- `docker/**`;
-- `docker-compose.yml`;
-- `docs/openapi.yaml`, que gera os tipos consumidos pelo frontend;
-- os próprios workflows quando alterados.
+### Environment
 
-O workflow `CI Gate` é o check global recomendado para proteção das branches principais. Ele detecta as aplicações impactadas, aguarda somente o CI da API e/ou do Web quando necessário e publica o resultado final em `CI Gate result`. Configure esse check como obrigatório nas regras de proteção da branch; não configure os checks individuais filtrados por caminho como obrigatórios.
-
-## Fluxo principal da aplicação
-
-1. Usuário realiza cadastro de uma nota fiscal
-2. Usuário cria uma lista de compras
-3. Usuário define a distância e a localização para a qual pretende otimizar a lista
-4. Uma lista com os mercados/itens mais em conta, ordenado por distância é mostrada.
-
-## Como executar
-
-### Documentação da API
-
-- [Especificação OpenAPI](docs/openapi.yaml)
-- [Abrir no Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/stylbandeira/oiai-platform/main/docs/openapi.yaml)
-
-### Contribuição e commits
-
-Os commits seguem o padrão Conventional Commits, com scopes como `api`, `web`, `infra` e `ci`. Consulte o [guia de contribuição](docs/CONTRIBUTING.md) para tipos permitidos, breaking changes e exemplos.
-
-### Versionamento
-
-API e Web são versionados independentemente com tags `api-vX.Y.Z` e `web-vX.Y.Z`. Consulte o [guia de versionamento](docs/VERSIONING.md).
-
-### Pré-requisitos
-* Docker
-* Docker Compose
-* Git
-
-### Instalação
+A API usa seu próprio arquivo de ambiente; não é necessário `.env` na raiz:
 
 ```bash
-git clone https://github.com/stylbandeira/oiai-platform
-cd projeto
+cp apps/api/.env.example apps/api/.env
+```
+
+Configure, na API, o Meilisearch com `MEILISEARCH_HOST=http://meilisearch:7700`.
+
+### Running with Docker
+
+```bash
 docker compose up -d --build
 ```
+
+- Web: http://localhost:3000
+- API: http://localhost:8001
+- Meilisearch: http://localhost:7700
+- phpMyAdmin: http://localhost:8080
+- MailHog: http://localhost:8025
+
+```bash
+docker compose logs -f app
+docker compose logs -f oiai-front
+```
+
+### API e Web fora do Docker
+
+```bash
+docker compose exec app php artisan migrate
+docker compose exec app php artisan storage:link
+cd apps/web && npm ci && npm run generate:api && npm run dev
+```
+
+## Testing
+
+### API
+
+```bash
+docker compose exec app php artisan test
+docker compose exec app vendor/bin/pint --test
+docker compose exec app vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=512M
+```
+
+### Web
+
+```bash
+cd apps/web
+npm ci
+npm run lint
+npm run typecheck
+npm test --if-present
+npm run build
+npm run check:api
+```
+
+## Continuous Integration
+
+`ci-api.yml` valida o Backend e `ci-web.yml` valida o Web. Os filtros por caminho evitam pipelines desnecessários. Alterações em `docker/**`, `docker-compose.yml`, `docs/openapi.yaml` ou workflows podem afetar ambas as aplicações. O `ci-gate.yml` detecta os componentes necessários e publica o check global `CI Gate / CI Gate result`, recomendado como obrigatório na proteção da branch.
+
+## Versioning
+
+API e Web usam Semantic Versioning independentemente:
+
+- API: [apps/api/VERSION](apps/api/VERSION);
+- Web: [apps/web/package.json](apps/web/package.json);
+- guia: [docs/VERSIONING.md](docs/VERSIONING.md).
+
+Tags: `api-v1.0.0` e `web-v1.0.0`.
+
+## Releases
+
+O [Release Please](.github/workflows/release.yml) interpreta Conventional Commits, cria PRs de release separados, atualiza versões e changelogs, cria tags e publica GitHub Releases.
+
+## Documentation
+
+- [OpenAPI/Swagger](docs/openapi.yaml) · [Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/stylbandeira/oiai-platform/main/docs/openapi.yaml);
+- [Contributing e Conventional Commits](docs/CONTRIBUTING.md);
+- [Versionamento](docs/VERSIONING.md);
+- [CI API](.github/workflows/ci-api.yml) · [CI Web](.github/workflows/ci-web.yml) · [CI Gate](.github/workflows/ci-gate.yml);
+- [GitHub Releases](https://github.com/stylbandeira/oiai-platform/releases).
+
+Changelogs são gerados pelo Release Please junto aos respectivos componentes.
+
+## Contributing
+
+Siga o [guia de contribuição](docs/CONTRIBUTING.md), execute os testes da aplicação alterada e regenere os tipos TypeScript quando o OpenAPI mudar.
+
+## License
+
+Consulte `LICENSE` quando disponível.
