@@ -124,7 +124,7 @@ GitHub Releases é o registro oficial das versões publicadas. Cada release iden
 ## Documentation
 
 - [OpenAPI/Swagger](docs/openapi.yaml) · [Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/stylbandeira/oiai-platform/main/docs/openapi.yaml);
-- [Contributing e Conventional Commits](docs/CONTRIBUTING.md);
+- [Contributing e Conventional Commits](CONTRIBUTING.md);
 - [Versionamento](docs/VERSIONING.md);
 - [CI API](.github/workflows/ci-api.yml) · [CI Web](.github/workflows/ci-web.yml) · [CI Gate](.github/workflows/ci-gate.yml);
 - [GitHub Releases](https://github.com/stylbandeira/oiai-platform/releases).
