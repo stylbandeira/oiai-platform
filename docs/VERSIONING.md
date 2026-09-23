@@ -46,6 +46,8 @@ Cada GitHub Release deve corresponder a uma única tag de componente:
 
 As notas da release são geradas a partir dos Conventional Commits e organizadas por categoria. Assim, é possível rastrear a alteração desde o commit até a tag, a versão, o CHANGELOG e a release publicada.
 
+Breaking changes e migrações que exigirem ação adicional devem apontar para um guia em [`docs/releases/`](releases/README.md). Releases compatíveis não precisam criar um documento de migração.
+
 ## Relação com commits
 
 Os scopes `api` e `web` dos Conventional Commits ajudam a identificar a aplicação afetada. O incremento da versão deve considerar somente os commits da aplicação que está sendo publicada.
