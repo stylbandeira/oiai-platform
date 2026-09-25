@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Product\ProductSearch;
+use App\DTO\Product\ProductSearchCriteria;
 use App\Enums\ProductQuantitySource;
 use App\Enums\ProductRefinementStatus;
 use App\Models\Product;
@@ -12,7 +14,10 @@ class ProductRepository
 {
     protected Product $product;
 
-    public function __construct(Product $product)
+    public function __construct(
+        Product $product,
+        private ProductSearch $productSearch,
+    )
     {
         $this->product = $product;
     }
@@ -29,23 +34,19 @@ class ProductRepository
 
         if (isset($data['search']) && trim($data['search']) !== '') {
             $search = trim($data['search']);
-            $searchResultIds = $this->searchProductIds($search);
-            $likeTerm = '%'.$search.'%';
-            $isExactCode = preg_match('/^\d{8,14}$/', $search) === 1;
+            $searchResult = $this->productSearch->search(new ProductSearchCriteria(
+                query: $search,
+                categoryId: isset($data['category_id']) ? (int) $data['category_id'] : null,
+                brandId: isset($data['brand_id']) ? (int) $data['brand_id'] : null,
+                dimension: $data['quantity_dimension'] ?? null,
+                page: isset($data['page']) ? (int) $data['page'] : 1,
+                perPage: isset($data['per_page']) ? (int) $data['per_page'] : 20,
+            ));
+            $searchResultIds = $searchResult->ids;
 
-            $query->where(function ($searchQuery) use ($search, $likeTerm, $isExactCode, $searchResultIds) {
-                if ($isExactCode) {
-                    $searchQuery->where('products.ean', $search)
-                        ->orWhere('products.sku', $search);
-                } else {
-                    $searchQuery->where('products.name', 'like', $likeTerm)
-                        ->orWhere('products.sku', 'like', $likeTerm);
-                }
-
-                if ($searchResultIds !== []) {
-                    $searchQuery->orWhereIn('products.id', $searchResultIds);
-                }
-            });
+            // A search term must never silently turn into an unfiltered listing.
+            // This is especially important when an exact EAN does not exist.
+            $query->whereIn('products.id', $searchResultIds);
 
             if ($searchResultIds !== []) {
                 $quotedIds = implode(',', array_map('intval', $searchResultIds));
@@ -76,29 +77,6 @@ class ProductRepository
             ->orderBy('listAdded', 'desc')
             ->orderBy('name', 'asc')
             ->limit(1500);
-    }
-
-    /**
-     * Search through Scout/Meilisearch while keeping the final result in an
-     * Eloquent query so authorization, relations and pagination stay intact.
-     */
-    private function searchProductIds(string $search): array
-    {
-        $isExactCode = preg_match('/^\d{8,14}$/', $search) === 1;
-
-        try {
-            $builder = Product::search($isExactCode ? '' : $search);
-
-            if ($isExactCode) {
-                $builder->where('ean', $search);
-            }
-
-            return $builder->get()->pluck('id')->map(fn ($id) => (int) $id)->all();
-        } catch (\Throwable $exception) {
-            report($exception);
-
-            return [];
-        }
     }
 
     public function paginate(User $user, array $data)
