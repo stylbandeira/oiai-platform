@@ -8,6 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // MySQL may retain the table when a previous execution fails after
+        // CREATE TABLE but before the migration is recorded.
+        if (Schema::hasTable('product_normalization_decisions')) {
+            return;
+        }
+
         Schema::create('product_normalization_decisions', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
@@ -18,7 +24,10 @@ return new class extends Migration
             $table->unsignedInteger('algorithm_version');
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
-            $table->index(['normalized_raw_name', 'algorithm_version']);
+            $table->index(
+                ['normalized_raw_name', 'algorithm_version'],
+                'prod_norm_decisions_raw_version_idx',
+            );
         });
     }
 
