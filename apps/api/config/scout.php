@@ -3,7 +3,9 @@
 return [
     'driver' => env('SCOUT_DRIVER', 'database'),
     'prefix' => env('SCOUT_PREFIX', ''),
-    'queue' => env('SCOUT_QUEUE', false),
+    // Indexing must never block product/invoice writes. Set SCOUT_QUEUE=false
+    // only for local debugging when synchronous indexing is explicitly wanted.
+    'queue' => env('SCOUT_QUEUE', true),
     'chunk' => ['searchable' => 500, 'unsearchable' => 500],
     'soft_delete' => false,
     'identify' => env('SCOUT_IDENTIFY', false),

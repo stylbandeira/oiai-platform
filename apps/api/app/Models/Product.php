@@ -34,6 +34,8 @@ class Product extends BaseModel
         'quantity_confidence',
         'raw_name',
         'normalized_name',
+        'normalization_version',
+        'normalized_at',
         'search_description',
         'img',
         'sku',
@@ -57,6 +59,8 @@ class Product extends BaseModel
     protected $casts = [
         'average_price' => 'float',
         'quantity_confidence' => 'float',
+        'normalized_at' => 'datetime',
+        'normalization_version' => 'integer',
         'quantity_source' => ProductQuantitySource::class,
         'refined' => ProductRefinementStatus::class,
     ];
