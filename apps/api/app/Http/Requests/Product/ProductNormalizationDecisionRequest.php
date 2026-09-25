@@ -8,7 +8,7 @@ class ProductNormalizationDecisionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isAdmin() === true;
+        return $this->user() !== null;
     }
 
     public function rules(): array
@@ -16,10 +16,11 @@ class ProductNormalizationDecisionRequest extends FormRequest
         return [
             'selected_values' => ['required', 'array'],
             'selected_values.normalized_name' => ['sometimes', 'string', 'max:255'],
-            'selected_values.normalized_quantity' => ['sometimes', 'nullable', 'string', 'max:50'],
-            'selected_values.quantity_dimension' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'selected_values.normalized_quantity' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'selected_values.quantity_dimension' => ['sometimes', 'nullable', 'string', 'max:255'],
             'selected_values.search_description' => ['sometimes', 'nullable', 'string'],
             'algorithm_version' => ['sometimes', 'integer', 'min:1'],
+            'validated' => ['sometimes', 'boolean'],
         ];
     }
 }

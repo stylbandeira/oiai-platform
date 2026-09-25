@@ -151,6 +151,7 @@ class ProductController extends Controller
             selectedValues: $request->validated('selected_values'),
             reviewedBy: (int) $request->user()->getAuthIdentifier(),
             algorithmVersion: (int) $request->validated('algorithm_version', 2),
+            validated: (bool) $request->validated('validated', true),
         );
 
         return response([

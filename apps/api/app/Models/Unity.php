@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Unity extends BaseModel
 {
+    protected $casts = [
+        'convertion_factor' => 'float',
+    ];
     use HasFactory;
 
     protected $table = 'unities';
