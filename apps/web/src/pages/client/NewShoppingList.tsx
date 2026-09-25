@@ -9,6 +9,7 @@ import { ArrowLeft, Search, Plus, Minus, Heart, MapPin, DollarSign } from "lucid
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
 import { CustomPagination } from "@/components/oiai_ui/CustomPagination";
+import { ProductDecisionPopup } from "@/components/modals/ProductDecisionPopup";
 import type { QueryParams, PaginationMeta } from "@/types/api";
 
 interface ProductSearchResult {
@@ -73,6 +74,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [decisionItem, setDecisionItem] = useState<SelectedItem | null>(null);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const [products, setProducts] = useState<ProductSearchResult[]>([]);
@@ -223,10 +225,16 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
   const totalValue = selectedItems.reduce((total, item) => total + (item.product.average_price * item.quantity), 0);
 
-  const saveList = async () => {
+  const saveList = async (afterDecision = false) => {
     if (!listName.trim() || selectedItems.length === 0) return;
 
     setIsSaving(true);
+
+    if (!decisionItem && !afterDecision) {
+      setDecisionItem(selectedItems[0]);
+      setIsSaving(false);
+      return;
+    }
 
     try {
       const formattedItems = selectedItems.map(item => ({
@@ -261,7 +269,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   const buttonText = isEditMode ? "Atualizar Lista" : "Salvar Lista";
 
   return (
-    <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Header Responsivo */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-6">
@@ -278,7 +286,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
             />
           </div>
           <Button
-            onClick={saveList}
+            onClick={() => void saveList()}
             disabled={!listName || selectedItems.length === 0}
             className="bg-gradient-primary hover:shadow-glow transition-all duration-300 w-full sm:w-auto"
           >
@@ -556,6 +564,17 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
           </div>
         </div>
       </div>
+      {decisionItem && <ProductDecisionPopup
+        open={Boolean(decisionItem)}
+        productId={decisionItem.product.id}
+        rawName={decisionItem.product.name}
+        attribute="name"
+        canSkip
+        onComplete={() => {
+          setDecisionItem(null);
+          void saveList(true);
+        }}
+      />}
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { QRCodeModal } from "../modals/QrcodeModal";
 import { NotificationToast } from "../notification/NotificationToast";
 import { formatarData } from "@/utils/formatters";
 import { InvoiceCodeModal } from "../modals/InvoiceCodeModal";
+import { ProductDecisionPopup } from "../modals/ProductDecisionPopup";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -87,6 +88,7 @@ export function ClientDashboard() {
   const [loading, setLoading] = useState(true);
   const [showQRModal, setShowQRModal] = useState(false);
   const [showInvoiceCodeModal, setShowInvoiceCodeModal] = useState(false);
+  const [decisionProduct, setDecisionProduct] = useState<{ id: number; name: string } | null>(null);
   const [isListsSheetOpen, setIsListsSheetOpen] = useState(false);
   const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false);
 
@@ -517,6 +519,10 @@ export function ClientDashboard() {
         isOpen={showQRModal}
         onClose={() => setShowQRModal(false)}
         onSuccess={(data) => {
+          const firstProduct = Array.isArray(data?.products) ? data.products[0] : null;
+          if (firstProduct && typeof firstProduct.id === 'number' && typeof firstProduct.name === 'string') {
+            setDecisionProduct(firstProduct);
+          }
           setShowNotification(true);
           setNotificationData({
             message: 'QRCode validado com sucesso!',
@@ -533,10 +539,23 @@ export function ClientDashboard() {
         }}
       />
 
+      {decisionProduct && <ProductDecisionPopup
+        open={Boolean(decisionProduct)}
+        productId={decisionProduct.id}
+        rawName={decisionProduct.name}
+        attribute={/\d+(?:[,.]\d+)?\s*[a-z]{1,2}(?:\s|$)/i.test(decisionProduct.name) ? "quantity" : "name"}
+        canSkip
+        onComplete={() => setDecisionProduct(null)}
+      />}
+
       <InvoiceCodeModal
         isOpen={showInvoiceCodeModal}
         onClose={() => setShowInvoiceCodeModal(false)}
         onSuccess={(data) => {
+          const firstProduct = Array.isArray(data?.products) ? data.products[0] : null;
+          if (firstProduct && typeof firstProduct.id === 'number' && typeof firstProduct.name === 'string') {
+            setDecisionProduct(firstProduct);
+          }
           setShowNotification(true);
           setNotificationData({
             message: typeof data?.message === 'string' ? data.message : 'Código validado com sucesso!',
