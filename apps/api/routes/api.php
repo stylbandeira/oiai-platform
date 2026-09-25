@@ -42,6 +42,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::post('/products/import', [ProductController::class, 'import']);
         Route::get('/products/export', [ProductController::class, 'export']);
         Route::post('/products/bulk-validate', [ProductController::class, 'bulkValidate']);
+        Route::post('/products/{product}/normalization-decisions', [ProductController::class, 'storeNormalizationDecision']);
         Route::apiResource('/products', ProductController::class);
         Route::apiResource('/users', UserController::class)->withTrashed(['show', 'update', 'destroy']);
         Route::apiResource('/categories', ProductCategoryController::class);

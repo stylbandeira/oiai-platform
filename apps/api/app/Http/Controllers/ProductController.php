@@ -14,12 +14,14 @@ use App\Http\Requests\Product\ProductBulkValidateRequest;
 use App\Http\Requests\Product\ProductExportRequest;
 use App\Http\Requests\Product\ProductImportRequest;
 use App\Http\Requests\Product\ProductIndexRequest;
+use App\Http\Requests\Product\ProductNormalizationDecisionRequest;
 use App\Http\Requests\Product\ProductStoreRequest;
 use App\Http\Requests\Product\ProductUpdateRequest;
 use App\Http\Resources\AdminProductResource;
 use App\Http\Resources\ClientProductResource;
 use App\Models\Product;
 use App\Services\ExportService;
+use App\Services\Product\ProductNormalizationDecisionService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -137,5 +139,22 @@ class ProductController extends Controller
             'message' => 'Produtos atualizados com sucesso!',
             'count' => count($affectedProducts),
         ]);
+    }
+
+    public function storeNormalizationDecision(
+        ProductNormalizationDecisionRequest $request,
+        Product $product,
+        ProductNormalizationDecisionService $decisions,
+    ): Response {
+        $decision = $decisions->recordManualDecision(
+            product: $product,
+            selectedValues: $request->validated('selected_values'),
+            reviewedBy: (int) $request->user()->getAuthIdentifier(),
+            algorithmVersion: (int) $request->validated('algorithm_version', 2),
+        );
+
+        return response([
+            'decision' => $decision,
+        ], 201);
     }
 }
