@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\ProductNormalizationDecision;
 use App\Models\Unity;
 use App\Models\User;
+use App\Services\Product\ProductNormalizationDecisionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -31,14 +32,18 @@ class ProductNormalizationDecisionTest extends TestCase
             "/api/products/{$product->id}/normalization-decisions",
             [
                 'selected_values' => [
-                    'normalized_quantity' => '100',
+                    'normalized_quantity' => '100 g',
                     'quantity_dimension' => 'gramas',
                 ],
                 'algorithm_version' => 2,
             ],
         );
 
-        $response->assertCreated();
+        $response->assertCreated()
+            ->assertJsonPath('product.name', 'BANANA')
+            ->assertJsonPath('product.unity_quantity', 100)
+            ->assertJsonPath('product.unity', 'g')
+            ->assertJsonPath('product.unity_id', $unity->id);
         $this->assertDatabaseHas('product_normalization_decisions', [
             'product_id' => $product->id,
             'decision_source' => 'manual',
@@ -47,9 +52,68 @@ class ProductNormalizationDecisionTest extends TestCase
 
         $product->refresh();
         $this->assertSame($unity->id, $product->unit_id);
-        $this->assertSame('100', (string) $product->normalized_quantity);
+        $this->assertSame('100 g', (string) $product->normalized_quantity);
         $this->assertSame('mass', $product->quantity_dimension);
-        $this->assertSame('banana', $product->normalized_name);
+        $this->assertSame('BANANA', $product->name);
+        $this->assertSame('BANANA', $product->normalized_name);
+        $this->assertNotNull($product->normalization_validated_at);
+        $this->assertFalse(app(ProductNormalizationDecisionService::class)->requiresDecision($product));
         $this->assertTrue(ProductNormalizationDecision::query()->where('product_id', $product->id)->exists());
+    }
+
+    public function test_repeated_correction_reaches_confidence_and_is_reused(): void
+    {
+        $user = User::factory()->create();
+        $unity = Unity::query()->updateOrCreate(
+            ['abbreviation' => 'mg'],
+            [
+                'name' => 'miligrama',
+                'dimension' => 'mass',
+                'convertion_factor' => 0.001,
+            ],
+        );
+        $reviewedProduct = Product::factory()->create([
+            'name' => 'CEFALIV 100MG 12CPR',
+            'raw_name' => 'CEFALIV 100MG 12CPR',
+            'normalized_name' => 'CEFALIV 100MG 12CPR',
+        ]);
+        $values = [
+            'normalized_quantity' => '100 mg',
+            'quantity_dimension' => 'mg',
+        ];
+        $service = app(ProductNormalizationDecisionService::class);
+
+        $service->recordManualDecision($reviewedProduct, $values, $user->id, 2);
+        $secondDecision = $service->recordManualDecision($reviewedProduct, $values, $user->id, 2);
+
+        $this->assertSame(2, $secondDecision->confirmation_count);
+        $this->assertSame(0.8, $secondDecision->confidence);
+
+        $newProduct = Product::factory()->create([
+            'name' => 'CEFALIV 100MG 12CPR',
+            'raw_name' => 'CEFALIV 100MG 12CPR',
+            'normalized_name' => 'CEFALIV 100MG 12CPR',
+        ]);
+
+        $this->assertTrue($service->applyConfirmedDecision($newProduct, 2));
+
+        $newProduct->refresh();
+        $this->assertSame('CEFALIV 12CPR', $newProduct->name);
+        $this->assertSame(100.0, (float) $newProduct->quantity);
+        $this->assertSame($unity->id, $newProduct->unit_id);
+        $this->assertNotNull($newProduct->normalization_validated_at);
+        $this->assertFalse($service->requiresDecision($newProduct));
+    }
+
+    public function test_validated_product_is_not_requested_for_normalization_again(): void
+    {
+        $product = Product::factory()->create([
+            'normalization_validated_at' => now(),
+        ]);
+
+        $service = app(ProductNormalizationDecisionService::class);
+
+        $this->assertFalse($service->requiresDecision($product));
+        $this->assertFalse($service->requiresDecision($product->fresh()));
     }
 }
