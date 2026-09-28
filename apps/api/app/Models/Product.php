@@ -18,6 +18,8 @@ class Product extends BaseModel
 {
     use HasFactory, Searchable, SoftDeletes;
 
+    public const SEARCH_DOCUMENT_VERSION = 1;
+
     protected $table = 'products';
 
     const AVERAGE_PRICE_JOB_CONSTANCY_DAYS = 1;
@@ -29,16 +31,28 @@ class Product extends BaseModel
         'quantity',
         'name',
         'normalized_quantity',
+        'package_count',
+        'normalization_conflict',
         'quantity_dimension',
         'quantity_source',
         'quantity_confidence',
         'raw_name',
         'normalized_name',
+        'normalization_version',
+        'normalized_at',
+        'normalization_validated_at',
+        'name_normalization_validated_at',
+        'quantity_normalization_validated_at',
+        'search_document_version',
+        'search_indexed_at',
         'search_description',
         'img',
         'sku',
         'average_price',
         'category_id',
+        'product_type_id',
+        'brand_id',
+        'variant_id',
         'ean',
         'ncm',
         'description',
@@ -57,6 +71,15 @@ class Product extends BaseModel
     protected $casts = [
         'average_price' => 'float',
         'quantity_confidence' => 'float',
+        'normalized_at' => 'datetime',
+        'normalization_validated_at' => 'datetime',
+        'name_normalization_validated_at' => 'datetime',
+        'quantity_normalization_validated_at' => 'datetime',
+        'normalization_version' => 'integer',
+        'package_count' => 'integer',
+        'normalization_conflict' => 'boolean',
+        'search_document_version' => 'integer',
+        'search_indexed_at' => 'datetime',
         'quantity_source' => ProductQuantitySource::class,
         'refined' => ProductRefinementStatus::class,
     ];
@@ -64,7 +87,7 @@ class Product extends BaseModel
     public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_products')
-            ->withPivot(['average_price']);
+            ->withPivot(['average_price', 'current_price', 'price_per_base_unit']);
     }
 
     public function userAddedProducts(): HasMany
@@ -78,10 +101,25 @@ class Product extends BaseModel
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 
+    /** @return BelongsTo<ProductType, $this> */
+    public function productType(): BelongsTo
+    {
+        return $this->belongsTo(ProductType::class);
+    }
+
     /** @return BelongsTo<Unity, $this> */
     public function unity(): BelongsTo
     {
         return $this->belongsTo(Unity::class, 'unit_id');
+    }
+
+    public function baseQuantity(): ?float
+    {
+        if (! $this->unity || (float) $this->quantity <= 0) {
+            return null;
+        }
+
+        return $this->unity->toBaseQuantity((float) $this->quantity);
     }
 
     public function providerAttempts(): HasMany
@@ -99,6 +137,50 @@ class Product extends BaseModel
         return config('scout.prefix').'products';
     }
 
+    public function searchIndexShouldBeUpdated(): bool
+    {
+        return $this->wasChanged([
+            'name',
+            'normalized_name',
+            'search_description',
+            'description',
+            'ean',
+            'sku',
+            'normalized_quantity',
+            'quantity_dimension',
+            'package_count',
+            'validated',
+            'average_price',
+            'brand_id',
+            'category_id',
+            'product_type_id',
+            'unit_id',
+        ]);
+    }
+
+    public function requiresQuantityNormalizationValidation(): bool
+    {
+        return preg_match('/\d/u', (string) ($this->raw_name ?: $this->name)) === 1;
+    }
+
+    public function nextNormalizationDecisionAttribute(): ?string
+    {
+        if ($this->requiresQuantityNormalizationValidation() && $this->quantity_normalization_validated_at === null) {
+            return 'quantity';
+        }
+
+        if ($this->name_normalization_validated_at === null) {
+            return 'name';
+        }
+
+        return null;
+    }
+
+    public function normalizationValidationIsComplete(): bool
+    {
+        return $this->nextNormalizationDecisionAttribute() === null;
+    }
+
     public function toSearchableArray(): array
     {
         $attributes = $this->attributesToArray();
@@ -110,12 +192,14 @@ class Product extends BaseModel
             'description' => $this->search_description ?: ($this->description ?: null),
             'brand' => $attributes['brand'] ?? null,
             'category' => $this->category?->name,
+            'product_type' => $this->productType?->name,
             'aliases' => $attributes['aliases'] ?? [],
             'search_terms' => $attributes['search_terms'] ?? null,
             'ean' => $this->ean,
             'sku' => $this->sku,
             'quantity_base' => $this->normalized_quantity,
             'quantity_dimension' => $this->quantity_dimension,
+            'package_count' => $this->package_count,
             'validated' => (bool) $this->validated,
             'average_price' => $this->average_price,
             'brand_id' => $attributes['brand_id'] ?? null,

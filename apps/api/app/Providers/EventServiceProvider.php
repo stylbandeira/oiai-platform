@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\CompanyProducts;
 use App\Models\Event;
 use App\Models\Invoice;
 use App\Models\ItensList;
 use App\Models\Product;
 use App\Models\User;
+use App\Observers\CompanyProductsObserver;
 use App\Observers\EventObserver;
 use App\Observers\InvoiceObserver;
 use App\Observers\ListObserver;
@@ -37,6 +39,7 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         User::observe(UserObserver::class);
+        CompanyProducts::observe(CompanyProductsObserver::class);
         Event::observe(EventObserver::class);
         Product::observe(ProductObserver::class);
         Invoice::observe(InvoiceObserver::class);
