@@ -42,6 +42,9 @@ class Product extends BaseModel
         'sku',
         'average_price',
         'category_id',
+        'product_type_id',
+        'brand_id',
+        'variant_id',
         'ean',
         'ncm',
         'description',
@@ -70,7 +73,7 @@ class Product extends BaseModel
     public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_products')
-            ->withPivot(['average_price']);
+            ->withPivot(['average_price', 'current_price', 'price_per_base_unit']);
     }
 
     public function userAddedProducts(): HasMany
@@ -84,10 +87,24 @@ class Product extends BaseModel
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 
+    public function productType(): BelongsTo
+    {
+        return $this->belongsTo(ProductType::class);
+    }
+
     /** @return BelongsTo<Unity, $this> */
     public function unity(): BelongsTo
     {
         return $this->belongsTo(Unity::class, 'unit_id');
+    }
+
+    public function baseQuantity(): ?float
+    {
+        if (! $this->unity || (float) $this->quantity <= 0) {
+            return null;
+        }
+
+        return $this->unity->toBaseQuantity((float) $this->quantity);
     }
 
     public function providerAttempts(): HasMany
@@ -116,6 +133,7 @@ class Product extends BaseModel
             'description' => $this->search_description ?: ($this->description ?: null),
             'brand' => $attributes['brand'] ?? null,
             'category' => $this->category?->name,
+            'product_type' => $this->productType?->name,
             'aliases' => $attributes['aliases'] ?? [],
             'search_terms' => $attributes['search_terms'] ?? null,
             'ean' => $this->ean,

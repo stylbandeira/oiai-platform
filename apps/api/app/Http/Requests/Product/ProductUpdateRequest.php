@@ -25,6 +25,7 @@ class ProductUpdateRequest extends FormRequest
             'img' => 'image',
             'unit_id' => 'exists:unities,id',
             'category_id' => 'exists:product_category,id',
+            'product_type_id' => ['nullable', 'exists:product_types,id'],
             'quantity' => 'integer',
             'average_price' => 'nullable|numeric',
             'ean' => [

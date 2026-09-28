@@ -10,6 +10,7 @@ class Unity extends BaseModel
     protected $casts = [
         'convertion_factor' => 'float',
     ];
+
     use HasFactory;
 
     protected $table = 'unities';
@@ -36,5 +37,10 @@ class Unity extends BaseModel
             get: fn ($value) => strtolower($value),
             set: fn ($value) => strtolower($value)
         );
+    }
+
+    public function toBaseQuantity(float $quantity): float
+    {
+        return $quantity * (float) ($this->convertion_factor ?? 1);
     }
 }
