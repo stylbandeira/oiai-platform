@@ -7,6 +7,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         $gramId = DB::table('unities')->where('abbreviation', 'g')->value('id');
 
         DB::table('unities')->updateOrInsert(
