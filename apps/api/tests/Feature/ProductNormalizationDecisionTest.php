@@ -56,9 +56,26 @@ class ProductNormalizationDecisionTest extends TestCase
         $this->assertSame('mass', $product->quantity_dimension);
         $this->assertSame('BANANA', $product->name);
         $this->assertSame('BANANA', $product->normalized_name);
-        $this->assertNotNull($product->normalization_validated_at);
-        $this->assertFalse(app(ProductNormalizationDecisionService::class)->requiresDecision($product));
+        $this->assertNull($product->normalization_validated_at);
+        $this->assertNotNull($product->quantity_normalization_validated_at);
+        $this->assertNull($product->name_normalization_validated_at);
+        $this->assertSame('name', $product->nextNormalizationDecisionAttribute());
+        $this->assertTrue(app(ProductNormalizationDecisionService::class)->requiresDecision($product));
         $this->assertTrue(ProductNormalizationDecision::query()->where('product_id', $product->id)->exists());
+
+        $nameResponse = $this->actingAs($user)->postJson(
+            "/api/products/{$product->id}/normalization-decisions",
+            [
+                'selected_values' => ['normalized_name' => 'BANANA'],
+                'algorithm_version' => 2,
+            ],
+        );
+
+        $nameResponse->assertCreated()->assertJsonPath('product.normalization_validated', true);
+        $product->refresh();
+        $this->assertNotNull($product->normalization_validated_at);
+        $this->assertNotNull($product->name_normalization_validated_at);
+        $this->assertFalse(app(ProductNormalizationDecisionService::class)->requiresDecision($product));
     }
 
     public function test_repeated_correction_reaches_confidence_and_is_reused(): void
@@ -101,14 +118,85 @@ class ProductNormalizationDecisionTest extends TestCase
         $this->assertSame('CEFALIV 12CPR', $newProduct->name);
         $this->assertSame(100.0, (float) $newProduct->quantity);
         $this->assertSame($unity->id, $newProduct->unit_id);
+        $this->assertNull($newProduct->normalization_validated_at);
+        $this->assertNotNull($newProduct->quantity_normalization_validated_at);
+        $this->assertNull($newProduct->name_normalization_validated_at);
+        $this->assertTrue($service->requiresDecision($newProduct));
+
+        $service->recordManualDecision(
+            $newProduct,
+            ['normalized_name' => 'CEFALIV 12CPR'],
+            $user->id,
+            2,
+        );
+        $newProduct->refresh();
         $this->assertNotNull($newProduct->normalization_validated_at);
         $this->assertFalse($service->requiresDecision($newProduct));
+    }
+
+    public function test_numeric_product_requires_quantity_and_name_validation_in_sequence(): void
+    {
+        $user = User::factory()->create();
+        $unity = Unity::factory()->create([
+            'name' => 'mililitros',
+            'abbreviation' => 'ml',
+            'dimension' => 'volume',
+        ]);
+        $product = Product::factory()->create([
+            'name' => 'Det. Liq. Brilux 500 ml',
+            'raw_name' => 'Det. Liq. Brilux 500 ml',
+            'normalized_name' => 'Det. Liq. Brilux 500 ml',
+        ]);
+
+        $quantityResponse = $this->actingAs($user)->postJson(
+            "/api/products/{$product->id}/normalization-decisions",
+            [
+                'selected_values' => [
+                    'normalized_quantity' => '500 ml',
+                    'quantity_dimension' => 'ml',
+                ],
+                'algorithm_version' => 2,
+            ],
+        );
+
+        $quantityResponse->assertCreated()
+            ->assertJsonPath('product.normalization_validated', false)
+            ->assertJsonPath('product.normalization_next_attribute', 'name')
+            ->assertJsonPath('product.quantity_normalization_validated', true)
+            ->assertJsonPath('product.name_normalization_validated', false);
+
+        $product->refresh();
+        $this->assertSame($unity->id, $product->unit_id);
+        $this->assertSame('Det. Liq. Brilux', $product->name);
+        $this->assertNull($product->normalization_validated_at);
+
+        $nameResponse = $this->actingAs($user)->postJson(
+            "/api/products/{$product->id}/normalization-decisions",
+            [
+                'selected_values' => ['normalized_name' => 'Det. Liq. Brilux'],
+                'algorithm_version' => 2,
+            ],
+        );
+
+        $nameResponse->assertCreated()
+            ->assertJsonPath('product.normalization_validated', true)
+            ->assertJsonPath('product.normalization_next_attribute', null);
+
+        $product->refresh();
+        $this->assertNotNull($product->normalization_validated_at);
+        $this->assertNotNull($product->name_normalization_validated_at);
+        $this->assertNotNull($product->quantity_normalization_validated_at);
+        $this->assertFalse(app(ProductNormalizationDecisionService::class)->requiresDecision($product));
+        $this->assertSame(2, ProductNormalizationDecision::query()->where('product_id', $product->id)->count());
     }
 
     public function test_validated_product_is_not_requested_for_normalization_again(): void
     {
         $product = Product::factory()->create([
+            'raw_name' => 'BANANA',
+            'name' => 'BANANA',
             'normalization_validated_at' => now(),
+            'name_normalization_validated_at' => now(),
         ]);
 
         $service = app(ProductNormalizationDecisionService::class);
