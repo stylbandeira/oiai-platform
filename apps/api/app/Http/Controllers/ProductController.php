@@ -168,7 +168,10 @@ class ProductController extends Controller
                 'quantity_dimension' => $product->quantity_dimension,
                 'unit_id' => $product->unit_id,
                 'unity_id' => $product->unit_id,
-                'normalization_validated' => $product->normalization_validated_at !== null,
+                'normalization_validated' => $product->normalizationValidationIsComplete(),
+                'normalization_next_attribute' => $product->nextNormalizationDecisionAttribute(),
+                'name_normalization_validated' => $product->name_normalization_validated_at !== null,
+                'quantity_normalization_validated' => $product->quantity_normalization_validated_at !== null,
             ],
         ], 201);
     }

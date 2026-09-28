@@ -28,30 +28,33 @@ final class ProductNormalizationDecisionService
     public function applyConfirmedDecision(Product $product, int $algorithmVersion): bool
     {
         $rawName = (string) ($product->raw_name ?: $product->name);
-        $decision = ProductNormalizationDecision::query()
+        $decisions = ProductNormalizationDecision::query()
             ->where('normalized_raw_name', $this->normalizedKey($rawName))
             ->where('algorithm_version', '<=', $algorithmVersion)
             ->where('decision_source', 'manual')
             ->where('confidence', '>=', 0.8)
             ->latest('id')
-            ->first();
+            ->get();
 
-        if (! $decision) {
+        if ($decisions->isEmpty()) {
             return false;
         }
 
-        $values = array_intersect_key(
-            (array) $decision->selected_values,
-            array_flip(self::SAFE_FIELDS),
-        );
+        $values = [];
+        foreach ($decisions as $decision) {
+            $values += array_intersect_key(
+                (array) $decision->selected_values,
+                array_flip(self::SAFE_FIELDS),
+            );
+        }
 
         $this->applyQuantityAndUnity($product, $values);
+        $this->applyName($product, $values);
 
         if ($values !== []) {
-            $product->forceFill([
-                ...$values,
-                'normalization_validated_at' => now(),
-            ])->saveQuietly();
+            $product->forceFill($values)->saveQuietly();
+            $this->markValidatedSteps($product, $values);
+            $this->syncOverallValidation($product);
         }
 
         return true;
@@ -71,7 +74,9 @@ final class ProductNormalizationDecisionService
 
         if ($validated) {
             $this->applyQuantityAndUnity($product, $safeValues);
-            $product->forceFill(['normalization_validated_at' => now()])->saveQuietly();
+            $this->applyName($product, $safeValues);
+            $this->markValidatedSteps($product, $safeValues);
+            $this->syncOverallValidation($product);
         }
 
         $previousConfirmations = ProductNormalizationDecision::query()
@@ -102,7 +107,7 @@ final class ProductNormalizationDecisionService
 
     public function requiresDecision(Product $product): bool
     {
-        return $product->normalization_validated_at === null;
+        return ! $product->normalizationValidationIsComplete();
     }
 
     /** @param array<string, mixed> $values */
@@ -190,5 +195,44 @@ final class ProductNormalizationDecisionService
         ])->saveQuietly();
 
         IndexProductJob::dispatch((int) $product->getKey());
+    }
+
+    /** @param array<string, mixed> $values */
+    private function applyName(Product $product, array $values): void
+    {
+        if (! isset($values['normalized_name'])) {
+            return;
+        }
+
+        $name = trim((string) $values['normalized_name']);
+        $product->forceFill([
+            'name' => $name,
+            'normalized_name' => $name,
+        ])->saveQuietly();
+
+        IndexProductJob::dispatch((int) $product->getKey());
+    }
+
+    /** @param array<string, mixed> $values */
+    private function markValidatedSteps(Product $product, array $values): void
+    {
+        $updates = [];
+        if (isset($values['normalized_name'])) {
+            $updates['name_normalization_validated_at'] = now();
+        }
+        if (isset($values['normalized_quantity'], $values['quantity_dimension'])) {
+            $updates['quantity_normalization_validated_at'] = now();
+        }
+
+        if ($updates !== []) {
+            $product->forceFill($updates)->saveQuietly();
+        }
+    }
+
+    private function syncOverallValidation(Product $product): void
+    {
+        $product->forceFill([
+            'normalization_validated_at' => $product->normalizationValidationIsComplete() ? now() : null,
+        ])->saveQuietly();
     }
 }

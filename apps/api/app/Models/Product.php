@@ -41,6 +41,8 @@ class Product extends BaseModel
         'normalization_version',
         'normalized_at',
         'normalization_validated_at',
+        'name_normalization_validated_at',
+        'quantity_normalization_validated_at',
         'search_document_version',
         'search_indexed_at',
         'search_description',
@@ -71,6 +73,8 @@ class Product extends BaseModel
         'quantity_confidence' => 'float',
         'normalized_at' => 'datetime',
         'normalization_validated_at' => 'datetime',
+        'name_normalization_validated_at' => 'datetime',
+        'quantity_normalization_validated_at' => 'datetime',
         'normalization_version' => 'integer',
         'package_count' => 'integer',
         'normalization_conflict' => 'boolean',
@@ -152,6 +156,29 @@ class Product extends BaseModel
             'product_type_id',
             'unit_id',
         ]);
+    }
+
+    public function requiresQuantityNormalizationValidation(): bool
+    {
+        return preg_match('/\d/u', (string) ($this->raw_name ?: $this->name)) === 1;
+    }
+
+    public function nextNormalizationDecisionAttribute(): ?string
+    {
+        if ($this->requiresQuantityNormalizationValidation() && $this->quantity_normalization_validated_at === null) {
+            return 'quantity';
+        }
+
+        if ($this->name_normalization_validated_at === null) {
+            return 'name';
+        }
+
+        return null;
+    }
+
+    public function normalizationValidationIsComplete(): bool
+    {
+        return $this->nextNormalizationDecisionAttribute() === null;
     }
 
     public function toSearchableArray(): array
