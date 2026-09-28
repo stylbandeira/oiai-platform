@@ -8,13 +8,13 @@ use Illuminate\Console\Command;
 
 final class RenormalizeProducts extends Command
 {
-    protected $signature = 'products:renormalize {--version=2 : Normalization version to apply}';
+    protected $signature = 'products:renormalize {--normalization-version=3 : Normalization version to apply}';
 
     protected $description = 'Queue products whose normalization is older than the requested version';
 
     public function handle(): int
     {
-        $version = (int) $this->option('version');
+        $version = (int) $this->option('normalization-version');
         $count = 0;
 
         Product::where('normalization_version', '<', $version)

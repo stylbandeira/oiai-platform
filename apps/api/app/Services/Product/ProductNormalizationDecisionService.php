@@ -30,7 +30,7 @@ final class ProductNormalizationDecisionService
         $rawName = (string) ($product->raw_name ?: $product->name);
         $decision = ProductNormalizationDecision::query()
             ->where('normalized_raw_name', $this->normalizedKey($rawName))
-            ->where('algorithm_version', $algorithmVersion)
+            ->where('algorithm_version', '<=', $algorithmVersion)
             ->where('decision_source', 'manual')
             ->where('confidence', '>=', 0.8)
             ->latest('id')
@@ -183,8 +183,8 @@ final class ProductNormalizationDecisionService
         $product->forceFill([
             'normalized_quantity' => $values['normalized_quantity'],
             'quantity' => $quantity,
-            'quantity_dimension' => $unity?->dimension ?? $dimension,
-            'unit_id' => $unity?->getKey() ?? $product->unit_id,
+            'quantity_dimension' => $unity instanceof Unity ? $unity->dimension : $dimension,
+            'unit_id' => $unity instanceof Unity ? $unity->getKey() : $product->unit_id,
             'name' => $normalizedName,
             'normalized_name' => $normalizedName,
         ])->saveQuietly();

@@ -29,6 +29,8 @@ class Product extends BaseModel
         'quantity',
         'name',
         'normalized_quantity',
+        'package_count',
+        'normalization_conflict',
         'quantity_dimension',
         'quantity_source',
         'quantity_confidence',
@@ -66,6 +68,8 @@ class Product extends BaseModel
         'normalized_at' => 'datetime',
         'normalization_validated_at' => 'datetime',
         'normalization_version' => 'integer',
+        'package_count' => 'integer',
+        'normalization_conflict' => 'boolean',
         'quantity_source' => ProductQuantitySource::class,
         'refined' => ProductRefinementStatus::class,
     ];
@@ -87,6 +91,7 @@ class Product extends BaseModel
         return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 
+    /** @return BelongsTo<ProductType, $this> */
     public function productType(): BelongsTo
     {
         return $this->belongsTo(ProductType::class);
@@ -140,6 +145,7 @@ class Product extends BaseModel
             'sku' => $this->sku,
             'quantity_base' => $this->normalized_quantity,
             'quantity_dimension' => $this->quantity_dimension,
+            'package_count' => $this->package_count,
             'validated' => (bool) $this->validated,
             'average_price' => $this->average_price,
             'brand_id' => $attributes['brand_id'] ?? null,
