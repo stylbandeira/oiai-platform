@@ -23,6 +23,7 @@ class BaseProductResource extends JsonResource
             'ean' => $this->ean,
             'average_price' => floatval($this->average_price),
             'validated' => $this->validated,
+            'normalization_validated' => $this->normalization_validated_at !== null,
 
             'mentioned_quantity' => $this->mentioned_quantity,
             'mentioned_quantity_variant' => $this->mentioned_quantity_variant,

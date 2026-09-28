@@ -15,12 +15,16 @@ final class ProductNormalizationDecision extends BaseModel
         'selected_values',
         'decision_source',
         'algorithm_version',
+        'confidence',
+        'confirmation_count',
         'reviewed_by',
     ];
 
     protected $casts = [
         'selected_values' => 'array',
         'algorithm_version' => 'integer',
+        'confidence' => 'float',
+        'confirmation_count' => 'integer',
     ];
 
     public function product(): BelongsTo
