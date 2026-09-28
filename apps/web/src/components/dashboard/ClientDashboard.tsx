@@ -88,7 +88,7 @@ export function ClientDashboard() {
   const [loading, setLoading] = useState(true);
   const [showQRModal, setShowQRModal] = useState(false);
   const [showInvoiceCodeModal, setShowInvoiceCodeModal] = useState(false);
-  const [decisionProduct, setDecisionProduct] = useState<{ id: number; name: string } | null>(null);
+  const [decisionProduct, setDecisionProduct] = useState<{ id: number; name: string; normalization_validated?: boolean } | null>(null);
   const [isListsSheetOpen, setIsListsSheetOpen] = useState(false);
   const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false);
 
@@ -520,7 +520,7 @@ export function ClientDashboard() {
         onClose={() => setShowQRModal(false)}
         onSuccess={(data) => {
           const firstProduct = Array.isArray(data?.products) ? data.products[0] : null;
-          if (firstProduct && typeof firstProduct.id === 'number' && typeof firstProduct.name === 'string') {
+          if (firstProduct && firstProduct.normalization_validated !== true && typeof firstProduct.id === 'number' && typeof firstProduct.name === 'string') {
             setDecisionProduct(firstProduct);
           }
           setShowNotification(true);
@@ -553,7 +553,7 @@ export function ClientDashboard() {
         onClose={() => setShowInvoiceCodeModal(false)}
         onSuccess={(data) => {
           const firstProduct = Array.isArray(data?.products) ? data.products[0] : null;
-          if (firstProduct && typeof firstProduct.id === 'number' && typeof firstProduct.name === 'string') {
+          if (firstProduct && firstProduct.normalization_validated !== true && typeof firstProduct.id === 'number' && typeof firstProduct.name === 'string') {
             setDecisionProduct(firstProduct);
           }
           setShowNotification(true);

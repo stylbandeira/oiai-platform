@@ -17,7 +17,18 @@ interface ProductDecisionPopupProps {
   attribute: ProductDecisionAttribute;
   initialValue?: string | null;
   canSkip?: boolean;
-  onComplete: () => void;
+  onComplete: (product?: {
+    id: number;
+    name: string;
+    normalized_quantity?: string | null;
+    quantity?: number | null;
+    unity_quantity?: number | null;
+    unity?: string | null;
+    quantity_dimension?: string | null;
+    unit_id?: number | null;
+    unity_id?: number | null;
+    normalization_validated?: boolean;
+  }) => void;
 }
 
 function similarity(a: string, b: string): number {
@@ -55,6 +66,7 @@ export function ProductDecisionPopup({
   const [dimension, setDimension] = useState("");
   const [quantityChoice, setQuantityChoice] = useState("");
   const [dimensionChoice, setDimensionChoice] = useState("");
+  const numericDecision = attribute !== "name" || numericName;
 
   useEffect(() => {
     setValue(initialValue ?? "");
@@ -104,17 +116,17 @@ export function ProductDecisionPopup({
     setSaving(true);
     setError(null);
     try {
-      const selectedValues = attribute === "name"
+      const selectedValues = !numericDecision
         ? { normalized_name: value }
         : {
           normalized_quantity: `${quantityChoice === "custom" ? value : quantityChoice} ${dimensionChoice === "custom" ? dimension : dimensionChoice}`.trim(),
           quantity_dimension: dimensionChoice === "custom" ? dimension : dimensionChoice,
         };
-      await api.post(`/products/${productId}/normalization-decisions`, {
+      const response = await api.post(`/products/${productId}/normalization-decisions`, {
         selected_values: selectedValues,
         algorithm_version: 2,
       });
-      onComplete();
+      onComplete(response.data.product);
     } catch (requestError: unknown) {
       setError(getApiErrorMessage(requestError, "Não foi possível salvar a decisão."));
     } finally {
@@ -122,7 +134,6 @@ export function ProductDecisionPopup({
     }
   };
 
-  const numericDecision = attribute !== "name" || numericName;
   const title = numericDecision ? "Confirmar quantidade e dimensão" : "Confirmar nome do produto";
 
   return <Dialog open={open} onOpenChange={(next) => !next && canSkip && onComplete()}>
@@ -162,7 +173,7 @@ export function ProductDecisionPopup({
       {error && <p className="text-sm text-destructive">{error}</p>}
       {!numericDecision && !validName && <p className="text-xs text-amber-600">O backend aceitará o valor, mas poderá classificá-lo como não validado pela baixa proximidade.</p>}
       <div className="flex justify-end gap-2">
-        {canSkip && <Button variant="outline" onClick={onComplete}>Agora não</Button>}
+        {canSkip && <Button variant="outline" onClick={() => onComplete()}>Agora não</Button>}
         <Button disabled={saving || (!numericDecision && !value.trim()) || (numericDecision && !(quantityChoice && dimensionChoice))} onClick={() => submit()}>
           Confirmar
         </Button>

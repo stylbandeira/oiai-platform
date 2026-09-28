@@ -26,6 +26,7 @@ interface ProductSearchResult {
   unity_quantity: number;
   unity: string;
   unity_id: number;
+  normalization_validated?: boolean;
 }
 
 interface ShoppingListProduct {
@@ -39,6 +40,7 @@ interface ShoppingListProduct {
   unity: string;
   unity_id: number;
   img?: string;
+  normalization_validated?: boolean;
 }
 
 interface ListProductRow {
@@ -225,19 +227,21 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
   const totalValue = selectedItems.reduce((total, item) => total + (item.product.average_price * item.quantity), 0);
 
-  const saveList = async (afterDecision = false) => {
-    if (!listName.trim() || selectedItems.length === 0) return;
+  const saveList = async (afterDecision = false, itemsOverride?: SelectedItem[]) => {
+    const itemsToSave = itemsOverride ?? selectedItems;
+    if (!listName.trim() || itemsToSave.length === 0) return;
 
     setIsSaving(true);
 
-    if (!decisionItem && !afterDecision) {
-      setDecisionItem(selectedItems[0]);
+    const pendingDecision = itemsToSave.find((item) => item.product.normalization_validated !== true);
+    if (!decisionItem && !afterDecision && pendingDecision) {
+      setDecisionItem(pendingDecision);
       setIsSaving(false);
       return;
     }
 
     try {
-      const formattedItems = selectedItems.map(item => ({
+      const formattedItems = itemsToSave.map(item => ({
         product_id: item.product.id,
         quantity: item.quantity,
         unity: item.unity
@@ -254,7 +258,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
       } else {
         response = await api.post("/lists", {
-          products: selectedItems,
+          products: itemsToSave,
           name: listName
         });
       }
@@ -570,9 +574,39 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
         rawName={decisionItem.product.name}
         attribute="name"
         canSkip
-        onComplete={() => {
+        onComplete={(updatedProduct) => {
+          let correctedItems = selectedItems;
+          if (updatedProduct) {
+            setProducts((currentProducts) => currentProducts.map((product) => product.id === updatedProduct.id
+              ? {
+                ...product,
+                ...updatedProduct,
+                unity_quantity: updatedProduct.unity_quantity ?? updatedProduct.quantity ?? product.unity_quantity,
+                unity: updatedProduct.unity ?? product.unity,
+                unit: updatedProduct.unity ?? product.unit,
+                unity_id: updatedProduct.unity_id ?? updatedProduct.unit_id ?? product.unity_id,
+              }
+              : product));
+            correctedItems = selectedItems.map((item) => item.product.id === updatedProduct.id
+              ? {
+                ...item,
+                quantity: updatedProduct.unity_quantity ?? updatedProduct.quantity ?? item.quantity,
+                unity: updatedProduct.unity ?? item.unity,
+                product: {
+                  ...item.product,
+                  ...updatedProduct,
+                  unity_quantity: updatedProduct.unity_quantity ?? updatedProduct.quantity ?? item.product.unity_quantity,
+                  unity: updatedProduct.unity ?? item.product.unity,
+                  unit: updatedProduct.unity ?? item.product.unit,
+                  unity_id: updatedProduct.unity_id ?? updatedProduct.unit_id ?? item.product.unity_id,
+                  normalization_validated: updatedProduct.normalization_validated ?? true,
+                },
+              }
+              : item);
+            setSelectedItems(correctedItems);
+          }
           setDecisionItem(null);
-          void saveList(true);
+          void saveList(true, correctedItems);
         }}
       />}
     </div>
