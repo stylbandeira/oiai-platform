@@ -4,6 +4,7 @@ namespace App\Services\Product;
 
 use App\Models\Product;
 use App\Models\ProductNormalizationDecision;
+use App\Models\Unity;
 
 final class ProductNormalizationDecisionService
 {
@@ -42,6 +43,8 @@ final class ProductNormalizationDecisionService
             array_flip(self::SAFE_FIELDS),
         );
 
+        $this->applyQuantityAndUnity($product, $values);
+
         if ($values !== []) {
             $product->forceFill($values)->saveQuietly();
         }
@@ -60,6 +63,10 @@ final class ProductNormalizationDecisionService
         $rawName = (string) ($product->raw_name ?: $product->name);
         $safeValues = array_intersect_key($selectedValues, array_flip(self::SAFE_FIELDS));
         $validated = $this->isValidDecision($rawName, $safeValues);
+
+        if ($validated) {
+            $this->applyQuantityAndUnity($product, $safeValues);
+        }
 
         return ProductNormalizationDecision::create([
             'product_id' => $product->getKey(),
@@ -80,7 +87,7 @@ final class ProductNormalizationDecisionService
         }
 
         if (isset($values['normalized_quantity'], $values['quantity_dimension'])) {
-            return preg_match('/\d+(?:[,.]\d+)?\s*[a-z]{1,2}/i', (string) $values['normalized_quantity']) === 1
+            return is_numeric(str_replace(',', '.', (string) $values['normalized_quantity']))
                 && trim((string) $values['quantity_dimension']) !== '';
         }
 
@@ -97,5 +104,35 @@ final class ProductNormalizationDecisionService
         }
 
         return 1 - levenshtein($left, $right) / max(strlen($left), strlen($right));
+    }
+
+    /** @param array<string, mixed> $values */
+    private function applyQuantityAndUnity(Product $product, array $values): void
+    {
+        if (! isset($values['normalized_quantity'], $values['quantity_dimension'])) {
+            return;
+        }
+
+        $dimension = trim((string) $values['quantity_dimension']);
+        $unity = Unity::query()
+            ->whereRaw('LOWER(abbreviation) = ?', [mb_strtolower($dimension)])
+            ->orWhereRaw('LOWER(name) = ?', [mb_strtolower($dimension)])
+            ->first();
+
+        $normalizedName = (string) ($product->normalized_name ?: $product->name);
+        if ($unity) {
+            $normalizedName = trim((string) preg_replace(
+                '/\s*\d+(?:[,.]\d+)?\s*(?:'.preg_quote($unity->abbreviation, '/').'|'.preg_quote($unity->name, '/').')\b/iu',
+                '',
+                $normalizedName,
+            ));
+        }
+
+        $product->forceFill([
+            'normalized_quantity' => $values['normalized_quantity'],
+            'quantity_dimension' => $unity?->dimension ?? $dimension,
+            'unit_id' => $unity?->getKey(),
+            'normalized_name' => $normalizedName,
+        ])->saveQuietly();
     }
 }
