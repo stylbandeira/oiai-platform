@@ -25,6 +25,13 @@ class SearchLoggingTest extends TestCase
         $repository->shouldReceive('paginate')
             ->once()
             ->andReturn(new LengthAwarePaginator([], 0, 20));
+        $repository->shouldReceive('lastSearchTelemetry')
+            ->once()
+            ->andReturn([
+                'engine' => 'mysql',
+                'duration_ms' => 12,
+                'fallback_used' => true,
+            ]);
         $action = new IndexProductAction($repository, new SearchQueryNormalizer);
 
         $action->execute($user, ['search' => '  NESCal   400 g  ', 'per_page' => 20]);
@@ -34,5 +41,8 @@ class SearchLoggingTest extends TestCase
         $this->assertSame('nescal 400g', $log->normalized_query);
         $this->assertSame(0, $log->result_count);
         $this->assertSame($user->id, $log->user_id);
+        $this->assertSame('mysql', $log->search_engine);
+        $this->assertSame(12, $log->duration_ms);
+        $this->assertTrue($log->fallback_used);
     }
 }

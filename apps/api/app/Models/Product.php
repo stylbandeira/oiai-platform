@@ -18,6 +18,8 @@ class Product extends BaseModel
 {
     use HasFactory, Searchable, SoftDeletes;
 
+    public const SEARCH_DOCUMENT_VERSION = 1;
+
     protected $table = 'products';
 
     const AVERAGE_PRICE_JOB_CONSTANCY_DAYS = 1;
@@ -39,6 +41,8 @@ class Product extends BaseModel
         'normalization_version',
         'normalized_at',
         'normalization_validated_at',
+        'search_document_version',
+        'search_indexed_at',
         'search_description',
         'img',
         'sku',
@@ -70,6 +74,8 @@ class Product extends BaseModel
         'normalization_version' => 'integer',
         'package_count' => 'integer',
         'normalization_conflict' => 'boolean',
+        'search_document_version' => 'integer',
+        'search_indexed_at' => 'datetime',
         'quantity_source' => ProductQuantitySource::class,
         'refined' => ProductRefinementStatus::class,
     ];
@@ -125,6 +131,27 @@ class Product extends BaseModel
     public function searchableAs(): string
     {
         return config('scout.prefix').'products';
+    }
+
+    public function searchIndexShouldBeUpdated(): bool
+    {
+        return $this->wasChanged([
+            'name',
+            'normalized_name',
+            'search_description',
+            'description',
+            'ean',
+            'sku',
+            'normalized_quantity',
+            'quantity_dimension',
+            'package_count',
+            'validated',
+            'average_price',
+            'brand_id',
+            'category_id',
+            'product_type_id',
+            'unit_id',
+        ]);
     }
 
     public function toSearchableArray(): array

@@ -20,11 +20,15 @@ class IndexProductAction
 
         if (isset($request['search']) && trim((string) $request['search']) !== '') {
             $query = mb_substr(trim((string) $request['search']), 0, 500);
+            $telemetry = $this->productRepo->lastSearchTelemetry();
             SearchLog::create([
                 'query' => $query,
                 'normalized_query' => $this->queryNormalizer->normalize($query),
                 'result_count' => $products->total(),
                 'user_id' => $user->getKey(),
+                'search_engine' => $telemetry['engine'] ?? null,
+                'duration_ms' => $telemetry['duration_ms'] ?? null,
+                'fallback_used' => $telemetry['fallback_used'] ?? false,
             ]);
         }
 

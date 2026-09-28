@@ -10,10 +10,17 @@ final readonly class ProductSearchResult
     public function __construct(
         public array $ids,
         public ?Product $exactProduct = null,
+        public string $engine = 'mysql',
+        public bool $fallbackUsed = false,
     ) {}
 
     public static function fromExactProduct(Product $product): self
     {
-        return new self([(int) $product->getKey()], $product);
+        return new self([(int) $product->getKey()], $product, 'mysql_exact');
+    }
+
+    public function asFallback(): self
+    {
+        return new self($this->ids, $this->exactProduct, $this->engine, true);
     }
 }

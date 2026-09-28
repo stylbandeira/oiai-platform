@@ -6,6 +6,7 @@ use App\Events\ProductEnriched;
 use App\Models\Product;
 use App\Services\Product\ProductNameNormalizer;
 use App\Services\Product\ProductNormalizationDecisionService;
+use App\Services\Product\ProductOperationMonitor;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -20,31 +21,34 @@ final class NormalizeProductJob implements ShouldQueue
     public function handle(
         ProductNormalizationDecisionService $decisions,
         ProductNameNormalizer $normalizer,
+        ProductOperationMonitor $monitor,
     ): void {
         $product = Product::find($this->productId);
         if (! $product || $product->normalization_version >= self::VERSION) {
             return;
         }
 
-        $name = trim((string) ($product->raw_name ?: $product->name));
-        $reusedDecision = $decisions->applyConfirmedDecision($product, self::VERSION);
-        $normalization = $normalizer->normalize($name, $product->normalized_quantity);
+        $monitor->measure('normalization', $product, function () use ($product, $decisions, $normalizer): void {
+            $name = trim((string) ($product->raw_name ?: $product->name));
+            $reusedDecision = $decisions->applyConfirmedDecision($product, self::VERSION);
+            $normalization = $normalizer->normalize($name, $product->normalized_quantity);
 
-        if (! $reusedDecision) {
+            if (! $reusedDecision) {
+                $product->forceFill([
+                    'normalized_name' => $normalization->normalizedName,
+                    'normalized_quantity' => $normalization->normalizedQuantity,
+                    'quantity_dimension' => $normalization->quantityDimension ?? $product->quantity_dimension,
+                    'package_count' => $normalization->packageCount,
+                    'normalization_conflict' => $normalization->hasConflict,
+                    'search_description' => trim((string) ($product->search_description ?: $product->description)),
+                ])->saveQuietly();
+            }
+
             $product->forceFill([
-                'normalized_name' => $normalization->normalizedName,
-                'normalized_quantity' => $normalization->normalizedQuantity,
-                'quantity_dimension' => $normalization->quantityDimension ?? $product->quantity_dimension,
-                'package_count' => $normalization->packageCount,
-                'normalization_conflict' => $normalization->hasConflict,
-                'search_description' => trim((string) ($product->search_description ?: $product->description)),
+                'normalization_version' => self::VERSION,
+                'normalized_at' => now(),
             ])->saveQuietly();
-        }
-
-        $product->forceFill([
-            'normalization_version' => self::VERSION,
-            'normalized_at' => now(),
-        ])->saveQuietly();
+        });
 
         ProductEnriched::dispatch($this->productId);
         IndexProductJob::dispatch($this->productId);

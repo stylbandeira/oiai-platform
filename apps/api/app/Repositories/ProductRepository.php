@@ -14,11 +14,13 @@ class ProductRepository
 {
     protected Product $product;
 
+    /** @var array{engine: string, duration_ms: int, fallback_used: bool}|null */
+    private ?array $lastSearchTelemetry = null;
+
     public function __construct(
         Product $product,
         private ProductSearch $productSearch,
-    )
-    {
+    ) {
         $this->product = $product;
     }
 
@@ -29,11 +31,13 @@ class ProductRepository
 
     public function list(User $user, array $data)
     {
+        $this->lastSearchTelemetry = null;
         $query = $this->product->with(['category', 'unity', 'companies']);
         $searchResultIds = null;
 
         if (isset($data['search']) && trim($data['search']) !== '') {
             $search = trim($data['search']);
+            $started = hrtime(true);
             $searchResult = $this->productSearch->search(new ProductSearchCriteria(
                 query: $search,
                 categoryId: isset($data['category_id']) ? (int) $data['category_id'] : null,
@@ -42,6 +46,11 @@ class ProductRepository
                 page: isset($data['page']) ? (int) $data['page'] : 1,
                 perPage: isset($data['per_page']) ? (int) $data['per_page'] : 20,
             ));
+            $this->lastSearchTelemetry = [
+                'engine' => $searchResult->engine,
+                'duration_ms' => max(1, (int) round((hrtime(true) - $started) / 1_000_000)),
+                'fallback_used' => $searchResult->fallbackUsed,
+            ];
             $searchResultIds = $searchResult->ids;
 
             // A search term must never silently turn into an unfiltered listing.
@@ -82,6 +91,12 @@ class ProductRepository
     public function paginate(User $user, array $data)
     {
         return $this->list($user, $data)->paginate($data['per_page'] ?? 15);
+    }
+
+    /** @return array{engine: string, duration_ms: int, fallback_used: bool}|null */
+    public function lastSearchTelemetry(): ?array
+    {
+        return $this->lastSearchTelemetry;
     }
 
     public function find($id)

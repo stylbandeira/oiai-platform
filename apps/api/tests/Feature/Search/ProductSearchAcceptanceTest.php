@@ -4,6 +4,8 @@ namespace Tests\Feature\Search;
 
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
+use Laravel\Scout\Jobs\MakeSearchable;
 use Tests\TestCase;
 
 class ProductSearchAcceptanceTest extends TestCase
@@ -29,6 +31,11 @@ class ProductSearchAcceptanceTest extends TestCase
         $this->assertSame('7891000100103', $document['ean']);
         $this->assertSame('NESCAU-200G', $document['sku']);
         $this->assertSame('mass', $document['quantity_dimension']);
+        $this->assertArrayNotHasKey('img', $document);
+        $this->assertArrayNotHasKey('raw_name', $document);
+        $this->assertArrayNotHasKey('companies', $document);
+        $this->assertArrayNotHasKey('provider_attempts', $document);
+        $this->assertArrayNotHasKey('price_history', $document);
     }
 
     public function test_search_configuration_supports_typo_tolerance_but_keeps_codes_exact(): void
@@ -43,5 +50,17 @@ class ProductSearchAcceptanceTest extends TestCase
         $this->assertContains('sku', $settings['filterableAttributes']);
         $this->assertTrue($settings['typoTolerance']['enabled']);
         $this->assertSame(['ean', 'sku'], $settings['typoTolerance']['disableOnAttributes']);
+    }
+
+    public function test_scout_only_indexes_when_search_document_fields_change(): void
+    {
+        $product = Product::withoutEvents(fn () => Product::factory()->create());
+        Bus::fake();
+
+        $product->touch();
+        Bus::assertNotDispatched(MakeSearchable::class);
+
+        $product->update(['average_price' => (float) $product->average_price + 1]);
+        Bus::assertDispatched(MakeSearchable::class);
     }
 }

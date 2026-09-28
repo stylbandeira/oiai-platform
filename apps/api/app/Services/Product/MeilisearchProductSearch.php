@@ -32,13 +32,18 @@ final class MeilisearchProductSearch implements ProductSearch
                 $builder->where('quantity_dimension', $criteria->dimension);
             }
 
+            if ($criteria->brandId !== null) {
+                $builder->where('brand_id', $criteria->brandId);
+            }
+
             return new ProductSearchResult(
-                $builder->get()->pluck('id')->map(static fn ($id): int => (int) $id)->all()
+                $builder->get()->pluck('id')->map(static fn ($id): int => (int) $id)->all(),
+                engine: 'meilisearch',
             );
         } catch (Throwable $exception) {
             report($exception);
 
-            return $this->fallback->search($criteria);
+            return $this->fallback->search($criteria)->asFallback();
         }
     }
 }
