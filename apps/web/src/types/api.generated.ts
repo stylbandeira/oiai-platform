@@ -1597,6 +1597,10 @@ export interface components {
             companies_count?: number | null;
             product_type_id?: number | null;
             normalization_validated?: boolean;
+            /** @enum {string|null} */
+            normalization_next_attribute?: "quantity" | "name" | null;
+            name_normalization_validated?: boolean;
+            quantity_normalization_validated?: boolean;
         };
         ProductType: {
             id?: number;

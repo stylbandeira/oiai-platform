@@ -14,6 +14,7 @@ import { NotificationToast } from "../notification/NotificationToast";
 import { formatarData } from "@/utils/formatters";
 import { InvoiceCodeModal } from "../modals/InvoiceCodeModal";
 import { ProductDecisionPopup } from "../modals/ProductDecisionPopup";
+import type { ProductDecisionAttribute } from "../modals/ProductDecisionPopup";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -88,7 +89,14 @@ export function ClientDashboard() {
   const [loading, setLoading] = useState(true);
   const [showQRModal, setShowQRModal] = useState(false);
   const [showInvoiceCodeModal, setShowInvoiceCodeModal] = useState(false);
-  const [decisionProduct, setDecisionProduct] = useState<{ id: number; name: string; normalization_validated?: boolean } | null>(null);
+  const [decisionProduct, setDecisionProduct] = useState<{
+    id: number;
+    name: string;
+    normalization_validated?: boolean;
+    normalization_next_attribute?: ProductDecisionAttribute | null;
+    name_normalization_validated?: boolean;
+    quantity_normalization_validated?: boolean;
+  } | null>(null);
   const [isListsSheetOpen, setIsListsSheetOpen] = useState(false);
   const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false);
 
@@ -543,9 +551,16 @@ export function ClientDashboard() {
         open={Boolean(decisionProduct)}
         productId={decisionProduct.id}
         rawName={decisionProduct.name}
-        attribute={/\d+(?:[,.]\d+)?\s*[a-z]{1,2}(?:\s|$)/i.test(decisionProduct.name) ? "quantity" : "name"}
+        attribute={decisionProduct.normalization_next_attribute ?? (/\d/.test(decisionProduct.name) ? "quantity" : "name")}
+        initialValue={decisionProduct.normalization_next_attribute === "name" ? decisionProduct.name : ""}
         canSkip
-        onComplete={() => setDecisionProduct(null)}
+        onComplete={(updatedProduct) => {
+          if (updatedProduct?.normalization_validated !== true) {
+            setDecisionProduct({ ...decisionProduct, ...updatedProduct });
+            return;
+          }
+          setDecisionProduct(null);
+        }}
       />}
 
       <InvoiceCodeModal

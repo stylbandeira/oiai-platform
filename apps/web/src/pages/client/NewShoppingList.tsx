@@ -10,6 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
 import { CustomPagination } from "@/components/oiai_ui/CustomPagination";
 import { ProductDecisionPopup } from "@/components/modals/ProductDecisionPopup";
+import type { ProductDecisionAttribute } from "@/components/modals/ProductDecisionPopup";
 import type { QueryParams, PaginationMeta } from "@/types/api";
 
 interface ProductSearchResult {
@@ -27,6 +28,9 @@ interface ProductSearchResult {
   unity: string;
   unity_id: number;
   normalization_validated?: boolean;
+  normalization_next_attribute?: ProductDecisionAttribute | null;
+  name_normalization_validated?: boolean;
+  quantity_normalization_validated?: boolean;
 }
 
 interface ShoppingListProduct {
@@ -41,6 +45,9 @@ interface ShoppingListProduct {
   unity_id: number;
   img?: string;
   normalization_validated?: boolean;
+  normalization_next_attribute?: ProductDecisionAttribute | null;
+  name_normalization_validated?: boolean;
+  quantity_normalization_validated?: boolean;
 }
 
 interface ListProductRow {
@@ -234,7 +241,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
     setIsSaving(true);
 
     const pendingDecision = itemsToSave.find((item) => item.product.normalization_validated !== true);
-    if (!decisionItem && !afterDecision && pendingDecision) {
+    if (!afterDecision && pendingDecision) {
       setDecisionItem(pendingDecision);
       setIsSaving(false);
       return;
@@ -572,7 +579,8 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
         open={Boolean(decisionItem)}
         productId={decisionItem.product.id}
         rawName={decisionItem.product.name}
-        attribute="name"
+        attribute={decisionItem.product.normalization_next_attribute ?? (/\d/.test(decisionItem.product.name) ? "quantity" : "name")}
+        initialValue={decisionItem.product.normalization_next_attribute === "name" ? decisionItem.product.name : ""}
         canSkip
         onComplete={(updatedProduct) => {
           let correctedItems = selectedItems;
@@ -599,14 +607,28 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
                   unity: updatedProduct.unity ?? item.product.unity,
                   unit: updatedProduct.unity ?? item.product.unit,
                   unity_id: updatedProduct.unity_id ?? updatedProduct.unit_id ?? item.product.unity_id,
-                  normalization_validated: updatedProduct.normalization_validated ?? true,
+                  normalization_validated: updatedProduct.normalization_validated ?? item.product.normalization_validated,
+                  normalization_next_attribute: updatedProduct.normalization_next_attribute,
+                  name_normalization_validated: updatedProduct.name_normalization_validated,
+                  quantity_normalization_validated: updatedProduct.quantity_normalization_validated,
                 },
               }
               : item);
             setSelectedItems(correctedItems);
           }
           setDecisionItem(null);
-          void saveList(true, correctedItems);
+          if (!updatedProduct) {
+            void saveList(true, correctedItems);
+            return;
+          }
+          if (updatedProduct?.normalization_validated !== true) {
+            const nextItem = correctedItems.find((item) => item.product.id === updatedProduct?.id);
+            if (nextItem) {
+              setDecisionItem(nextItem);
+              return;
+            }
+          }
+          void saveList(false, correctedItems);
         }}
       />}
     </div>

@@ -28,6 +28,9 @@ interface ProductDecisionPopupProps {
     unit_id?: number | null;
     unity_id?: number | null;
     normalization_validated?: boolean;
+    normalization_next_attribute?: ProductDecisionAttribute | null;
+    name_normalization_validated?: boolean;
+    quantity_normalization_validated?: boolean;
   }) => void;
 }
 
@@ -62,11 +65,10 @@ export function ProductDecisionPopup({
   const [unities, setUnities] = useState<Unity[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const numericName = /\d+(?:[,.]\d+)?\s*[a-z]{1,2}(?:\s|$)/i.test(rawName);
   const [dimension, setDimension] = useState("");
   const [quantityChoice, setQuantityChoice] = useState("");
   const [dimensionChoice, setDimensionChoice] = useState("");
-  const numericDecision = attribute !== "name" || numericName;
+  const numericDecision = attribute !== "name";
 
   useEffect(() => {
     setValue(initialValue ?? "");
@@ -134,7 +136,7 @@ export function ProductDecisionPopup({
     }
   };
 
-  const title = numericDecision ? "Confirmar quantidade e dimensão" : "Confirmar nome do produto";
+  const title = numericDecision ? "Confirmar quantidade e unidade" : "Confirmar nome do produto";
 
   return <Dialog open={open} onOpenChange={(next) => !next && canSkip && onComplete()}>
     <DialogContent>
