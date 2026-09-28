@@ -9,6 +9,8 @@ use App\Models\Product;
 
 final class MySqlProductSearch implements ProductSearch
 {
+    public function __construct(private ProductSearchRanker $ranker) {}
+
     public function search(ProductSearchCriteria $criteria): ProductSearchResult
     {
         $query = Product::query();
@@ -20,20 +22,6 @@ final class MySqlProductSearch implements ProductSearch
             return $product ? ProductSearchResult::fromExactProduct($product) : new ProductSearchResult([]);
         }
 
-        if ($term !== '') {
-            $words = preg_split('/\s+/', mb_strtolower($term), -1, PREG_SPLIT_NO_EMPTY) ?: [];
-            $query->where(function ($search) use ($term, $words): void {
-                $search->where('name', 'like', '%'.$term.'%')
-                    ->orWhere('sku', $term)
-                    ->orWhere('description', 'like', '%'.$term.'%');
-
-                foreach ($words as $word) {
-                    $search->orWhere('name', 'like', '%'.$word.'%')
-                        ->orWhere('description', 'like', '%'.$word.'%');
-                }
-            });
-        }
-
         if ($criteria->categoryId !== null) {
             $query->where('category_id', $criteria->categoryId);
         }
@@ -42,10 +30,14 @@ final class MySqlProductSearch implements ProductSearch
             $query->where('quantity_dimension', $criteria->dimension);
         }
 
+        if ($criteria->brandId !== null) {
+            $query->where('brand_id', $criteria->brandId);
+        }
+
+        $products = $query->limit(1500)->get();
+
         return new ProductSearchResult(
-            $query->orderByDesc('validated')
-                ->orderByDesc('mentioned_quantity')
-                ->orderBy('name')
+            $this->ranker->rank($products, $term)
                 ->pluck('id')
                 ->map(static fn ($id): int => (int) $id)
                 ->all()
