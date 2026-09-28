@@ -274,6 +274,9 @@ components:
         companies_count: { type: integer, nullable: true }
         product_type_id: { type: integer, nullable: true }
         normalization_validated: { type: boolean }
+        normalization_next_attribute: { type: string, enum: [quantity, name], nullable: true }
+        name_normalization_validated: { type: boolean }
+        quantity_normalization_validated: { type: boolean }
     ProductType:
       type: object
       properties:
