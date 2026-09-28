@@ -153,9 +153,23 @@ class ProductController extends Controller
             algorithmVersion: (int) $request->validated('algorithm_version', 2),
             validated: (bool) $request->validated('validated', true),
         );
+        $product->refresh()->load('unity');
 
         return response([
             'decision' => $decision,
+            'product' => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'normalized_name' => $product->normalized_name,
+                'normalized_quantity' => $product->normalized_quantity,
+                'quantity' => $product->quantity,
+                'unity_quantity' => $product->quantity,
+                'unity' => $product->unity?->abbreviation,
+                'quantity_dimension' => $product->quantity_dimension,
+                'unit_id' => $product->unit_id,
+                'unity_id' => $product->unit_id,
+                'normalization_validated' => $product->normalization_validated_at !== null,
+            ],
         ], 201);
     }
 }
