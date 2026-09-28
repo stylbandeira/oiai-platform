@@ -22,6 +22,8 @@ return new class extends Migration
             $table->json('selected_values');
             $table->string('decision_source', 32);
             $table->unsignedInteger('algorithm_version');
+            $table->decimal('confidence', 5, 4)->default(0);
+            $table->unsignedInteger('confirmation_count')->default(1);
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->index(
