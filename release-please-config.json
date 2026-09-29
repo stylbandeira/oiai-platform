@@ -18,13 +18,12 @@
       "component": "api",
       "release-type": "simple",
       "package-name": "oiai-api",
-      "extra-files": ["apps/api/VERSION"]
+      "extra-files": ["VERSION"]
     },
     "apps/web": {
       "component": "web",
       "release-type": "node",
-      "package-name": "oiai-web",
-      "extra-files": ["apps/web/package.json"]
+      "package-name": "oiai-web"
     }
   }
 }
