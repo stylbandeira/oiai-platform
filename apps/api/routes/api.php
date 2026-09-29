@@ -12,8 +12,6 @@ use App\Http\Controllers\ListController;
 use App\Http\Controllers\ListItensController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProductTypeController;
-use App\Http\Controllers\ShoppingListRequirementController;
 use App\Http\Controllers\UnityController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -44,7 +42,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::post('/products/import', [ProductController::class, 'import']);
         Route::get('/products/export', [ProductController::class, 'export']);
         Route::post('/products/bulk-validate', [ProductController::class, 'bulkValidate']);
-        Route::post('/product-types', [ProductTypeController::class, 'store']);
         Route::apiResource('/products', ProductController::class);
         Route::apiResource('/users', UserController::class)->withTrashed(['show', 'update', 'destroy']);
         Route::apiResource('/categories', ProductCategoryController::class);
@@ -76,8 +73,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::apiResource('lists', ListController::class);
     Route::post('/lists/{list}/optimize', [ListController::class, 'optimize']);
-    Route::post('/lists/{list}/requirements', [ShoppingListRequirementController::class, 'store']);
-    Route::post('/lists/{list}/requirements/{requirement}/optimize', [ShoppingListRequirementController::class, 'optimize']);
 
     // Route::apiResource('/listItems', ListItensController::class);
 
@@ -92,11 +87,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/unities', UnityController::class);
     // FAVORITE-PRODUCTS
     Route::post('/products/{product}/favorite', [FavoriteProductsController::class, 'favorite']);
-    Route::post('/products/{product}/normalization-decisions', [ProductController::class, 'storeNormalizationDecision']);
 
     // CATEGORIES
     Route::get('/categories', [ProductCategoryController::class, 'index']);
-    Route::get('/product-types', [ProductTypeController::class, 'index']);
 
     // INVOICES
     Route::post('/invoice/process', [InvoiceController::class, 'processInvoice']);

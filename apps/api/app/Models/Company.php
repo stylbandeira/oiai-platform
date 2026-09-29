@@ -51,7 +51,7 @@ class Company extends BaseModel
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'company_products')
-            ->withPivot(['average_price', 'current_price', 'price_per_base_unit']);
+            ->withPivot(['average_price']);
     }
 
     public function owners(): BelongsToMany

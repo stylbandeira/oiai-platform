@@ -32,7 +32,6 @@ class ProductStoreRequest extends FormRequest
             'quantity' => ['required', 'integer'],
             'unit_id' => ['required', 'exists:unities,id'],
             'category_id' => ['required', 'exists:product_category,id'],
-            'product_type_id' => ['nullable', 'exists:product_types,id'],
             'average_price' => ['nullable', 'numeric'],
             'ean' => ['nullable', 'string', 'unique:products,ean'],
             'description' => ['nullable', 'string'],

@@ -9,8 +9,6 @@ import { ArrowLeft, Search, Plus, Minus, Heart, MapPin, DollarSign } from "lucid
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
 import { CustomPagination } from "@/components/oiai_ui/CustomPagination";
-import { ProductDecisionPopup } from "@/components/modals/ProductDecisionPopup";
-import type { ProductDecisionAttribute } from "@/components/modals/ProductDecisionPopup";
 import type { QueryParams, PaginationMeta } from "@/types/api";
 
 interface ProductSearchResult {
@@ -27,10 +25,6 @@ interface ProductSearchResult {
   unity_quantity: number;
   unity: string;
   unity_id: number;
-  normalization_validated?: boolean;
-  normalization_next_attribute?: ProductDecisionAttribute | null;
-  name_normalization_validated?: boolean;
-  quantity_normalization_validated?: boolean;
 }
 
 interface ShoppingListProduct {
@@ -44,10 +38,6 @@ interface ShoppingListProduct {
   unity: string;
   unity_id: number;
   img?: string;
-  normalization_validated?: boolean;
-  normalization_next_attribute?: ProductDecisionAttribute | null;
-  name_normalization_validated?: boolean;
-  quantity_normalization_validated?: boolean;
 }
 
 interface ListProductRow {
@@ -83,7 +73,6 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [decisionItem, setDecisionItem] = useState<SelectedItem | null>(null);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const [products, setProducts] = useState<ProductSearchResult[]>([]);
@@ -234,21 +223,13 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
   const totalValue = selectedItems.reduce((total, item) => total + (item.product.average_price * item.quantity), 0);
 
-  const saveList = async (afterDecision = false, itemsOverride?: SelectedItem[]) => {
-    const itemsToSave = itemsOverride ?? selectedItems;
-    if (!listName.trim() || itemsToSave.length === 0) return;
+  const saveList = async () => {
+    if (!listName.trim() || selectedItems.length === 0) return;
 
     setIsSaving(true);
 
-    const pendingDecision = itemsToSave.find((item) => item.product.normalization_validated !== true);
-    if (!afterDecision && pendingDecision) {
-      setDecisionItem(pendingDecision);
-      setIsSaving(false);
-      return;
-    }
-
     try {
-      const formattedItems = itemsToSave.map(item => ({
+      const formattedItems = selectedItems.map(item => ({
         product_id: item.product.id,
         quantity: item.quantity,
         unity: item.unity
@@ -265,7 +246,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
       } else {
         response = await api.post("/lists", {
-          products: itemsToSave,
+          products: selectedItems,
           name: listName
         });
       }
@@ -280,7 +261,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   const buttonText = isEditMode ? "Atualizar Lista" : "Salvar Lista";
 
   return (
-      <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Header Responsivo */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-6">
@@ -297,7 +278,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
             />
           </div>
           <Button
-            onClick={() => void saveList()}
+            onClick={saveList}
             disabled={!listName || selectedItems.length === 0}
             className="bg-gradient-primary hover:shadow-glow transition-all duration-300 w-full sm:w-auto"
           >
@@ -575,62 +556,6 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
           </div>
         </div>
       </div>
-      {decisionItem && <ProductDecisionPopup
-        open={Boolean(decisionItem)}
-        productId={decisionItem.product.id}
-        rawName={decisionItem.product.name}
-        attribute={decisionItem.product.normalization_next_attribute ?? (/\d/.test(decisionItem.product.name) ? "quantity" : "name")}
-        initialValue={decisionItem.product.normalization_next_attribute === "name" ? decisionItem.product.name : ""}
-        canSkip
-        onComplete={(updatedProduct) => {
-          let correctedItems = selectedItems;
-          if (updatedProduct) {
-            setProducts((currentProducts) => currentProducts.map((product) => product.id === updatedProduct.id
-              ? {
-                ...product,
-                ...updatedProduct,
-                unity_quantity: updatedProduct.unity_quantity ?? updatedProduct.quantity ?? product.unity_quantity,
-                unity: updatedProduct.unity ?? product.unity,
-                unit: updatedProduct.unity ?? product.unit,
-                unity_id: updatedProduct.unity_id ?? updatedProduct.unit_id ?? product.unity_id,
-              }
-              : product));
-            correctedItems = selectedItems.map((item) => item.product.id === updatedProduct.id
-              ? {
-                ...item,
-                quantity: updatedProduct.unity_quantity ?? updatedProduct.quantity ?? item.quantity,
-                unity: updatedProduct.unity ?? item.unity,
-                product: {
-                  ...item.product,
-                  ...updatedProduct,
-                  unity_quantity: updatedProduct.unity_quantity ?? updatedProduct.quantity ?? item.product.unity_quantity,
-                  unity: updatedProduct.unity ?? item.product.unity,
-                  unit: updatedProduct.unity ?? item.product.unit,
-                  unity_id: updatedProduct.unity_id ?? updatedProduct.unit_id ?? item.product.unity_id,
-                  normalization_validated: updatedProduct.normalization_validated ?? item.product.normalization_validated,
-                  normalization_next_attribute: updatedProduct.normalization_next_attribute,
-                  name_normalization_validated: updatedProduct.name_normalization_validated,
-                  quantity_normalization_validated: updatedProduct.quantity_normalization_validated,
-                },
-              }
-              : item);
-            setSelectedItems(correctedItems);
-          }
-          setDecisionItem(null);
-          if (!updatedProduct) {
-            void saveList(true, correctedItems);
-            return;
-          }
-          if (updatedProduct?.normalization_validated !== true) {
-            const nextItem = correctedItems.find((item) => item.product.id === updatedProduct?.id);
-            if (nextItem) {
-              setDecisionItem(nextItem);
-              return;
-            }
-          }
-          void saveList(false, correctedItems);
-        }}
-      />}
     </div>
   );
 }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('unities', function (Blueprint $table) {
             $table->string('dimension')->nullable()->after('name');
-            $table->decimal('convertion_factor', 12, 6)->nullable()->after('dimension');
+            $table->integer('convertion_factor')->nullable()->after('dimension');
             $table->foreignId('base_unity_id')->nullable()->after('convertion_factor')->constrained('unities');
         });
     }
