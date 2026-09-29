@@ -68,6 +68,33 @@ paths:
       parameters:
         - { $ref: '#/components/parameters/ListId' }
       responses: { '200': { description: Lista otimizada } }
+  /lists/{list}/requirements:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Adiciona uma necessidade genérica à lista
+      parameters:
+        - { $ref: '#/components/parameters/ListId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ShoppingListRequirementRequest' }
+      responses:
+        '201': { description: Necessidade criada }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /lists/{list}/requirements/{requirement}/optimize:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Encontra a melhor combinação para uma necessidade genérica
+      parameters:
+        - { $ref: '#/components/parameters/ListId' }
+        - { name: requirement, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200':
+          description: Combinação calculada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProductCombinationResponse' }
   /logout:
     post:
       security: [{ sanctum: [] }]
@@ -118,6 +145,19 @@ paths:
     post: { security: [{ sanctum: [] }], summary: Cria unidade, responses: { '201': { description: Unidade criada } } }
   /categories:
     get: { security: [{ sanctum: [] }], summary: Lista categorias, responses: { '200': { description: Categorias } } }
+  /product-types:
+    get:
+      security: [{ sanctum: [] }]
+      summary: Lista tipos de produto
+      responses:
+        '200':
+          description: Tipos de produto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/ProductType' } }
   /invoice/process:
     post:
       security: [{ sanctum: [] }]
@@ -161,6 +201,23 @@ paths:
     get: { security: [{ sanctum: [] }], summary: Exporta produtos, responses: { '200': { description: Arquivo CSV } } }
   /admin/products/bulk-validate:
     post: { security: [{ sanctum: [] }], summary: Valida produtos em lote, responses: { '200': { description: Produtos validados } } }
+  /admin/product-types:
+    post:
+      security: [{ sanctum: [] }]
+      summary: Cria um tipo de produto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                description: { type: string, nullable: true }
+      responses:
+        '201': { description: Tipo de produto criado }
+        '422': { $ref: '#/components/responses/ValidationError' }
 components:
   securitySchemes:
     sanctum:
@@ -215,6 +272,48 @@ components:
         unity_quantity: { type: number, nullable: true }
         category: { type: string, nullable: true }
         companies_count: { type: integer, nullable: true }
+        product_type_id: { type: integer, nullable: true }
+        normalization_validated: { type: boolean }
+        normalization_next_attribute: { type: string, enum: [quantity, name], nullable: true }
+        name_normalization_validated: { type: boolean }
+        quantity_normalization_validated: { type: boolean }
+    ProductType:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        normalized_name: { type: string }
+        description: { type: string, nullable: true }
+    ShoppingListRequirementRequest:
+      type: object
+      required: [product_type_id, desired_quantity, desired_unit_id]
+      properties:
+        product_type_id: { type: integer }
+        desired_quantity: { type: number, minimum: 0, exclusiveMinimum: true }
+        desired_unit_id: { type: integer }
+        brand_id: { type: integer, nullable: true }
+        variant_id: { type: integer, nullable: true }
+        specific_product_id: { type: integer, nullable: true }
+    ProductCombinationResponse:
+      type: object
+      properties:
+        combination:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  offer_id: { type: integer }
+                  product_id: { type: integer }
+                  packages: { type: integer }
+                  package_base_quantity: { type: number }
+                  unit_price: { type: number }
+            desiredBaseQuantity: { type: number }
+            suppliedBaseQuantity: { type: number }
+            excessBaseQuantity: { type: number }
+            totalPrice: { type: number }
     Company:
       type: object
       properties:

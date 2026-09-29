@@ -23,6 +23,10 @@ class BaseProductResource extends JsonResource
             'ean' => $this->ean,
             'average_price' => floatval($this->average_price),
             'validated' => $this->validated,
+            'normalization_validated' => $this->normalizationValidationIsComplete(),
+            'normalization_next_attribute' => $this->nextNormalizationDecisionAttribute(),
+            'name_normalization_validated' => $this->name_normalization_validated_at !== null,
+            'quantity_normalization_validated' => $this->quantity_normalization_validated_at !== null,
 
             'mentioned_quantity' => $this->mentioned_quantity,
             'mentioned_quantity_variant' => $this->mentioned_quantity_variant,
@@ -31,6 +35,7 @@ class BaseProductResource extends JsonResource
             'unity_id' => $this->whenLoaded('unity', $this->unity->id),
             'unity_quantity' => $this->whenLoaded('unity', $this->quantity),
             'category' => $this->whenLoaded('category', $this->category->name),
+            'product_type_id' => $this->product_type_id,
             'companies_count' => $this->whenLoaded('companies', count($this->companies)),
         ];
     }

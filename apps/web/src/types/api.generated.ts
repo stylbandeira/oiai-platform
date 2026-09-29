@@ -260,6 +260,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lists/{list}/requirements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Adiciona uma necessidade genérica à lista */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    list: components["parameters"]["ListId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ShoppingListRequirementRequest"];
+                };
+            };
+            responses: {
+                /** @description Necessidade criada */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lists/{list}/requirements/{requirement}/optimize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Encontra a melhor combinação para uma necessidade genérica */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    list: components["parameters"]["ListId"];
+                    requirement: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Combinação calculada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProductCombinationResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/logout": {
         parameters: {
             query?: never;
@@ -750,6 +830,44 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/product-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista tipos de produto */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Tipos de produto */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: components["schemas"]["ProductType"][];
+                        };
+                    };
                 };
             };
         };
@@ -1401,6 +1519,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/product-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cria um tipo de produto */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                        description?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Tipo de produto criado */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1435,6 +1595,41 @@ export interface components {
             unity_quantity?: number | null;
             category?: string | null;
             companies_count?: number | null;
+            product_type_id?: number | null;
+            normalization_validated?: boolean;
+            /** @enum {string|null} */
+            normalization_next_attribute?: "quantity" | "name" | null;
+            name_normalization_validated?: boolean;
+            quantity_normalization_validated?: boolean;
+        };
+        ProductType: {
+            id?: number;
+            name?: string;
+            normalized_name?: string;
+            description?: string | null;
+        };
+        ShoppingListRequirementRequest: {
+            product_type_id: number;
+            desired_quantity: number;
+            desired_unit_id: number;
+            brand_id?: number | null;
+            variant_id?: number | null;
+            specific_product_id?: number | null;
+        };
+        ProductCombinationResponse: {
+            combination?: {
+                items?: {
+                    offer_id?: number;
+                    product_id?: number;
+                    packages?: number;
+                    package_base_quantity?: number;
+                    unit_price?: number;
+                }[];
+                desiredBaseQuantity?: number;
+                suppliedBaseQuantity?: number;
+                excessBaseQuantity?: number;
+                totalPrice?: number;
+            };
         };
         Company: {
             id?: number;

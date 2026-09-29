@@ -44,6 +44,11 @@ class ItensList extends BaseModel
         return $this->hasMany(ListProducts::class, 'list_id');
     }
 
+    public function requirements(): HasMany
+    {
+        return $this->hasMany(ShoppingListRequirement::class, 'list_id');
+    }
+
     public function completedSnapshot()
     {
         return $this->hasOne(CompletedList::class, 'list_id');
