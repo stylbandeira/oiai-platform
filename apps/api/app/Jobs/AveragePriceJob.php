@@ -57,8 +57,11 @@ class AveragePriceJob implements ShouldQueue
             }
 
             DB::transaction(function () use ($product, $purchases) {
-                $product->average_price = $purchases->avg('price');
-                $product->save();
+                $averagePrice = round((float) $purchases->avg('price'), 2);
+                if ($product->average_price === null || round((float) $product->average_price, 2) !== $averagePrice) {
+                    $product->average_price = $averagePrice;
+                    $product->save();
+                }
 
                 $purchasesByCompany = $purchases->groupBy('company_id');
                 $companyIds = $purchasesByCompany->keys();
@@ -72,7 +75,7 @@ class AveragePriceJob implements ShouldQueue
                         'company_id' => $companyId,
                         'product_id' => $product->id,
                     ], [
-                        'average_price' => $companyPurchases->avg('price'),
+                        'average_price' => round((float) $companyPurchases->avg('price'), 2),
                     ]);
                 }
             });

@@ -25,6 +25,12 @@ return new class extends Migration
                 'convertion_factor' => 1,
                 'base_abbreviation' => 'g',
             ],
+            'mg' => [
+                'name' => 'miligrama',
+                'dimension' => 'mass',
+                'convertion_factor' => 0.001,
+                'base_abbreviation' => 'g',
+            ],
             'kg' => [
                 'name' => 'quilograma',
                 'dimension' => 'mass',
