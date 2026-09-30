@@ -55,9 +55,18 @@ class UnityIndexTest extends TestCase
     public function test_returns_unities_based_on_resource(): void
     {
         $admin = User::factory()->admin()->create();
+        $gram = Unity::factory()->create([
+            'name' => 'grama',
+            'abbreviation' => 'g',
+            'dimension' => 'mass',
+            'convertion_factor' => 1,
+        ]);
         $unity = Unity::factory()->create([
             'name' => 'quilograma',
             'abbreviation' => 'kg',
+            'dimension' => 'mass',
+            'convertion_factor' => 1000,
+            'base_unity_id' => $gram->id,
         ]);
 
         $response = $this->actingAs($admin)
@@ -70,12 +79,18 @@ class UnityIndexTest extends TestCase
                     'id',
                     'name',
                     'abbreviation',
+                    'dimension',
+                    'convertion_factor',
+                    'base_unity_id',
                 ]],
                 'links',
                 'meta',
             ])
             ->assertJsonPath('data.0.name', 'quilograma')
-            ->assertJsonPath('data.0.abbreviation', 'kg');
+            ->assertJsonPath('data.0.abbreviation', 'kg')
+            ->assertJsonPath('data.0.dimension', 'mass')
+            ->assertJsonPath('data.0.convertion_factor', 1000)
+            ->assertJsonPath('data.0.base_unity_id', $gram->id);
     }
 
     public function invalidFiltersProvider(): array
