@@ -76,6 +76,28 @@ class ProcessInvoiceJob implements ShouldQueue
             'invoice_data' => $invoice_data,
         ]);
 
+        $rawDate = $invoice_data->dados_nota->data_emissao
+            ?? $invoice_data->nota->data_emissao
+            ?? null;
+
+        try {
+            if (! is_string($rawDate) || trim($rawDate) === '') {
+                throw new \UnexpectedValueException('Data de emissão ausente na NFCe');
+            }
+
+            $format = preg_match('/[+-]\d{2}:\d{2}$/', $rawDate)
+                ? 'd/m/Y H:i:sP'
+                : 'd/m/Y H:i:s';
+            $purchase_date = Carbon::createFromFormat($format, $rawDate);
+        } catch (\Throwable $exception) {
+            Log::warning('Não foi possível interpretar a data da NFCe', [
+                'invoice_id' => $invoice->id,
+                'data' => $rawDate,
+                'error' => $exception->getMessage(),
+            ]);
+
+            $purchase_date = $invoice->receipt_data ? Carbon::parse($invoice->receipt_data) : null;
+        }
         // FIRST OR CREATE DE COMPANY
         $company_data = $invoice_data->emitente;
         $company = Company::updateOrCreate(
@@ -153,21 +175,6 @@ class ProcessInvoiceJob implements ShouldQueue
                         'average_price' => null,
                     ]
                 );
-
-                try {
-                    $dataBruta = $invoice_data->dados_nota->data_emissao;
-
-                    $purchase_date = str_contains($dataBruta, '-03:00')
-                        ? Carbon::createFromFormat('d/m/Y H:i:sP', $dataBruta)
-                        : Carbon::createFromFormat('d/m/Y H:i:s', $dataBruta);
-                } catch (\Throwable $exception) {
-                    Log::warning('Não foi possível interpretar a data da NFCe', [
-                        'data' => $dataBruta ?? null,
-                        'error' => $exception->getMessage(),
-                    ]);
-
-                    $purchase_date = Carbon::now();
-                }
 
                 $user_inserted_products[] = [
                     'user_id' => $user->id,
