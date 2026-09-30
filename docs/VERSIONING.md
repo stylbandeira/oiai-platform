@@ -35,6 +35,21 @@ O workflow `Release Please` acompanha a branch `main` e usa os Conventional Comm
 
 Depois do merge de um PR de release, a automação atualiza a versão do componente, o CHANGELOG, cria a tag (`api-vX.Y.Z` ou `web-vX.Y.Z`) e publica o GitHub Release correspondente.
 
+### Configuração da GitHub App de release
+
+O Release Please usa um token temporário de GitHub App para que o `CI Gate` e os demais workflows `pull_request` iniciem automaticamente nos PRs que ele cria. A aprovação de código e o merge continuam sendo decisões humanas.
+
+Configuração única, feita por quem administra o repositório:
+
+1. Em **GitHub → Settings → Developer settings → GitHub Apps → New GitHub App**, crie uma App privada de automação. Webhooks não são necessários se a App for usada apenas por este workflow.
+2. Conceda à App as permissões de repositório **Actions: Read**, **Contents: Read and write**, **Issues: Read and write** e **Pull requests: Read and write**. Instale-a somente em `stylbandeira/oiai-platform`.
+3. Na página da App, copie o **Client ID** e gere uma **private key** (`.pem`). Não adicione a chave ao repositório.
+4. Em **Repository → Settings → Secrets and variables → Actions → Variables**, crie `RELEASE_APP_CLIENT_ID` com o Client ID.
+5. Na aba **Secrets**, crie `RELEASE_APP_PRIVATE_KEY` com o conteúdo completo do `.pem`, incluindo as linhas `BEGIN` e `END`.
+6. Depois que este workflow estiver em `main`, abra **Actions → Release Please → Run workflow** (ou faça um novo merge em `main`). Confira se o `CI Gate` inicia nos PRs de release sem solicitar **Approve workflows to run**.
+
+O workflow falha se a variável ou o secret estiverem ausentes; não retorna silenciosamente ao `GITHUB_TOKEN`. PRs já abertos podem continuar exigindo aprovação até serem atualizados pela automação configurada. A política de aprovação de workflows de PRs vindos de *forks* é independente.
+
 ## GitHub Releases como registro oficial
 
 Cada GitHub Release deve corresponder a uma única tag de componente:
