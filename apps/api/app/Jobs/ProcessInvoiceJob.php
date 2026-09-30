@@ -109,10 +109,10 @@ class ProcessInvoiceJob implements ShouldQueue
                 'name' => $company_data->razao_social,
                 'cnpj' => $company_data->cnpj,
                 'raw_address' => $company_data->endereco
-                    . ' - ' . ($company_data->numero ?? '')
-                    . ', ' . $company_data->bairro
-                    . ', ' . $company_data->municipio
-                    . ', ' . $company_data->uf,
+                    .' - '.($company_data->numero ?? '')
+                    .', '.$company_data->bairro
+                    .', '.$company_data->municipio
+                    .', '.$company_data->uf,
                 'phone' => ($company_data->telefone ?? ''),
             ]
         );
@@ -150,7 +150,7 @@ class ProcessInvoiceJob implements ShouldQueue
                     'raw_name' => $productData->descricao,
                     'normalized_name' => $productData->descricao,
                     'search_description' => $productData->descricao,
-                    'normalized_quantity' => ($productData->quantidade ?? 1) . ' ' . $productData->unidade,
+                    'normalized_quantity' => ($productData->quantidade ?? 1).' '.$productData->unidade,
                     'quantity_source' => $quantitySource->value,
                     'quantity_dimension' => $unity->dimension ?? 'unit',
                     'quantity_confidence' => $quantitySource->confidence(),
@@ -218,7 +218,7 @@ class ProcessInvoiceJob implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::error('Falha ao processar pedido: ' . $exception->getMessage(), $this->not_inserted_products);
+        Log::error('Falha ao processar pedido: '.$exception->getMessage(), $this->not_inserted_products);
     }
 
     private function firstOrNewUnity(string $abbreviation): Unity
