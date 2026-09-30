@@ -11,6 +11,7 @@ import EmailConfirmationScreen from "./pages/EmailConfirmationScreen";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
 import ManageCompanies from "./pages/admin/ManageCompanies";
 import { UserProvider } from "./contexts/UserContext";
+import { UnityCatalogProvider } from "./contexts/UnityCatalogContext";
 import AddCompany from "./pages/admin/AddCompany";
 import EditCompany from "./pages/admin/EditCompany";
 import ManageProducts from "./pages/admin/ManageProducts";
@@ -35,6 +36,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <UserProvider>
+            <UnityCatalogProvider>
             <Routes>
               <Route path="/" element={<Index />} />
               {/* LISTS */}
@@ -98,6 +100,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </UnityCatalogProvider>
           </UserProvider>
         </BrowserRouter>
       </TooltipProvider>
