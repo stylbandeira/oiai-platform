@@ -23,6 +23,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ShoppingListProductRow } from "@/components/shopping-list/ShoppingListProductRow";
+import { useUnityCatalog } from "@/contexts/UnityCatalogContext";
+import { readableTotalQuantity, readableUnitPrice } from "@/lib/unityConversions";
+import type { Unity } from "@/lib/unityConversions";
 
 interface Product {
   id: number;
@@ -30,7 +33,8 @@ interface Product {
   average_price: number;
   quantity: number;
   unity_quantity?: number;
-  unity?: {
+  unity_id?: number;
+  unity?: string | {
     id: number;
     abbreviation: string;
     name: string;
@@ -109,6 +113,7 @@ export default function ViewShoppingList() {
   const skipNextAddressSearch = useRef(false);
   const changedListId = useRef<string | undefined>(undefined);
   const user = useUser();
+  const unities = useUnityCatalog();
 
   useEffect(() => {
     if (skipNextAddressSearch.current) {
@@ -155,6 +160,7 @@ export default function ViewShoppingList() {
   const [originalQuantities, setOriginalQuantities] = useState<Map<number, number>>(new Map());
 
   const getProductUnity = (product: Product): string => {
+    if (typeof product.unity === "string") return product.unity;
     if (product.unity?.abbreviation) return product.unity.abbreviation;
     if (product.unity?.name) return product.unity.name;
     return 'un';
@@ -166,7 +172,31 @@ export default function ViewShoppingList() {
   };
 
   const getProductQuantity = (product: Product): number => {
-    return product.quantity || product.unity_quantity || 1;
+    return product.quantity || 1;
+  };
+
+  const getProductPackageQuantity = (product: Product): number => {
+    return product.unity_quantity && product.unity_quantity > 0 ? product.unity_quantity : 1;
+  };
+
+  const getUnity = (product: Product): Unity | undefined => {
+    const abbreviation = getProductUnity(product);
+    return unities.find((unity) => unity.id === (product.unity_id ?? (typeof product.unity === 'object' ? product.unity?.id : undefined)))
+      ?? unities.find((unity) => unity.abbreviation === abbreviation);
+  };
+
+  const getPricePerProductUnit = (price: number, product: Product): { price: number; unit: string } => {
+    const packageQuantity = getProductPackageQuantity(product);
+    const abbreviation = getProductUnity(product);
+    const source = getUnity(product);
+    return readableUnitPrice(price, packageQuantity, source, unities)
+      ?? { price: price / packageQuantity, unit: abbreviation };
+  };
+
+  const getTotalQuantity = (packageCount: number, product: Product): { quantity: number; unit: string } => {
+    const quantity = packageCount * getProductPackageQuantity(product);
+    return readableTotalQuantity(quantity, getUnity(product), unities)
+      ?? { quantity, unit: getProductUnity(product) };
   };
 
   const getUniqueProducts = (products: Product[]): Product[] => {
@@ -790,6 +820,10 @@ export default function ViewShoppingList() {
                       const unity = getProductUnity(product);
                       const category = getProductCategory(product);
                       const quantity = originalQuantities.get(product.id) || getProductQuantity(product);
+                      const packageQuantity = getProductPackageQuantity(product);
+                      const totalPrice = item.average_price * quantity;
+                      const unitPrice = getPricePerProductUnit(item.average_price, product);
+                      const totalQuantity = getTotalQuantity(quantity, product);
 
                       return (
                         <ShoppingListProductRow
@@ -797,9 +831,14 @@ export default function ViewShoppingList() {
                           name={product.name}
                           image={product.img}
                           quantity={quantity}
+                          packageQuantity={packageQuantity}
                           unity={unity}
+                          totalQuantity={totalQuantity.quantity}
+                          totalUnity={totalQuantity.unit}
                           category={category}
-                          unitPrice={item.average_price}
+                          unitPrice={unitPrice.price}
+                          priceUnit={unitPrice.unit}
+                          totalPrice={totalPrice}
                           completed={completedItems.has(product.id)}
                           canComplete={!isCompleted}
                           onToggleComplete={() => toggleItemComplete(product.id)}
@@ -833,6 +872,10 @@ export default function ViewShoppingList() {
                   const unity = getProductUnity(product);
                   const category = getProductCategory(product);
                   const quantity = getProductQuantity(product);
+                  const packageQuantity = getProductPackageQuantity(product);
+                  const totalPrice = (product.average_price || 0) * quantity;
+                  const unitPrice = getPricePerProductUnit(product.average_price || 0, product);
+                  const totalQuantity = getTotalQuantity(quantity, product);
 
                   return (
                     <ShoppingListProductRow
@@ -840,9 +883,14 @@ export default function ViewShoppingList() {
                       name={product.name}
                       image={product.img}
                       quantity={quantity}
+                      packageQuantity={packageQuantity}
                       unity={unity}
+                      totalQuantity={totalQuantity.quantity}
+                      totalUnity={totalQuantity.unit}
                       category={category}
-                      unitPrice={product.average_price || 0}
+                      unitPrice={unitPrice.price}
+                      priceUnit={unitPrice.unit}
+                      totalPrice={totalPrice}
                       completed={completedItems.has(product.id)}
                       canComplete={!isCompleted}
                       onToggleComplete={() => toggleItemComplete(product.id)}

@@ -141,7 +141,22 @@ paths:
       parameters: [{ $ref: '#/components/parameters/ListId' }]
       responses: { '200': { description: Itens atualizados } }
   /unities:
-    get: { security: [{ sanctum: [] }], summary: Lista unidades, responses: { '200': { description: Unidades } } }
+    get:
+      security: [{ sanctum: [] }]
+      summary: Lista unidades e suas relações de conversão
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+        - { name: per_page, in: query, schema: { type: integer, minimum: 1, maximum: 100 } }
+      responses:
+        '200':
+          description: Unidades paginadas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Unity' } }
+                  meta: { $ref: '#/components/schemas/PaginationMeta' }
     post: { security: [{ sanctum: [] }], summary: Cria unidade, responses: { '201': { description: Unidade criada } } }
   /categories:
     get: { security: [{ sanctum: [] }], summary: Lista categorias, responses: { '200': { description: Categorias } } }
@@ -336,10 +351,14 @@ components:
         description: { type: string, nullable: true }
     Unity:
       type: object
+      required: [id, name, abbreviation, dimension, convertion_factor, base_unity_id]
       properties:
         id: { type: integer }
         name: { type: string }
         abbreviation: { type: string }
+        dimension: { type: string }
+        convertion_factor: { type: number, format: double }
+        base_unity_id: { type: integer, nullable: true }
     PaginationMeta:
       type: object
       properties:

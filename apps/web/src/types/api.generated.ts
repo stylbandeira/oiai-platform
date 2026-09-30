@@ -762,22 +762,30 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Lista unidades */
+        /** Lista unidades e suas relações de conversão */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: number;
+                    per_page?: number;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
             responses: {
-                /** @description Unidades */
+                /** @description Unidades paginadas */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": {
+                            data?: components["schemas"]["Unity"][];
+                            meta?: components["schemas"]["PaginationMeta"];
+                        };
+                    };
                 };
             };
         };
@@ -1652,9 +1660,13 @@ export interface components {
             description?: string | null;
         };
         Unity: {
-            id?: number;
-            name?: string;
-            abbreviation?: string;
+            id: number;
+            name: string;
+            abbreviation: string;
+            dimension: string;
+            /** Format: double */
+            convertion_factor: number;
+            base_unity_id: number | null;
         };
         PaginationMeta: {
             current_page?: number;

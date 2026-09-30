@@ -22,6 +22,9 @@ class UnityResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'abbreviation' => $this->abbreviation,
+            'dimension' => $this->dimension,
+            'convertion_factor' => $this->convertion_factor,
+            'base_unity_id' => $this->base_unity_id,
         ];
     }
 }
