@@ -8,9 +8,14 @@ interface ShoppingListProductRowProps {
   name: string;
   image: string | null;
   quantity: number;
+  packageQuantity: number;
   unity: string;
+  totalQuantity: number;
+  totalUnity: string;
   category: string;
   unitPrice: number;
+  priceUnit?: string;
+  totalPrice: number;
   completed: boolean;
   canComplete: boolean;
   onToggleComplete: () => void;
@@ -33,9 +38,14 @@ export function ShoppingListProductRow({
   name,
   image,
   quantity,
+  packageQuantity,
   unity,
+  totalQuantity,
+  totalUnity,
   category,
   unitPrice,
+  priceUnit,
+  totalPrice,
   completed,
   canComplete,
   onToggleComplete,
@@ -84,7 +94,7 @@ export function ShoppingListProductRow({
         </h4>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            {quantity} {unity}
+            {quantity.toLocaleString("pt-BR")}x {packageQuantity.toLocaleString("pt-BR", { maximumFractionDigits: 6 })}{unity} ({totalQuantity.toLocaleString("pt-BR", { maximumFractionDigits: 6 })}{totalUnity})
           </span>
           <Badge variant="outline" className="text-xs">
             {category}
@@ -93,8 +103,12 @@ export function ShoppingListProductRow({
       </div>
 
       <div className="flex-shrink-0 text-right">
-        <p className="font-bold text-primary">R$ {(unitPrice * quantity).toFixed(2)}</p>
-        <p className="text-xs text-muted-foreground">R$ {unitPrice.toFixed(2)}/{unity}</p>
+        <p className="font-bold text-primary">
+          R$ {totalPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          R$ {unitPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}/{priceUnit ?? unity}
+        </p>
       </div>
     </div>
   );

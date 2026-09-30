@@ -54,6 +54,8 @@ interface ListProductRow {
   id?: number;
   name?: string;
   price?: number;
+  average_price?: number;
+  unity_quantity?: number;
   quantity?: number;
   unity?: string;
   unity_id?: number;
@@ -129,11 +131,11 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
             product: {
             id: item.id || item.product?.id,
             name: item.product?.name || item.name || "Produto",
-            average_price: item.price || item.product?.average_price || 0,
+            average_price: item.average_price || item.price || item.product?.average_price || 0,
             category: item.product?.category || item.category || "",
             isFavorite: item.product?.isFavorite || false,
             unit: item.unity || item.product?.unit || "un",
-            unity_quantity: item.product?.unity_quantity || 0,
+            unity_quantity: item.unity_quantity || item.product?.unity_quantity || 1,
             unity: item.unity || item.product?.unity || "un",
             unity_id: item.unity_id || item.product?.unity_id || 1
           },
@@ -196,6 +198,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   };
 
   const setProductQuantity = (addQuantity: number, product: ShoppingListProduct) => {
+    if (!Number.isInteger(addQuantity) || addQuantity < 1) return;
     const existingItem = selectedItems.find(item => item.product.id === product.id);
     console.log(selectedItems);
     if (existingItem) {
@@ -233,6 +236,10 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   };
 
   const totalValue = selectedItems.reduce((total, item) => total + (item.product.average_price * item.quantity), 0);
+  const getPackageQuantity = (product: ShoppingListProduct): number => product.unity_quantity > 0 ? product.unity_quantity : 1;
+
+  const getTotalContent = (item: SelectedItem): number => item.quantity * getPackageQuantity(item.product);
+
 
   const saveList = async (afterDecision = false, itemsOverride?: SelectedItem[]) => {
     const itemsToSave = itemsOverride ?? selectedItems;
@@ -354,17 +361,17 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
                             <Input
                               placeholder="1"
-                              value={item.quantity.toFixed(2).replace('.', ',')}
-                              type="text"
-                              onChange={(e) => setProductQuantity(
-                                parseFloat(e.target.value.replace(',', '.')) || 0,
-                                item.product
-                              )}
+                              aria-label={`Quantidade de embalagens de ${item.product.name}`}
+                              value={item.quantity}
+                              type="number"
+                              min="1"
+                              step="1"
+                              onChange={(e) => setProductQuantity(Number(e.target.value), item.product)}
                               className="w-14 sm:w-16 h-7 text-center text-sm"
                             />
 
                             <span className="text-xs text-muted-foreground">
-                              {item.unity}
+                              {item.quantity === 1 ? 'embalagem' : 'embalagens'}
                             </span>
 
                             <Button
@@ -378,8 +385,12 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
                           </div>
                         </div>
 
+                        <div className="text-xs text-muted-foreground">
+                          Conteúdo total: {getTotalContent(item).toLocaleString('pt-BR', { maximumFractionDigits: 3 })} {item.unity}
+                        </div>
+
                         <div className="text-xs text-muted-foreground space-y-0.5">
-                          <div>Preço: R$ {item.product.average_price.toFixed(2)}</div>
+                          <div>Preço da embalagem: R$ {item.product.average_price.toFixed(2)}</div>
                           <div className="font-semibold text-foreground">
                             Subtotal: R$ {(item.product.average_price * item.quantity).toFixed(2)}
                           </div>
