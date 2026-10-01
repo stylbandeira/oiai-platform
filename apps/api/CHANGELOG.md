@@ -2,6 +2,13 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [2.0.2](https://github.com/stylbandeira/oiai-platform/compare/api-v2.0.1...api-v2.0.2) (2026-09-30)
+
+
+### Bug Fixes
+
+* allow different issue dates ([#27](https://github.com/stylbandeira/oiai-platform/issues/27)) ([faa03cb](https://github.com/stylbandeira/oiai-platform/commit/faa03cb041837bb793d582f4a4c1be7bb02c315c))
+
 ## [2.0.1](https://github.com/stylbandeira/oiai-platform/compare/api-v2.0.0...api-v2.0.1) (2026-09-30)
 
 
