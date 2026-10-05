@@ -63,7 +63,7 @@ export default function EmailVerificationPage() {
                         O link de verificação está expirado ou inválido. Solicite outro.
                     </p>
                     <a
-                        href="/reenviar-email"
+                        href="/email-verification"
                         className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
                     >
                         Reenviar link de verificação

@@ -53,10 +53,8 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
             localStorage.setItem('token', response.data.access_token);
 
-            // Use a função login do contexto em vez de onRegister
             login(response.data.access_token, response.data.user);
-
-            navigate("/", { state: { fromRegister: true } });
+            navigate("/email-verification", { state: { email } });
 
         } catch (error: unknown) {
             if (axios.isAxiosError(error) && error.response) {

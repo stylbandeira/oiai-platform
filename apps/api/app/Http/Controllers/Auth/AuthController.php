@@ -31,6 +31,29 @@ class AuthController extends Controller
         return $action->execute($request->user());
     }
 
+    public function sendVerificationNotice(Request $request)
+    {
+        return response()->json([
+            'verified' => $request->user()->hasVerifiedEmail(),
+        ]);
+    }
+
+    public function resendVerificationEmail(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'E-mail já verificado',
+                'email_verified' => true,
+            ], 409);
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return response()->json([
+            'message' => 'E-mail de verificação enviado',
+        ]);
+    }
+
     public function logout(Request $request, LogoutAction $action)
     {
         return $action->execute($request);

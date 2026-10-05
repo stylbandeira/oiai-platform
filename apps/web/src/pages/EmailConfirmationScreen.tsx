@@ -1,7 +1,39 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import api from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import axios from "axios";
+
+function maskEmail(email: string): string {
+    const [name, domain] = email.split("@");
+    if (!name || !domain) return email;
+    return `${name.slice(0, 3)}***@${domain}`;
+}
 
 export default function EmailConfirmationScreen() {
+    const location = useLocation();
+    const [email] = useState<string>(location.state?.email ?? "");
+    const [sending, setSending] = useState(false);
+    const [message, setMessage] = useState("");
+
+    const resendEmail = async () => {
+        setSending(true);
+        setMessage("");
+        try {
+            await api.post("/email/verification-notification");
+            setMessage("E-mail reenviado. Verifique sua caixa de entrada.");
+        } catch (error: unknown) {
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.message
+                : undefined;
+            setMessage(message ?? "Não foi possível reenviar agora");
+        } finally {
+            setSending(false);
+        }
+    };
+
     return (
         <div className="flex items-center justify-center min-h-screen bg-background p-4">
             <Card className="max-w-md w-full text-center shadow-lg border-0">
@@ -11,13 +43,18 @@ export default function EmailConfirmationScreen() {
                     </div>
                     <CardTitle className="text-2xl font-bold">Confirmação de E-mail</CardTitle>
                     <p className="text-muted-foreground mt-2">
-                        Enviamos um e-mail com o link de confirmação para você. Verifique sua caixa de entrada (e spam também).
+                        Enviamos um link de confirmação para:
                     </p>
+                    {email && <p className="font-medium mt-2">{maskEmail(email)}</p>}
                 </CardHeader>
                 <CardContent>
                     <p className="text-sm text-muted-foreground">
-                        Depois de confirmar seu e-mail, você poderá acessar sua conta normalmente.
+                        Verifique sua caixa de entrada (e a pasta de spam também).
                     </p>
+                    <Button className="mt-4" onClick={resendEmail} disabled={sending}>
+                        {sending ? "Reenviando..." : "Reenviar e-mail"}
+                    </Button>
+                    {message && <p className="text-sm text-muted-foreground mt-3">{message}</p>}
                 </CardContent>
             </Card>
         </div>

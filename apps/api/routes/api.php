@@ -34,7 +34,7 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified', 'role:admin'])->group(function () {
     Route::prefix('admin')->group(function () {
         Route::post('/users/revertDeleted/{user}', [UserController::class, 'revertDestroy'])->withTrashed();
         Route::get('/users/export', [UserController::class, 'export']);
@@ -63,14 +63,17 @@ Route::get('/email/verify', [AuthController::class, 'sendVerificationNotice'])
 Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
     ->middleware(['auth:sanctum', 'throttle:6,1'])
     ->name('verification.resend');
-Route::put('/listItems/{list}', [ListItensController::class, 'update']);
 
+Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
+    ->middleware(['auth:sanctum', 'throttle:6,1'])
+    ->name('verification.send');
 // Rotas autenticadas
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     // ADDRESS
     Route::apiResource('/addresses', AddressController::class);
 
@@ -116,9 +119,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('companies/request-with-new-company', [CompanyOwnersController::class, 'storeCompanyAndRequest']);
     Route::get('user/company-requests', [CompanyOwnersController::class, 'index']);
 
-    Route::get('/dashboard-data', [UserController::class, 'dashboardData']);
+    Route::put('/listItems/{list}', [ListItensController::class, 'update']);
 
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/dashboard-data', [UserController::class, 'dashboardData']);
 
     Route::get('/users/{user}', [UserController::class, 'show']);
     Route::put('/users/{user}', [UserController::class, 'update']);
