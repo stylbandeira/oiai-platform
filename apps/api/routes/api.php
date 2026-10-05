@@ -34,7 +34,7 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified', 'role:admin'])->group(function () {
     Route::prefix('admin')->group(function () {
         Route::post('/users/revertDeleted/{user}', [UserController::class, 'revertDestroy'])->withTrashed();
         Route::get('/users/export', [UserController::class, 'export']);
@@ -70,7 +70,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
 });
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     // ADDRESS
     Route::apiResource('/addresses', AddressController::class);
 
