@@ -47,7 +47,7 @@ Veja exemplos adicionais em [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 7. Resolva os comentários e faça o merge somente após aprovação.
 
 Quando o conjunto de alterações estiver pronto para produção, abra um PR de promoção de `develop` para `main`.
-Somente PRs de promoção/release devem entrar em `main`.
+`main` é a branch de produção; somente PRs de promoção/release devem entrar nela.
 
 Não misture alterações não relacionadas no mesmo Pull Request. Alterações de contrato da API devem atualizar `docs/openapi.yaml` e os tipos gerados do Web.
 
