@@ -63,6 +63,10 @@ Route::get('/email/verify', [AuthController::class, 'sendVerificationNotice'])
 Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
     ->middleware(['auth:sanctum', 'throttle:6,1'])
     ->name('verification.resend');
+
+Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
+    ->middleware(['auth:sanctum', 'throttle:6,1'])
+    ->name('verification.send');
 Route::put('/listItems/{list}', [ListItensController::class, 'update']);
 
 // Rotas autenticadas
