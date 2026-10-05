@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 
 function maskEmail(email: string): string {
     const [name, domain] = email.split("@");
@@ -23,8 +24,11 @@ export default function EmailConfirmationScreen() {
         try {
             await api.post("/email/verification-notification");
             setMessage("E-mail reenviado. Verifique sua caixa de entrada.");
-        } catch (error: any) {
-            setMessage(error.response?.data?.message ?? "Não foi possível reenviar agora.");
+        } catch (error: unknown) {
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.message
+                : undefined;
+            setMessage(message ?? "Não foi possível reenviar agora.");
         } finally {
             setSending(false);
         }
