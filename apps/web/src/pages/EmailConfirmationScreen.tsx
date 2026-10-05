@@ -28,7 +28,7 @@ export default function EmailConfirmationScreen() {
             const message = axios.isAxiosError(error)
                 ? error.response?.data?.message
                 : undefined;
-            setMessage(message ?? "Não foi possível reenviar agora.");
+            setMessage(message ?? "Não foi possível reenviar agora");
         } finally {
             setSending(false);
         }
