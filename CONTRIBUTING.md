@@ -6,17 +6,17 @@ Para uma visão ponta a ponta, consulte o [fluxo de engenharia](docs/ENGINEERING
 
 ## Branch naming
 
-Crie branches a partir de `main` usando um prefixo que indique o trabalho:
+Crie branches a partir de `develop` usando um dos prefixos aprovados:
 
 ```text
-feat/api-meilisearch
+feature/api-meilisearch
 fix/web-login-error
 refactor/api-product-service
-docs/update-architecture
-ci/add-quality-gate
+chore/update-architecture
 ```
 
 Use nomes curtos, em kebab-case, e mantenha uma branch por alteração coerente.
+Features e correções devem abrir PR para `develop`. Alterações não devem ser desenvolvidas diretamente em `main`.
 
 ## Commit convention
 
@@ -41,10 +41,13 @@ Veja exemplos adicionais em [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 1. Atualize sua branch com a base mais recente.
 2. Faça a alteração e adicione os testes necessários.
 3. Execute as verificações locais.
-4. Abra um Pull Request direcionado a `main`.
+4. Abra um Pull Request direcionado a `develop`.
 5. Descreva o problema, a solução, os impactos e como validar.
 6. Aguarde a revisão e todos os checks obrigatórios.
 7. Resolva os comentários e faça o merge somente após aprovação.
+
+Quando o conjunto de alterações estiver pronto para produção, abra um PR de promoção de `develop` para `main`.
+Somente PRs de promoção/release devem entrar em `main`.
 
 Não misture alterações não relacionadas no mesmo Pull Request. Alterações de contrato da API devem atualizar `docs/openapi.yaml` e os tipos gerados do Web.
 
