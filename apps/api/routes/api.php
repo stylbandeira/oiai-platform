@@ -67,11 +67,10 @@ Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
 Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
     ->middleware(['auth:sanctum', 'throttle:6,1'])
     ->name('verification.send');
-Route::put('/listItems/{list}', [ListItensController::class, 'update']);
-
 // Rotas autenticadas
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
@@ -120,9 +119,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('companies/request-with-new-company', [CompanyOwnersController::class, 'storeCompanyAndRequest']);
     Route::get('user/company-requests', [CompanyOwnersController::class, 'index']);
 
-    Route::get('/dashboard-data', [UserController::class, 'dashboardData']);
+    Route::put('/listItems/{list}', [ListItensController::class, 'update']);
 
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/dashboard-data', [UserController::class, 'dashboardData']);
 
     Route::get('/users/{user}', [UserController::class, 'show']);
     Route::put('/users/{user}', [UserController::class, 'update']);
