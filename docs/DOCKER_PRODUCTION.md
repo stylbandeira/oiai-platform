@@ -27,7 +27,7 @@ Com `VITE_API_URL` vazio, o Nginx do frontend encaminha `/api` internamente para
 o serviço da API. A stack publica apenas HTTP na porta 80; TLS/443 deve ser
 terminado no reverse proxy da VPS.
 
-Subida da stack:
+Subida da stack :
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d --build
