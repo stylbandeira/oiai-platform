@@ -51,6 +51,7 @@ interface Product {
 
 interface CompanyProduct {
   product: Product;
+  quantity?: number;
   average_price: number;
 }
 
@@ -353,7 +354,7 @@ export default function ViewShoppingList() {
   const calculateTotalWithOriginalQuantities = (products: CompanyProduct[]) => {
     return getUniqueCompanyProducts(products).reduce((sum, item) => {
       const productId = item.product.id;
-      const quantity = originalQuantities.get(productId) || 1; // USA A QUANTIDADE ORIGINAL
+      const quantity = item.quantity ?? originalQuantities.get(Number(productId)) ?? 1;
       const price = item.average_price;
       return sum + (price * quantity);
     }, 0);
@@ -546,6 +547,7 @@ export default function ViewShoppingList() {
   const totalProgress = getTotalProgress();
   const optimizedTotal = getOptimizedTotalValue();
   const unoptimizedTotal = getUnoptimizedTotalValue();
+  const savings = unoptimizedTotal - optimizedTotal;
   const totalItems = shoppingList.productsQuantity;
   const directProducts = getDirectProducts();
   const isCompleted = shoppingList.status === "completed";
@@ -611,10 +613,17 @@ export default function ViewShoppingList() {
                 </div>
                 <div>
                   <p className="text-sm sm:text-2xl font-bold">R$ {optimizedTotal.toFixed(2)}</p>
-                  <p className="text-[10px] sm:text-sm text-muted-foreground">Valor Total</p>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground">
+                    {shoppingList.optimized ? "Melhor combinação" : "Estimativa"}
+                  </p>
                   {shoppingList.optimized && unoptimizedTotal > 0 && (
-                    <p className="text-[8px] sm:text-xs text-muted-foreground line-through hidden sm:block">
-                      R$ {unoptimizedTotal.toFixed(2)}
+                    <p className="text-[8px] sm:text-xs text-muted-foreground hidden sm:block">
+                      Estimativa: R$ {unoptimizedTotal.toFixed(2)}
+                    </p>
+                  )}
+                  {shoppingList.optimized && (
+                    <p className={`text-[8px] sm:text-xs ${savings > 0 ? "text-emerald-600" : "text-amber-600"}`}>
+                      {savings > 0 ? `Economia: R$ ${savings.toFixed(2)}` : "Não houve economia"}
                     </p>
                   )}
                 </div>
@@ -819,7 +828,7 @@ export default function ViewShoppingList() {
                       const product = item.product;
                       const unity = getProductUnity(product);
                       const category = getProductCategory(product);
-                      const quantity = originalQuantities.get(product.id) || getProductQuantity(product);
+                      const quantity = item.quantity ?? originalQuantities.get(Number(product.id)) ?? getProductQuantity(product);
                       const packageQuantity = getProductPackageQuantity(product);
                       const totalPrice = item.average_price * quantity;
                       const unitPrice = getPricePerProductUnit(item.average_price, product);
