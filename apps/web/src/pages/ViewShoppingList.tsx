@@ -51,6 +51,7 @@ interface Product {
 
 interface CompanyProduct {
   product: Product;
+  quantity?: number;
   average_price: number;
 }
 
@@ -269,7 +270,7 @@ export default function ViewShoppingList() {
         if (data.products && data.products.length > 0) {
           data.products.forEach((product: Product) => {
             const quantity = getProductQuantity(product);
-            quantitiesMap.set(product.id, quantity);
+            quantitiesMap.set(Number(product.id), quantity);
           });
         }
         setOriginalQuantities(quantitiesMap);
@@ -352,8 +353,8 @@ export default function ViewShoppingList() {
   // FUNÇÃO CORRETÍSSIMA: calcula total usando SEMPRE as quantidades originais
   const calculateTotalWithOriginalQuantities = (products: CompanyProduct[]) => {
     return getUniqueCompanyProducts(products).reduce((sum, item) => {
-      const productId = item.product.id;
-      const quantity = originalQuantities.get(productId) || 1; // USA A QUANTIDADE ORIGINAL
+      const productId = Number(item.product.id);
+      const quantity = item.quantity ?? originalQuantities.get(productId) ?? 1;
       const price = item.average_price;
       return sum + (price * quantity);
     }, 0);
@@ -819,7 +820,7 @@ export default function ViewShoppingList() {
                       const product = item.product;
                       const unity = getProductUnity(product);
                       const category = getProductCategory(product);
-                      const quantity = originalQuantities.get(product.id) || getProductQuantity(product);
+                      const quantity = item.quantity ?? originalQuantities.get(Number(product.id)) ?? getProductQuantity(product);
                       const packageQuantity = getProductPackageQuantity(product);
                       const totalPrice = item.average_price * quantity;
                       const unitPrice = getPricePerProductUnit(item.average_price, product);

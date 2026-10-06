@@ -609,7 +609,6 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
             correctedItems = selectedItems.map((item) => item.product.id === updatedProduct.id
               ? {
                 ...item,
-                quantity: updatedProduct.unity_quantity ?? updatedProduct.quantity ?? item.quantity,
                 unity: updatedProduct.unity ?? item.unity,
                 product: {
                   ...item.product,

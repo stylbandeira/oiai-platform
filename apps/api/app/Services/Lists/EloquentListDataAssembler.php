@@ -71,6 +71,7 @@ class EloquentListDataAssembler implements ListDataAssembler
 
             $data['companies'][$company->id]['products'][] = [
                 'product' => (new ClientProductResource($listProduct->product))->resolve(),
+                'quantity' => (float) $listProduct->quantity,
                 'average_price' => (float) $companyProduct->average_price,
             ];
         }
