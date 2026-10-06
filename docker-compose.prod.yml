@@ -10,13 +10,25 @@ services:
             APP_ENV: production
             APP_DEBUG: "false"
             MEILISEARCH_HOST: http://meilisearch:7700
-        ports:
-            - "${API_PORT:-8001}:80"
+        volumes:
+            - api_storage_prod:/var/www/html/storage
         depends_on:
             db:
                 condition: service_healthy
             meilisearch:
                 condition: service_started
+
+    api-web:
+        build:
+            context: .
+            dockerfile: docker/api/Dockerfile.nginx.prod
+        restart: unless-stopped
+        volumes:
+            - api_storage_prod:/var/www/html/storage:ro
+        ports:
+            - "${API_PORT:-8001}:80"
+        depends_on:
+            - app
 
     queue:
         build:
@@ -88,3 +100,4 @@ services:
 volumes:
     dbdata_prod:
     meilisearch_data_prod:
+    api_storage_prod:

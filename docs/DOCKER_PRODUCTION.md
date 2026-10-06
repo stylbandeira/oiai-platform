@@ -4,6 +4,10 @@ O compose de desenvolvimento é `docker-compose.yml`. A VPS deve usar somente
 `docker-compose.prod.yml` e um arquivo de ambiente próprio, como
 `apps/api/.env.prod`, fora do versionamento.
 
+A API é executada em PHP-FPM atrás de um Nginx dedicado. O frontend também é
+compilado durante o build e servido por Nginx; nenhum serviço usa `php artisan
+serve` ou o servidor de desenvolvimento do Vite.
+
 Antes de subir a stack, configure no ambiente da VPS:
 
 ```bash
@@ -18,6 +22,7 @@ export VITE_API_URL='https://api.exemplo.com'
 
 O arquivo `.env.prod` deve usar `DB_HOST=db`, `MEILISEARCH_HOST=http://meilisearch:7700`,
 `APP_ENV=production`, `APP_DEBUG=false`, SMTP real e `QUEUE_CONNECTION=database`.
+Os caches `config`, `route` e `view` são gerados no startup do container PHP-FPM.
 
 Subida da stack:
 

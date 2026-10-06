@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev libjpeg62-turbo-dev libfreetype6-dev libonig-dev \
@@ -14,11 +14,13 @@ WORKDIR /var/www/html
 COPY apps/api /var/www/html
 
 RUN composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader \
-    && a2enmod rewrite \
-    && sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-EXPOSE 80
+COPY docker/api/entrypoint.prod.sh /usr/local/bin/entrypoint.prod.sh
+RUN chmod +x /usr/local/bin/entrypoint.prod.sh
 
-CMD ["apache2-foreground"]
+EXPOSE 9000
+
+ENTRYPOINT ["entrypoint.prod.sh"]
+CMD ["php-fpm"]
