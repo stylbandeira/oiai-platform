@@ -34,7 +34,7 @@ class OptimizeListAction
 
         foreach ($cheapest as $cheap) {
             $product = (new ClientProductResource($cheap->product))->resolve();
-            $product['average_price'] = (float) $cheap->average_price;
+            $product['average_price'] = $cheap->effectivePrice();
 
             $optimizedList[$cheap->company->name][] = $product;
 
@@ -52,8 +52,7 @@ class OptimizeListAction
     {
         $validOffers = $offers
             ->filter(
-                fn (CompanyProducts $offer) => $offer->average_price !== null
-                    && (float) $offer->average_price > 0
+                fn (CompanyProducts $offer) => $offer->effectivePrice() > 0
             );
 
         if ($validOffers->isEmpty()) {
@@ -75,7 +74,7 @@ class OptimizeListAction
         }
 
         return $validOffers
-            ->sortBy(fn (CompanyProducts $offer) => (float) $offer->average_price)
+            ->sortBy(fn (CompanyProducts $offer) => $offer->effectivePrice())
             ->first();
     }
 
