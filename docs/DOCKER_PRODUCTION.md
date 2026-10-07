@@ -40,7 +40,24 @@ docker compose -f docker-compose.prod.yml exec app php artisan migrate --force
 docker compose -f docker-compose.prod.yml exec app php artisan storage:link
 ```
 
-## Atualização da VPS a partir do GitHub
+## Atualização automática da VPS a partir do GitHub
+
+O workflow CI Gate executa o CD após um push em main, somente quando as
+validações de API e frontend terminam com sucesso. Ele conecta por SSH à VPS,
+atualiza o clone e recria a stack; nenhum git pull manual é necessário.
+
+Configure estes secrets no GitHub, de preferência no environment production:
+
+- VPS_HOST: hostname ou IP da VPS;
+- VPS_PORT: porta SSH (opcional; padrão 22);
+- VPS_USER: usuário de deploy;
+- VPS_APP_PATH: caminho absoluto do clone na VPS;
+- VPS_SSH_PRIVATE_KEY: chave privada usada pelo GitHub Actions para acessar a VPS;
+- VPS_KNOWN_HOSTS: saída de ssh-keyscan -H <host> para fixar a chave do servidor.
+
+O usuário de deploy precisa conseguir executar o Docker (por exemplo, estar no
+grupo docker) e o clone precisa ter origin configurado para o GitHub. A chave
+SSH da VPS e os arquivos .env continuam somente na VPS.
 
 O clone na VPS não acompanha o GitHub automaticamente. Depois que um PR de
 `develop` for promovido e integrado em `main`, atualize a VPS explicitamente:
