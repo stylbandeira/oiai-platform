@@ -10,6 +10,16 @@ on:
       - 'docker-compose.yml'
       - 'docs/openapi.yaml'
       - '.github/workflows/**'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/api/**'
+      - 'apps/web/**'
+      - 'docker/**'
+      - 'docker-compose.yml'
+      - 'docker-compose.prod.yml'
+      - 'docs/openapi.yaml'
+      - '.github/workflows/**'
 
 permissions:
   contents: read
@@ -83,3 +93,43 @@ jobs:
             exit 1
           fi
           echo "All required CI pipelines passed or were not needed."
+
+  deploy-production:
+    name: Deploy production to VPS
+    needs: [api, web, result]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.result.result == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Configure SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+
+      - name: Add VPS host key
+        env:
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$VPS_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+
+      - name: Update and restart production
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_APP_PATH: ${{ secrets.VPS_APP_PATH }}
+        run: |
+          ssh -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" <<EOF
+          set -e
+          cd "$VPS_APP_PATH"
+          git fetch origin main
+          git switch main
+          git pull --ff-only origin main
+          docker compose --env-file .env -f docker-compose.prod.yml up -d --build
+          docker compose --env-file .env -f docker-compose.prod.yml exec -T app php artisan migrate --force
+          docker compose --env-file .env -f docker-compose.prod.yml exec -T app php artisan storage:link
+          docker compose --env-file .env -f docker-compose.prod.yml exec -T app php artisan optimize:clear
+          docker compose --env-file .env -f docker-compose.prod.yml exec -T app php artisan optimize
+          EOF
