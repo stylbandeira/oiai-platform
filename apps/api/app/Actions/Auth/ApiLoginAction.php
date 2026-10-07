@@ -20,13 +20,6 @@ class ApiLoginAction
             ], 401);
         }
 
-        if (! $user->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'E-mail não verificado',
-                'email_verified' => false,
-            ], 403);
-        }
-
         return response([
             'user' => (new UserResource($user))->withNotifications(),
             'token' => $user->createToken('auth_token')->plainTextToken,
