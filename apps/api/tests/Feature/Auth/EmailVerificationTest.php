@@ -11,6 +11,12 @@ class EmailVerificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->markTestSkipped('A verificação de e-mail está desativada.');
+    }
+
     public function test_signed_link_verifies_an_unverified_user(): void
     {
         $user = User::factory()->unverified()->create();

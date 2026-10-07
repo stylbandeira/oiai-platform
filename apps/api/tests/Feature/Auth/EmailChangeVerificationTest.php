@@ -10,6 +10,12 @@ class EmailChangeVerificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->markTestSkipped('A verificação de e-mail está desativada.');
+    }
+
     public function test_changing_email_invalidates_previous_verification(): void
     {
         $user = User::factory()->client()->create([

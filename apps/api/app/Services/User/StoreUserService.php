@@ -4,7 +4,6 @@ namespace App\Services\User;
 
 use App\Models\User;
 use App\Services\CompanyOwners\CompanyOwnerService;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -23,8 +22,6 @@ class StoreUserService
             unset($data['companies']);
 
             $user = User::create($data);
-            event(new Registered($user));
-
             if ($user->isCompany()) {
                 $this->companyOwnerService->sync($user, $companies, $approvedBy);
             }

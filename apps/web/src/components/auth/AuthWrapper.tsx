@@ -10,9 +10,6 @@ export default function AuthWrapper({ children }) {
         const checkVerification = async () => {
             try {
                 const response = await api.get('/api/user');
-                if (!response.data.user?.email_verified) {
-                    navigate('/email-verification');
-                }
             } catch (error) {
                 navigate('/login');
             }
