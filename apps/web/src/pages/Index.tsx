@@ -7,7 +7,6 @@ import { useLocation } from "react-router-dom";
 import { NotificationToast } from "@/components/notification/NotificationToast";
 import { useUser } from "@/contexts/UserContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import EmailConfirmationScreen from "./EmailConfirmationScreen";
 
 const Index = () => {
   const { user, loading, logout } = useUser();
@@ -33,10 +32,6 @@ const Index = () => {
 
   if (!user) {
     return <Auth />;
-  }
-
-  if (!user.email_verified) {
-    return <EmailConfirmationScreen />;
   }
 
   const renderDashboard = () => {

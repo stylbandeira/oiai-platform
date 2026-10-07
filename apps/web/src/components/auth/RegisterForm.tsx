@@ -54,7 +54,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             localStorage.setItem('token', response.data.access_token);
 
             login(response.data.access_token, response.data.user);
-            navigate("/email-verification", { state: { email } });
+            navigate("/");
 
         } catch (error: unknown) {
             if (axios.isAxiosError(error) && error.response) {
