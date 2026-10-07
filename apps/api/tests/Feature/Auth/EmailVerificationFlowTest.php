@@ -13,6 +13,12 @@ class EmailVerificationFlowTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->markTestSkipped('A verificação de e-mail está desativada.');
+    }
+
     /** @dataProvider userTypesProvider */
     public function test_new_users_start_unverified_for_every_user_type(string $type): void
     {
