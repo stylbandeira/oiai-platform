@@ -40,8 +40,15 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::get('/users/export', [UserController::class, 'export']);
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
 
-        Route::apiResource('/companies', CompanyController::class)
-            ->names('admin.companies');
+        Route::apiResource('/companies', CompanyController::class)->names([
+            'index' => 'admin.companies.index',
+            'create' => 'admin.companies.create',
+            'store' => 'admin.companies.store',
+            'show' => 'admin.companies.show',
+            'edit' => 'admin.companies.edit',
+            'update' => 'admin.companies.update',
+            'destroy' => 'admin.companies.destroy',
+        ]);
         Route::post('/products/import', [ProductController::class, 'import']);
         Route::get('/products/export', [ProductController::class, 'export']);
         Route::post('/products/bulk-validate', [ProductController::class, 'bulkValidate']);
