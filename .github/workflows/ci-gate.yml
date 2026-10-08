@@ -97,7 +97,7 @@ jobs:
   deploy-production:
     name: Deploy production to VPS
     needs: [api, web, result]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.result.result == 'success'
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.result.result == 'success' }}
     runs-on: ubuntu-latest
     environment:
       name: production
