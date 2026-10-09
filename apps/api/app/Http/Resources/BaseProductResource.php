@@ -31,12 +31,12 @@ class BaseProductResource extends JsonResource
             'mentioned_quantity' => $this->mentioned_quantity,
             'mentioned_quantity_variant' => $this->mentioned_quantity_variant,
 
-            'unity' => $this->whenLoaded('unity', $this->unity->abbreviation),
-            'unity_id' => $this->whenLoaded('unity', $this->unity->id),
-            'unity_quantity' => $this->whenLoaded('unity', $this->quantity),
-            'category' => $this->whenLoaded('category', $this->category->name),
+            'unity' => $this->whenLoaded('unity', fn () => $this->unity?->abbreviation),
+            'unity_id' => $this->whenLoaded('unity', fn () => $this->unity?->id),
+            'unity_quantity' => $this->whenLoaded('unity', fn () => $this->quantity),
+            'category' => $this->whenLoaded('category', fn () => $this->category?->name),
             'product_type_id' => $this->product_type_id,
-            'companies_count' => $this->whenLoaded('companies', count($this->companies)),
+            'companies_count' => $this->whenLoaded('companies', fn () => $this->companies->count()),
         ];
     }
 
