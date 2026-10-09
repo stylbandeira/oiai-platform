@@ -2,6 +2,65 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [2.1.0](https://github.com/stylbandeira/oiai-platform/compare/api-v2.0.2...api-v2.1.0) (2026-10-09)
+
+
+### Features
+
+* create api health check ([4faae4b](https://github.com/stylbandeira/oiai-platform/commit/4faae4bbbe98c998603f5c44431feab54ddf1fcf))
+* post deploy health check ([c90e715](https://github.com/stylbandeira/oiai-platform/commit/c90e715e860b0c539572043ec670d1b0ddf5eb50))
+* post deploy health check ([c90e715](https://github.com/stylbandeira/oiai-platform/commit/c90e715e860b0c539572043ec670d1b0ddf5eb50))
+* post deploy health check ([5ac8fda](https://github.com/stylbandeira/oiai-platform/commit/5ac8fdae011c72d8af9338a78223a49694f2a965))
+* post deploy health check ([5ac8fda](https://github.com/stylbandeira/oiai-platform/commit/5ac8fdae011c72d8af9338a78223a49694f2a965))
+
+
+### Bug Fixes
+
+* adjust estimated price messages ([#32](https://github.com/stylbandeira/oiai-platform/issues/32)) ([8450e89](https://github.com/stylbandeira/oiai-platform/commit/8450e894c417a0484d984edf52989f2967c834c9))
+* **api:** avoid duplicate company route names ([d70c3a3](https://github.com/stylbandeira/oiai-platform/commit/d70c3a363804f9cf200d386ced8ea5c6ecf1e6f9))
+* category description ([2273ed1](https://github.com/stylbandeira/oiai-platform/commit/2273ed1396458392dd34b5606375ff1fc717565b))
+* category description ([2273ed1](https://github.com/stylbandeira/oiai-platform/commit/2273ed1396458392dd34b5606375ff1fc717565b))
+* category description ([30b5f41](https://github.com/stylbandeira/oiai-platform/commit/30b5f4187aa154ad17c36453965ec2b074ce5d75))
+* category description ([30b5f41](https://github.com/stylbandeira/oiai-platform/commit/30b5f4187aa154ad17c36453965ec2b074ce5d75))
+* category description ([0c8aa50](https://github.com/stylbandeira/oiai-platform/commit/0c8aa50863dbb19263e3a313a653a94f9451f0b0))
+* companies explicit naming ([01a403e](https://github.com/stylbandeira/oiai-platform/commit/01a403e5c079c51bbc39fbc73416dc37898f8db2))
+* companies explicit naming ([a9f8720](https://github.com/stylbandeira/oiai-platform/commit/a9f8720cc6f5d2a2e7fd3b0c4d0db043353f2d5b))
+* companies explicit naming ([a9f8720](https://github.com/stylbandeira/oiai-platform/commit/a9f8720cc6f5d2a2e7fd3b0c4d0db043353f2d5b))
+* companies explicit naming ([2715df6](https://github.com/stylbandeira/oiai-platform/commit/2715df6c8999ab1bc08561a8ab3edf9417d4d0d7))
+* correct isLoaded ([f62bfc0](https://github.com/stylbandeira/oiai-platform/commit/f62bfc07c571404dfd63afc879c28f598a734ce0))
+* correct isLoaded ([f62bfc0](https://github.com/stylbandeira/oiai-platform/commit/f62bfc07c571404dfd63afc879c28f598a734ce0))
+* correct isLoaded ([63f8f2e](https://github.com/stylbandeira/oiai-platform/commit/63f8f2ed721c1cdc135f11ffcba2bf1e11f51b0c))
+* correct isLoaded ([63f8f2e](https://github.com/stylbandeira/oiai-platform/commit/63f8f2ed721c1cdc135f11ffcba2bf1e11f51b0c))
+* correct product relationships ([655f02f](https://github.com/stylbandeira/oiai-platform/commit/655f02f2ef285b0fe588368b62e6d68eeb89dfae))
+* correct quantity ([99b62b8](https://github.com/stylbandeira/oiai-platform/commit/99b62b8287bf7031a5c8d22c2de0236e13eacb5b))
+* correct testing error ([b11df15](https://github.com/stylbandeira/oiai-platform/commit/b11df15fcb3935647cd622704c86ac78013a8eab))
+* correct unkown category problem, and duplicity on product valida… ([963635b](https://github.com/stylbandeira/oiai-platform/commit/963635be9f81f82166e199ca2371edd11f3a09ae))
+* correct unkown category problem, and duplicity on product validation ([963635b](https://github.com/stylbandeira/oiai-platform/commit/963635be9f81f82166e199ca2371edd11f3a09ae))
+* correct unkown category problem, and duplicity on product validation ([af7f570](https://github.com/stylbandeira/oiai-platform/commit/af7f570ff37cca114be1fc1436d412abaa726f9f))
+* correct unused import ([283b20a](https://github.com/stylbandeira/oiai-platform/commit/283b20a7ddee653c887ce7bd7beba7fbd05be555))
+* disable email verification and adjust production CI ([0bb09e2](https://github.com/stylbandeira/oiai-platform/commit/0bb09e244b115086e98fa5e4b86bb9ed010c5f1f))
+* disable email verification and adjust production CI ([0bb09e2](https://github.com/stylbandeira/oiai-platform/commit/0bb09e244b115086e98fa5e4b86bb9ed010c5f1f))
+* duplicated routes ([2566e6c](https://github.com/stylbandeira/oiai-platform/commit/2566e6c764938040e78c65d2e75f32e044f2758b))
+
+
+### Tests
+
+* remove email verification tests ([671e639](https://github.com/stylbandeira/oiai-platform/commit/671e639b5092410aee6b135420190ef14c141a57))
+
+
+### Maintenance
+
+* disable email verification ([dc72104](https://github.com/stylbandeira/oiai-platform/commit/dc72104575f0b69d0ddcd11fda6df19425729dda))
+* disable email verification ([dc72104](https://github.com/stylbandeira/oiai-platform/commit/dc72104575f0b69d0ddcd11fda6df19425729dda))
+* disable email verification ([19a710e](https://github.com/stylbandeira/oiai-platform/commit/19a710e4cd96a7a0a58fbb6f4f7f6e8586ff3b4a))
+* prepare production deployment ([3185c4e](https://github.com/stylbandeira/oiai-platform/commit/3185c4e9a5b70f3da6c73431a9f64e55f71b11c4))
+* prepare production deployment ([44ebf6a](https://github.com/stylbandeira/oiai-platform/commit/44ebf6a72cb95e62052857e9d8bc9af92b5a4bee))
+* prepare production deployment ([#33](https://github.com/stylbandeira/oiai-platform/issues/33)) ([1b1450b](https://github.com/stylbandeira/oiai-platform/commit/1b1450b3da1b1cfd2389d0f36260d837ce3bc913))
+* production adjusts ([7f58575](https://github.com/stylbandeira/oiai-platform/commit/7f58575051e48930f3cd6e06b104adf14d4025f1))
+* production adjusts ([7f58575](https://github.com/stylbandeira/oiai-platform/commit/7f58575051e48930f3cd6e06b104adf14d4025f1))
+* production adjusts ([99163f1](https://github.com/stylbandeira/oiai-platform/commit/99163f110bc1d3e4927223b4fa7c7218afaaf5f7))
+* production adjusts ([99163f1](https://github.com/stylbandeira/oiai-platform/commit/99163f110bc1d3e4927223b4fa7c7218afaaf5f7))
+
 ## [2.0.2](https://github.com/stylbandeira/oiai-platform/compare/api-v2.0.1...api-v2.0.2) (2026-09-30)
 
 
