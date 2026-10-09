@@ -7,6 +7,20 @@ servers:
   - url: http://localhost:8001/api
     description: Desenvolvimento local
 paths:
+  /health:
+    get:
+      summary: Verifica se a aplicação está respondendo
+      responses:
+        '200':
+          description: Aplicação e dependências disponíveis
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
+        '503':
+          description: Uma ou mais dependências indisponíveis
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
   /register:
     post:
       summary: Cadastra um usuário
@@ -258,6 +272,19 @@ components:
     CompanyId: { name: company, in: path, required: true, schema: { type: integer } }
     UserId: { name: user, in: path, required: true, schema: { type: integer } }
   schemas:
+    HealthResponse:
+      type: object
+      required: [status, checks]
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        checks:
+          type: object
+          required: [application, database, queue, meilisearch]
+          properties:
+            application: { type: string, enum: [ok, error] }
+            database: { type: string, enum: [ok, error] }
+            queue: { type: string, enum: [ok, error] }
+            meilisearch: { type: string, enum: [ok, error] }
     User:
       type: object
       properties:

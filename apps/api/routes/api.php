@@ -7,6 +7,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyOwnersController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FavoriteProductsController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ListController;
 use App\Http\Controllers\ListItensController;
@@ -30,6 +31,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Rotas públicas
+Route::get('/health', HealthController::class);
+
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/login', [AuthController::class, 'login']);
