@@ -133,3 +133,24 @@ jobs:
           docker compose --env-file .env -f docker-compose.prod.yml exec -T app php artisan optimize:clear
           docker compose --env-file .env -f docker-compose.prod.yml exec -T app php artisan optimize
           EOF
+
+      - name: Verify production health
+        env:
+          HEALTH_URL: https://api.oiai.stylbandeira.tech/api/health
+        run: |
+          response=$(curl --silent --show-error --max-time 5 \
+            --retry 10 --retry-delay 3 --retry-max-time 60 --retry-all-errors \
+            --write-out '\n%{http_code}' "$HEALTH_URL")
+          http_status="${response##*$'\n'}"
+          body="${response%$'\n'*}"
+
+          if [ "$http_status" != "200" ] || ! jq -e '
+            .status == "ok" and
+            .checks.application == "ok" and
+            .checks.database == "ok" and
+            .checks.queue == "ok" and
+            .checks.meilisearch == "ok"
+          ' <<< "$body"; then
+            echo "Production health check failed (HTTP $http_status)."
+            exit 1
+          fi
