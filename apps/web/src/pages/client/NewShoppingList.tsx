@@ -632,14 +632,9 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
             void saveList(true, correctedItems);
             return;
           }
-          if (updatedProduct?.normalization_validated !== true) {
-            const nextItem = correctedItems.find((item) => item.product.id === updatedProduct?.id);
-            if (nextItem) {
-              setDecisionItem(nextItem);
-              return;
-            }
-          }
-          void saveList(false, correctedItems);
+          // Uma lista dispara no máximo uma decisão de normalização.
+          // Pendências restantes ficam para validação administrativa.
+          void saveList(true, correctedItems);
         }}
       />}
     </div>
