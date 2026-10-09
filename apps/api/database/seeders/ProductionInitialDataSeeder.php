@@ -20,6 +20,7 @@ class ProductionInitialDataSeeder extends Seeder
             $fallbackCategory = ProductCategory::withTrashed()->firstOrNew([
                 'name' => 'Sem categoria',
             ]);
+            $fallbackCategory->description ??= 'Produtos sem categoria definida.';
 
             if ($fallbackCategory->trashed()) {
                 $fallbackCategory->restore();
