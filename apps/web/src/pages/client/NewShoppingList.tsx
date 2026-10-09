@@ -11,6 +11,8 @@ import api from "@/lib/api";
 import { CustomPagination } from "@/components/oiai_ui/CustomPagination";
 import { ProductDecisionPopup } from "@/components/modals/ProductDecisionPopup";
 import type { ProductDecisionAttribute } from "@/components/modals/ProductDecisionPopup";
+import { applyDecisionToList, applyProductDecision, toCreateListItems } from "./shoppingListDecision";
+import type { ListProduct as ShoppingListProduct, SelectedListItem as SelectedItem } from "./shoppingListDecision";
 import type { QueryParams, PaginationMeta } from "@/types/api";
 
 interface ProductSearchResult {
@@ -33,23 +35,6 @@ interface ProductSearchResult {
   quantity_normalization_validated?: boolean;
 }
 
-interface ShoppingListProduct {
-  id: number;
-  name: string;
-  average_price: number;
-  category: string;
-  isFavorite: boolean;
-  unit: string;
-  unity_quantity: number;
-  unity: string;
-  unity_id: number;
-  img?: string;
-  normalization_validated?: boolean;
-  normalization_next_attribute?: ProductDecisionAttribute | null;
-  name_normalization_validated?: boolean;
-  quantity_normalization_validated?: boolean;
-}
-
 interface ListProductRow {
   id?: number;
   name?: string;
@@ -61,12 +46,6 @@ interface ListProductRow {
   unity_id?: number;
   product?: ProductSearchResult;
   category?: string;
-}
-
-interface SelectedItem {
-  product: ShoppingListProduct;
-  quantity: number;
-  unity: string;
 }
 
 interface NewShoppingListProps {
@@ -185,7 +164,6 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
   const addToList = (product: ShoppingListProduct) => {
     const existingItem = selectedItems.find(item => item.product.id === product.id);
-    console.log(selectedItems);
     if (existingItem) {
       setSelectedItems(selectedItems.map(item =>
         item.product.id === product.id
@@ -200,7 +178,6 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   const setProductQuantity = (addQuantity: number, product: ShoppingListProduct) => {
     if (!Number.isInteger(addQuantity) || addQuantity < 1) return;
     const existingItem = selectedItems.find(item => item.product.id === product.id);
-    console.log(selectedItems);
     if (existingItem) {
       setSelectedItems(selectedItems.map(item =>
         item.product.id === product.id
@@ -255,32 +232,28 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
     }
 
     try {
-      const formattedItems = itemsToSave.map(item => ({
-        product_id: item.product.id,
-        quantity: item.quantity,
-        unity: item.unity
-      }));
-
-      let response;
-
       if (isEditMode && actualListId) {
-
-        response = await api.put(`/lists/${actualListId}`, {
+        const formattedItems = itemsToSave.map(item => ({
+          product_id: item.product.id,
+          quantity: item.quantity,
+          unity: item.unity
+        }));
+        await api.put(`/lists/${actualListId}`, {
           name: listName,
           items: formattedItems
         });
 
       } else {
-        response = await api.post("/lists", {
-          products: itemsToSave,
+        await api.post("/lists", {
+          products: toCreateListItems(itemsToSave),
           name: listName
         });
       }
-
-    } catch (error) {
-      console.log(error);
-    } finally {
       navigate("/");
+    } catch (error) {
+      console.error("Erro ao salvar lista:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -305,7 +278,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
           </div>
           <Button
             onClick={() => void saveList()}
-            disabled={!listName || selectedItems.length === 0}
+            disabled={isSaving || !listName.trim() || selectedItems.length === 0}
             className="bg-gradient-primary hover:shadow-glow transition-all duration-300 w-full sm:w-auto"
           >
             {isSaving ? "Salvando..." : buttonText}
@@ -594,46 +567,13 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
         initialValue={decisionItem.product.normalization_next_attribute === "name" ? decisionItem.product.name : ""}
         canSkip
         onComplete={(updatedProduct) => {
-          let correctedItems = selectedItems;
+          const correctedItems = updatedProduct ? applyDecisionToList(selectedItems, updatedProduct) : selectedItems;
           if (updatedProduct) {
-            setProducts((currentProducts) => currentProducts.map((product) => product.id === updatedProduct.id
-              ? {
-                ...product,
-                ...updatedProduct,
-                unity_quantity: updatedProduct.unity_quantity ?? updatedProduct.quantity ?? product.unity_quantity,
-                unity: updatedProduct.unity ?? product.unity,
-                unit: updatedProduct.unity ?? product.unit,
-                unity_id: updatedProduct.unity_id ?? updatedProduct.unit_id ?? product.unity_id,
-              }
-              : product));
-            correctedItems = selectedItems.map((item) => item.product.id === updatedProduct.id
-              ? {
-                ...item,
-                quantity: updatedProduct.unity_quantity ?? updatedProduct.quantity ?? item.quantity,
-                unity: updatedProduct.unity ?? item.unity,
-                product: {
-                  ...item.product,
-                  ...updatedProduct,
-                  unity_quantity: updatedProduct.unity_quantity ?? updatedProduct.quantity ?? item.product.unity_quantity,
-                  unity: updatedProduct.unity ?? item.product.unity,
-                  unit: updatedProduct.unity ?? item.product.unit,
-                  unity_id: updatedProduct.unity_id ?? updatedProduct.unit_id ?? item.product.unity_id,
-                  normalization_validated: updatedProduct.normalization_validated ?? item.product.normalization_validated,
-                  normalization_next_attribute: updatedProduct.normalization_next_attribute,
-                  name_normalization_validated: updatedProduct.name_normalization_validated,
-                  quantity_normalization_validated: updatedProduct.quantity_normalization_validated,
-                },
-              }
-              : item);
+            setProducts((currentProducts) => currentProducts.map((product) =>
+              product.id === updatedProduct.id ? applyProductDecision(product, updatedProduct) : product));
             setSelectedItems(correctedItems);
           }
           setDecisionItem(null);
-          if (!updatedProduct) {
-            void saveList(true, correctedItems);
-            return;
-          }
-          // Uma lista dispara no máximo uma decisão de normalização.
-          // Pendências restantes ficam para validação administrativa.
           void saveList(true, correctedItems);
         }}
       />}
