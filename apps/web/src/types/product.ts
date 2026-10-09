@@ -27,6 +27,10 @@ export interface ProductExportRow {
   brand?: string | null;
   description?: string | null;
   updated_at?: string;
+  normalization_validated?: boolean;
+  normalization_next_attribute?: "name" | "quantity" | null;
+  name_normalization_validated?: boolean;
+  quantity_normalization_validated?: boolean;
 }
 
 export type CsvValue = string | number | boolean | null;

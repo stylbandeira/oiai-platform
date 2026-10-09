@@ -37,8 +37,8 @@ class ListProductResource extends JsonResource
         ];
 
         if ($unityLoaded) {
-            $data['unity'] = $resource->product->unity->abbreviation;
-            $data['unity_id'] = $resource->product->unity->id;
+            $data['unity'] = $resource->product->unity?->abbreviation;
+            $data['unity_id'] = $resource->product->unity?->id;
             $data['unity_quantity'] = $resource->product->quantity;
         } else {
             $data['unity'] = null;
@@ -47,15 +47,15 @@ class ListProductResource extends JsonResource
         }
 
         if ($categoryLoaded) {
-            $data['category'] = $resource->product->category->name;
+            $data['category'] = $resource->product->category?->name;
         } else {
             $data['category'] = null;
         }
 
         if ($companyProductLoaded && $resource->companyProduct) {
             $data['company_id'] = $resource->companyProduct->company_id;
-            $data['company_name'] = $resource->companyProduct->company->name ?? null;
-            $data['store_address'] = $resource->companyProduct->company->address ?? null;
+            $data['company_name'] = $resource->companyProduct->company?->name;
+            $data['store_address'] = $resource->companyProduct->company?->address;
         }
 
         return $data;

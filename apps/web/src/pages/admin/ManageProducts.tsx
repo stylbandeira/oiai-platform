@@ -28,6 +28,7 @@ import { TableFilters } from "@/components/admin/TableFilters";
 import { BulkActionsBar } from "@/components/admin/BulkActionsBar";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { StandardDialog } from "@/components/ui/standard-dialog";
+import { ProductDecisionPopup } from "@/components/modals/ProductDecisionPopup";
 import type { ProductExportRow } from "@/types/product";
 import type { QueryParams } from "@/types/api";
 
@@ -77,6 +78,7 @@ export default function ManageProducts() {
   const [selectedProductDetail, setSelectedProductDetail] = useState<Product | null>(null);
   const [showValidationDialog, setShowValidationDialog] = useState(false);
   const [validationAction, setValidationAction] = useState<"validate" | "invalidate">("validate");
+  const [showNormalizationDialog, setShowNormalizationDialog] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -595,6 +597,11 @@ export default function ManageProducts() {
             <Button className="flex-1" onClick={() => navigate(`/admin/products/edit/${selectedProductDetail.id}`)}>
               <Edit3 className="w-4 h-4 mr-2" /> Editar
             </Button>
+            {selectedProductDetail.normalization_validated !== true && (
+              <Button variant="outline" className="flex-1" onClick={() => setShowNormalizationDialog(true)}>
+                Validar normalização
+              </Button>
+            )}
             <Button variant="destructive" className="flex-1" onClick={() => handleDelete(selectedProductDetail.id)}>
               <Trash2 className="w-4 h-4 mr-2" /> Excluir
             </Button>
@@ -665,6 +672,21 @@ export default function ManageProducts() {
             </div>
         )}
       </StandardDialog>
+      {selectedProductDetail && (
+        <ProductDecisionPopup
+          open={showNormalizationDialog}
+          productId={selectedProductDetail.id}
+          rawName={selectedProductDetail.name}
+          attribute={selectedProductDetail.normalization_next_attribute ?? (/\d/.test(selectedProductDetail.name) ? "quantity" : "name")}
+          initialValue={selectedProductDetail.normalization_next_attribute === "name" ? selectedProductDetail.name : ""}
+          canSkip
+          onComplete={() => {
+            setShowNormalizationDialog(false);
+            setSelectedProductDetail(null);
+            fetchProducts();
+          }}
+        />
+      )}
     </div>
   );
 }
