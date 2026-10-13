@@ -2,6 +2,14 @@
 
 Todas as alterações relevantes do frontend são registradas neste arquivo.
 
+## [2.1.1](https://github.com/stylbandeira/oiai-platform/compare/web-v2.1.0...web-v2.1.1) (2026-10-13)
+
+
+### Bug Fixes
+
+* correct web address ([99bb1f1](https://github.com/stylbandeira/oiai-platform/commit/99bb1f136d222d74b9c7da5c03833d33b7816e3a))
+* correct web address ([99bb1f1](https://github.com/stylbandeira/oiai-platform/commit/99bb1f136d222d74b9c7da5c03833d33b7816e3a))
+
 ## [2.1.0](https://github.com/stylbandeira/oiai-platform/compare/web-v2.0.1...web-v2.1.0) (2026-10-09)
 
 
