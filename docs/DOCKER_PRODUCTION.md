@@ -31,13 +31,10 @@ O `APP_KEY` deve ser gerado antes do primeiro deploy (`php artisan key:generate`
 ou usando uma chave já criada). O `DB_HOST` do arquivo `apps/api/.env.prod` deve
 ser `db`, e o `MEILISEARCH_HOST` deve ser `http://meilisearch:7700`.
 
-Subida da stack :
+Subida da stack (a partir da raiz do clone):
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build
-
-docker compose -f docker-compose.prod.yml exec app php artisan migrate --force
-docker compose -f docker-compose.prod.yml exec app php artisan storage:link
+bash scripts/deploy-production.sh "$(git rev-parse HEAD)"
 ```
 
 ## Atualização automática da VPS a partir do GitHub
@@ -59,19 +56,31 @@ O usuário de deploy precisa conseguir executar o Docker (por exemplo, estar no
 grupo docker) e o clone precisa ter origin configurado para o GitHub. A chave
 SSH da VPS e os arquivos .env continuam somente na VPS.
 
-O clone na VPS não acompanha o GitHub automaticamente. Depois que um PR de
-`develop` for promovido e integrado em `main`, atualize a VPS explicitamente:
+O clone na VPS não acompanha o GitHub automaticamente; o workflow faz essa
+atualização após a integração em `main`. Para atualizar manualmente:
 
 ```bash
 cd /caminho/do/oiai-monorepo
 git fetch origin
 git switch main
 git pull --ff-only origin main
-docker compose --env-file .env -f docker-compose.prod.yml up -d --build
-docker compose --env-file .env -f docker-compose.prod.yml exec app php artisan migrate --force
-docker compose --env-file .env -f docker-compose.prod.yml exec app php artisan optimize:clear
-docker compose --env-file .env -f docker-compose.prod.yml exec app php artisan optimize
+bash scripts/deploy-production.sh "$(git rev-parse HEAD)"
 ```
+
+O job de deploy registra o `GITHUB_SHA` solicitado, confere o SHA do clone e
+mostra o SHA de cada container da aplicação. Para conferir o commit que está
+rodando na API (e não apenas o checkout atual), execute na VPS:
+
+```bash
+docker inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' \
+  "$(docker compose --env-file .env -f docker-compose.prod.yml ps -q app)"
+```
+
+Substitua `app` por `web`, `api-web`, `queue` ou `scheduler` para conferir os
+demais containers. O deploy falha se algum SHA não corresponder ao commit
+solicitado. Os serviços de infraestrutura (`db` e `meilisearch`) não recebem
+esse rótulo. Para executar `docker compose` diretamente nessa stack, exporte
+`DEPLOY_SHA=$(git rev-parse HEAD)` antes; o script faz isso automaticamente.
 
 Os arquivos `.env` locais não devem ser sobrescritos pelo Git e permanecem
 separados do código. Antes de atualizar, confira `git status` e faça backup do

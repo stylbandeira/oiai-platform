@@ -1,5 +1,7 @@
 services:
     app:
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
         build:
             context: .
             dockerfile: docker/api/Dockerfile.prod
@@ -19,6 +21,8 @@ services:
                 condition: service_started
 
     api-web:
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
         build:
             context: .
             dockerfile: docker/api/Dockerfile.nginx.prod
@@ -31,6 +35,8 @@ services:
             - app
 
     queue:
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
         build:
             context: .
             dockerfile: docker/api/Dockerfile.prod
@@ -47,6 +53,8 @@ services:
                 condition: service_healthy
 
     scheduler:
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
         build:
             context: .
             dockerfile: docker/api/Dockerfile.prod
@@ -62,6 +70,8 @@ services:
                 condition: service_healthy
 
     web:
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
         build:
             context: ./apps/web
             dockerfile: Dockerfile.prod

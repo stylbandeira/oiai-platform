@@ -18,6 +18,7 @@ on:
       - 'docker/**'
       - 'docker-compose.yml'
       - 'docker-compose.prod.yml'
+      - 'scripts/deploy-production.sh'
       - 'docs/openapi.yaml'
       - '.github/workflows/**'
 
@@ -121,17 +122,14 @@ jobs:
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_APP_PATH: ${{ secrets.VPS_APP_PATH }}
         run: |
+          echo "Requested production SHA: $GITHUB_SHA"
           ssh -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" <<EOF
           set -e
           cd "$VPS_APP_PATH"
           git fetch origin main
           git switch main
           git pull --ff-only origin main
-          docker compose --env-file .env -f docker-compose.prod.yml up -d --build
-          docker compose --env-file .env -f docker-compose.prod.yml exec -T app php artisan migrate --force
-          docker compose --env-file .env -f docker-compose.prod.yml exec -T app php artisan storage:link
-          docker compose --env-file .env -f docker-compose.prod.yml exec -T app php artisan optimize:clear
-          docker compose --env-file .env -f docker-compose.prod.yml exec -T app php artisan optimize
+          bash scripts/deploy-production.sh "$GITHUB_SHA"
           EOF
 
       - name: Verify production health
@@ -154,3 +152,4 @@ jobs:
             echo "Production health check failed (HTTP $http_status)."
             exit 1
           fi
+          echo "Production health passed for SHA $GITHUB_SHA"
