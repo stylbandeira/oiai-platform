@@ -8,6 +8,7 @@ on:
       - 'apps/web/**'
       - 'docker/**'
       - 'docker-compose.yml'
+      - 'scripts/**'
       - 'docs/openapi.yaml'
       - '.github/workflows/**'
   push:
@@ -18,7 +19,7 @@ on:
       - 'docker/**'
       - 'docker-compose.yml'
       - 'docker-compose.prod.yml'
-      - 'scripts/deploy-production.sh'
+      - 'scripts/**'
       - 'docs/openapi.yaml'
       - '.github/workflows/**'
 

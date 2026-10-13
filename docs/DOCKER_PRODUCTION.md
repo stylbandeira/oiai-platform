@@ -87,6 +87,44 @@ separados do código. Antes de atualizar, confira `git status` e faça backup do
 banco. Se a VPS usa outro remote ou autenticação SSH, substitua `origin` pelo
 remote correto.
 
+## Rollback para um commit anterior
+
+Use o SHA completo de um deploy anterior que passou no health check. Ele pode
+ser obtido nos logs do job `Deploy production to VPS` ou no rótulo do container
+mostrado acima. **Não suponha que `HEAD^` foi a última versão saudável**: um
+commit intermediário pode nunca ter sido implantado. Antes de prosseguir,
+confirme que há backup do banco e evite iniciar outro deploy em paralelo.
+
+Na VPS, na raiz do clone:
+
+```bash
+cd /opt/oiai/app
+git status --short
+SHA_ANTERIOR=cole_o_sha_completo_aqui
+git show --no-patch --oneline "$SHA_ANTERIOR"
+bash scripts/rollback-production.sh "$SHA_ANTERIOR"
+```
+
+O script aceita um SHA de commit ancestral do checkout atual, recusa alterações
+locais em arquivos rastreados, faz checkout destacado do alvo, recompila e sobe
+a stack, verifica o SHA de cada container e exige HTTP 200 em
+`http://127.0.0.1:8001/api/health`. Não é necessário editar o código nem fazer
+`git reset` ou `push`. O branch `main` local permanece intacto; o checkout fica
+destacado até o próximo deploy ou até `git switch main`. Arquivos `.env` e
+volumes persistentes, incluindo o banco, permanecem no lugar.
+
+O rollback **não reverte migrações nem dados do MySQL**. Verifique antes se o
+commit antigo funciona com o esquema atual. Se o health check falhar, o script
+retorna erro e mantém o checkout no SHA alvo para diagnóstico; ele não tenta
+reverter automaticamente o banco ou publicar outra versão. Para voltar à
+versão mais recente após resolver o problema:
+
+```bash
+git switch main
+git pull --ff-only origin main
+bash scripts/deploy-production.sh "$(git rev-parse HEAD)"
+```
+
 A composição de produção não inicia Mailhog, phpMyAdmin, Vite, `artisan serve` ou
 bind mounts do código-fonte. MySQL, Meilisearch e PHP-FPM ficam acessíveis apenas
 na rede interna do Compose; não há portas públicas de infraestrutura.

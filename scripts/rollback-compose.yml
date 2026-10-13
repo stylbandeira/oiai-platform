@@ -1,0 +1,16 @@
+services:
+    app:
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
+    api-web:
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
+    queue:
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
+    scheduler:
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
+    web:
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
