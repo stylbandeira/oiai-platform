@@ -4,11 +4,14 @@ namespace Tests\Feature\Policies;
 
 use App\Models\User;
 use App\Policies\UsersPolicy;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Tests\TestCase;
 
 class UserPolicyTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_admin_can_delete_user(): void
     {
         $admin = User::factory()->admin()->create();
