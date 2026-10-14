@@ -566,6 +566,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
         attribute={decisionItem.product.normalization_next_attribute ?? (/\d/.test(decisionItem.product.name) ? "quantity" : "name")}
         initialValue={decisionItem.product.normalization_next_attribute === "name" ? decisionItem.product.name : ""}
         canSkip
+        approvalRequired
         onComplete={(updatedProduct) => {
           const correctedItems = updatedProduct ? applyDecisionToList(selectedItems, updatedProduct) : selectedItems;
           if (updatedProduct) {

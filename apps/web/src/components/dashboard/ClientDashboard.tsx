@@ -554,7 +554,12 @@ export function ClientDashboard() {
         attribute={decisionProduct.normalization_next_attribute ?? (/\d/.test(decisionProduct.name) ? "quantity" : "name")}
         initialValue={decisionProduct.normalization_next_attribute === "name" ? decisionProduct.name : ""}
         canSkip
+        approvalRequired
         onComplete={(updatedProduct) => {
+          if (updatedProduct?.review_pending === true) {
+            setDecisionProduct(null);
+            return;
+          }
           if (updatedProduct?.normalization_validated !== true) {
             setDecisionProduct({ ...decisionProduct, ...updatedProduct });
             return;

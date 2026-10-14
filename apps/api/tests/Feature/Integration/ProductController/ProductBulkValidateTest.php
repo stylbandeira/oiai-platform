@@ -76,6 +76,30 @@ class ProductBulkValidateTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_invalidate_and_revalidate_without_awarding_points_twice(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $creator = User::factory()->client()->create(['points' => 0]);
+        $product = Product::factory()->create(['validated' => true, 'created_by' => $creator->id]);
+
+        $this->actingAs($admin)->postJson('/api/admin/products/bulk-validate', [
+            'product_ids' => [$product->id], 'validated' => false,
+        ])->assertOk()->assertJsonPath('count', 1);
+        $this->assertFalse((bool) $product->fresh()->validated);
+        $this->assertSame(0, $creator->fresh()->points);
+
+        $this->actingAs($admin)->postJson('/api/admin/products/bulk-validate', [
+            'product_ids' => [$product->id], 'validated' => true,
+        ])->assertOk()->assertJsonPath('count', 1);
+        $this->assertTrue((bool) $product->fresh()->validated);
+        $this->assertSame(3, $creator->fresh()->points);
+
+        $this->actingAs($admin)->postJson('/api/admin/products/bulk-validate', [
+            'product_ids' => [$product->id], 'validated' => true,
+        ])->assertOk()->assertJsonPath('count', 0);
+        $this->assertSame(3, $creator->fresh()->points);
+    }
+
     public function invalidPayloadsProvider(): array
     {
         return [

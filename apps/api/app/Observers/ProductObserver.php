@@ -34,7 +34,7 @@ class ProductObserver
 
     public function updating(Product $product)
     {
-        if ($product->getOriginal('validated') === false && ! $product->validated_by) {
+        if ($product->isDirty('validated') && $product->validated && $product->getOriginal('validated') === false && ! $product->validated_by) {
             $this->userRepo->addPoints($product->created_by, 3);
         }
     }

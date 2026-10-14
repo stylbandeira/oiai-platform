@@ -15,10 +15,15 @@ class BulkValidateProductAction
 
     public function execute(User $user, array $data)
     {
-        $productsToScore = $this->product_repository->validateProducts($data['product_ids'], $user->id);
+        $validated = (bool) $data['validated'];
+        $productsToScore = $this->product_repository->validateProducts($data['product_ids'], $user->id, $validated);
 
-        foreach ($productsToScore as $product) {
-            $this->user_repository->addPoints($product->created_by, 3);
+        if ($validated) {
+            foreach ($productsToScore as $product) {
+                if ($product->created_by) {
+                    $this->user_repository->addPoints($product->created_by, 3);
+                }
+            }
         }
 
         return $productsToScore;

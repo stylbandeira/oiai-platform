@@ -3,6 +3,7 @@
 namespace Tests\Feature\Integration\ProductController;
 
 use App\Models\Product;
+use App\Models\ProductReviewSuggestion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,6 +11,35 @@ use Tests\TestCase;
 class ProductIndexTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_admin_status_counts_are_exclusive_and_ignore_deleted_products(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $valid = Product::factory()->create(['validated' => true]);
+        Product::factory()->create(['validated' => false]);
+        $deleted = Product::factory()->create(['validated' => true]);
+        $deleted->delete();
+        ProductReviewSuggestion::create([
+            'product_id' => $valid->id,
+            'submitted_by' => $admin->id,
+            'type' => 'name',
+            'original_name' => $valid->name,
+            'suggested_values' => ['normalized_name' => $valid->name],
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($admin)->getJson('/api/admin/products?status=pendentes')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('counts.total', 2)
+            ->assertJsonPath('counts.pendentes', 1)
+            ->assertJsonPath('counts.validados', 0)
+            ->assertJsonPath('counts.invalidos', 1);
+
+        $this->actingAs($admin)->getJson('/api/admin/products?status=invalidos')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    }
 
     public function test_client_and_admin_have_access(): void
     {

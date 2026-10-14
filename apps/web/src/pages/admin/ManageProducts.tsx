@@ -53,12 +53,14 @@ interface ProductCounts {
   total: number;
   pendentes: number;
   validados: number;
+  invalidos: number;
 }
 
 const defaultCounts: ProductCounts = {
   total: 0,
   pendentes: 0,
-  validados: 0
+  validados: 0,
+  invalidos: 0,
 };
 
 export default function ManageProducts() {
@@ -117,12 +119,10 @@ export default function ManageProducts() {
       if (searchTerm) params.search = searchTerm;
       if (category !== "all") params.category = category;
 
-      if (activeTab === "pendentes") {
-        params.validated = false;
-      } else if (activeTab === "validados") {
-        params.validated = true;
+      if (activeTab !== "todos") {
+        params.status = activeTab;
       } else if (status !== "all") {
-        params.validated = status === "validados";
+        params.status = status;
       }
 
       const response = await api.get("/admin/products", { params });
@@ -217,29 +217,47 @@ export default function ManageProducts() {
     }
   };
 
-  const formatPrice = (price: number) => {
+  const reviewSuggestion = async (suggestionId: number, decision: "approved" | "rejected") => {
+    try {
+      await api.post(`/admin/product-review-suggestions/${suggestionId}/review`, { decision });
+      setSelectedProductDetail(null);
+      await fetchProducts();
+    } catch (error) {
+      console.error("Erro ao revisar sugestão:", error);
+      alert("Não foi possível revisar a sugestão.");
+    }
+  };
+
+  const formatPrice = (price: number | null) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(price);
+    }).format(price ?? 0);
   };
 
-  const getImageUrl = (img: string | undefined) => {
+  const getImageUrl = (img: string | null | undefined) => {
     if (!img) return null;
     if (img.startsWith('http')) return img;
     return `${import.meta.env.VITE_API_URL}/storage/${img}`;
   };
 
+  const statusLabel = (product: Product) => {
+    if (product.status === "pendentes") return "Pendente";
+    return product.validated ? "Validado" : "Inválido";
+  };
+
   const stats = [
     { label: "Total", value: counts.total, icon: <Package className="w-3 h-3 sm:w-4 sm:h-4 text-white" />, color: "bg-primary" },
     { label: "Pendentes", value: counts.pendentes, icon: <XCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />, color: "bg-yellow-500" },
-    { label: "Validados", value: counts.validados, icon: <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />, color: "bg-green-500" }
+    { label: "Validados", value: counts.validados, icon: <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />, color: "bg-green-500" },
+    { label: "Inválidos", value: counts.invalidos, icon: <XCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />, color: "bg-red-500" }
   ];
 
   const categoryOptions = categories.map(cat => ({ value: cat.name, label: cat.name }));
   const statusOptions = [
     { value: "validados", label: "Validados" },
-    { value: "pendentes", label: "Pendentes" }
+    { value: "pendentes", label: "Pendentes" },
+    { value: "invalidos", label: "Inválidos" },
   ];
 
   if (loading) {
@@ -266,10 +284,11 @@ export default function ManageProducts() {
       <StatsCards stats={stats} />
 
       <Tabs defaultValue="todos" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="todos">Todos</TabsTrigger>
           <TabsTrigger value="pendentes">Pendentes</TabsTrigger>
           <TabsTrigger value="validados">Validados</TabsTrigger>
+          <TabsTrigger value="invalidos">Inválidos</TabsTrigger>
         </TabsList>
 
         <Card className="border-0 shadow-sm">
@@ -298,7 +317,7 @@ export default function ManageProducts() {
           </CardContent>
         </Card>
 
-        <BulkActionsBar
+        {activeTab !== "pendentes" && <BulkActionsBar
           selectedCount={selectedProducts.length}
           actions={[
             {
@@ -317,7 +336,7 @@ export default function ManageProducts() {
             }
           ]}
           onClear={() => { setSelectedProducts([]); setSelectAll(false); }}
-        />
+        />}
 
         {/* Tabela Desktop */}
         <Card className="border-0 shadow-sm hidden md:block">
@@ -334,6 +353,7 @@ export default function ManageProducts() {
                   <tr className="border-b">
                     <th className="w-12 py-3 text-left">
                       <Checkbox
+                        disabled={activeTab === "pendentes"}
                         checked={selectAll}
                         onCheckedChange={handleSelectAll}
                       />
@@ -353,6 +373,7 @@ export default function ManageProducts() {
                     <tr key={product.id} className="border-b hover:bg-muted/50">
                       <td className="py-3">
                         <Checkbox
+                          disabled={activeTab === "pendentes"}
                           checked={selectedProducts.includes(product.id)}
                           onCheckedChange={() => handleSelectProduct(product.id)}
                         />
@@ -377,12 +398,14 @@ export default function ManageProducts() {
                       </td>
                       <td className="py-3">
                         <div className="max-w-[250px]">
-                          <p className="font-medium truncate">{product.name}</p>
+                          <button type="button" className="font-medium truncate text-left hover:underline" onClick={() => setSelectedProductDetail(product)}>
+                            {product.name}
+                          </button>
                           {product.brand && <p className="text-sm text-muted-foreground truncate">{product.brand}</p>}
                         </div>
                       </td>
                       <td className="py-3">
-                        <code className="text-xs bg-muted px-2 py-1 rounded whitespace-nowrap">{product.sku || 'N/A'}</code>
+                        <code className="text-xs bg-muted px-2 py-1 rounded whitespace-nowrap">{product.ean || product.sku || 'N/A'}</code>
                       </td>
                       <td className="py-3">
                         <span className="text-sm whitespace-nowrap">{product.category}</span>
@@ -391,17 +414,9 @@ export default function ManageProducts() {
                         <span className="font-medium whitespace-nowrap">{formatPrice(product.average_price)}</span>
                       </td>
                       <td className="py-3">
-                        {product.validated ? (
-                          <Badge className="bg-green-100 text-green-700 whitespace-nowrap">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Validado
-                          </Badge>
-                        ) : (
-                          <Badge variant="destructive" className="whitespace-nowrap">
-                            <XCircle className="w-3 h-3 mr-1" />
-                            Pendente
-                          </Badge>
-                        )}
+                        <Badge variant={product.status === "invalidos" ? "destructive" : "secondary"}>
+                          {statusLabel(product)}
+                        </Badge>
                       </td>
                       <td className="py-3">
                         <span className="text-sm whitespace-nowrap">
@@ -482,22 +497,16 @@ export default function ManageProducts() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold truncate">{product.name}</p>
+                        <button type="button" className="font-semibold truncate text-left hover:underline" onClick={() => setSelectedProductDetail(product)}>
+                          {product.name}
+                        </button>
                         {product.brand && <p className="text-sm text-muted-foreground truncate">{product.brand}</p>}
-                        <p className="text-xs text-muted-foreground mt-1 truncate">SKU: {product.sku || 'N/A'}</p>
+                        <p className="text-xs text-muted-foreground mt-1 truncate">Código: {product.ean || product.sku || 'N/A'}</p>
                       </div>
                       <div className="flex-shrink-0">
-                        {product.validated ? (
-                          <Badge className="bg-green-100 text-green-700 text-xs whitespace-nowrap">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Validado
-                          </Badge>
-                        ) : (
-                          <Badge variant="destructive" className="text-xs whitespace-nowrap">
-                            <XCircle className="w-3 h-3 mr-1" />
-                            Pendente
-                          </Badge>
-                        )}
+                        <Badge variant={product.status === "invalidos" ? "destructive" : "secondary"}>
+                          {statusLabel(product)}
+                        </Badge>
                       </div>
                     </div>
 
@@ -597,7 +606,7 @@ export default function ManageProducts() {
             <Button className="flex-1" onClick={() => navigate(`/admin/products/edit/${selectedProductDetail.id}`)}>
               <Edit3 className="w-4 h-4 mr-2" /> Editar
             </Button>
-            {selectedProductDetail.normalization_validated !== true && (
+            {selectedProductDetail.status !== "pendentes" && selectedProductDetail.normalization_validated !== true && (
               <Button variant="outline" className="flex-1" onClick={() => setShowNormalizationDialog(true)}>
                 Validar normalização
               </Button>
@@ -636,7 +645,7 @@ export default function ManageProducts() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <p className="text-xs text-muted-foreground">Código de Barras</p>
-                    <p className="font-mono text-sm break-all">{selectedProductDetail.sku || 'N/A'}</p>
+                    <p className="font-mono text-sm break-all">{selectedProductDetail.ean || 'Sem GTIN'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Categoria</p>
@@ -659,14 +668,26 @@ export default function ManageProducts() {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Status</p>
-                      {selectedProductDetail.validated ? (
-                        <Badge className="bg-green-100 text-green-700">Validado</Badge>
-                      ) : (
-                        <Badge variant="destructive">Pendente</Badge>
-                      )}
+                      <Badge variant={selectedProductDetail.status === "invalidos" ? "destructive" : "secondary"}>
+                        {statusLabel(selectedProductDetail)}
+                      </Badge>
                     </div>
                   </div>
                 </div>
+                {selectedProductDetail.pending_suggestions?.map((suggestion) => (
+                  <div key={suggestion.id} className="rounded-md border p-3 space-y-2">
+                    <p className="font-medium">{suggestion.type === "equivalence" ? "Possível equivalência" : suggestion.type === "name" ? "Sugestão de nome" : "Sugestão de quantidade/unidade"}</p>
+                    <p className="text-sm">Nome original: <strong>{suggestion.original_name}</strong></p>
+                    {suggestion.type === "name" && <p className="text-sm">Nome escrito pelo usuário: <strong>{suggestion.suggested_values?.normalized_name}</strong></p>}
+                    {suggestion.type === "quantity" && <p className="text-sm">Quantidade/unidade descrita pelo usuário: <strong>{suggestion.suggested_values?.normalized_quantity}</strong></p>}
+                    {suggestion.type === "equivalence" && <p className="text-sm">Produto possivelmente equivalente: <strong>{suggestion.suggested_product?.name ?? "Indisponível"}</strong></p>}
+                    {suggestion.submitted_by && <p className="text-xs text-muted-foreground">Enviado por {suggestion.submitted_by}</p>}
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => void reviewSuggestion(suggestion.id, "approved")}>Aprovar</Button>
+                      <Button size="sm" variant="outline" onClick={() => void reviewSuggestion(suggestion.id, "rejected")}>Rejeitar</Button>
+                    </div>
+                  </div>
+                ))}
               </div>
 
             </div>

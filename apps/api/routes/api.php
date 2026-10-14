@@ -13,6 +13,7 @@ use App\Http\Controllers\ListController;
 use App\Http\Controllers\ListItensController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductReviewSuggestionController;
 use App\Http\Controllers\ProductTypeController;
 use App\Http\Controllers\ShoppingListRequirementController;
 use App\Http\Controllers\UnityController;
@@ -55,6 +56,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::post('/products/import', [ProductController::class, 'import']);
         Route::get('/products/export', [ProductController::class, 'export']);
         Route::post('/products/bulk-validate', [ProductController::class, 'bulkValidate']);
+        Route::post('/product-review-suggestions/{suggestion}/review', [ProductReviewSuggestionController::class, 'review']);
         Route::post('/product-types', [ProductTypeController::class, 'store']);
         Route::apiResource('/products', ProductController::class);
         Route::apiResource('/users', UserController::class)->withTrashed(['show', 'update', 'destroy']);

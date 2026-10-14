@@ -17,6 +17,16 @@ export interface ProductExportRow {
   img: string | null;
   average_price: number | null;
   validated: boolean;
+  status?: "pendentes" | "validados" | "invalidos";
+  raw_name?: string | null;
+  pending_suggestions?: Array<{
+    id: number;
+    type: "name" | "quantity" | "equivalence";
+    original_name: string;
+    suggested_values: { normalized_name?: string; normalized_quantity?: string; quantity_dimension?: string } | null;
+    suggested_product: { id: number; name: string } | null;
+    submitted_by: string | null;
+  }>;
   mentioned_quantity: number | null;
   mentioned_quantity_variant: string | null;
   unity: string | null;

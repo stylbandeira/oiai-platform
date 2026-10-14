@@ -67,10 +67,11 @@ final class ProductNormalizationDecisionService
         int $reviewedBy,
         int $algorithmVersion,
         bool $validated = true,
+        bool $trustedReviewer = false,
     ): ProductNormalizationDecision {
         $rawName = (string) ($product->raw_name ?: $product->name);
         $safeValues = array_intersect_key($selectedValues, array_flip(self::SAFE_FIELDS));
-        $validated = $this->isValidDecision($rawName, $safeValues);
+        $validated = $trustedReviewer || $this->isValidDecision($rawName, $safeValues);
 
         if ($validated) {
             $this->applyQuantityAndUnity($product, $safeValues);

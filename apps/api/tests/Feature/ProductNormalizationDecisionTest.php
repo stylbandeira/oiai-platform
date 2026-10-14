@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\ProductNormalizationDecision;
+use App\Models\ProductReviewSuggestion;
 use App\Models\Unity;
 use App\Models\User;
 use App\Services\Product\ProductNormalizationDecisionService;
@@ -14,9 +15,46 @@ class ProductNormalizationDecisionTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_client_suggestion_waits_for_admin_without_changing_product(): void
+    {
+        $client = User::factory()->client()->create();
+        $admin = User::factory()->admin()->create();
+        $product = Product::factory()->create([
+            'name' => 'BANANA',
+            'raw_name' => 'BANANA',
+            'normalized_name' => 'BANANA',
+            'validated' => true,
+        ]);
+
+        $this->actingAs($client)->postJson(
+            "/api/products/{$product->id}/normalization-decisions",
+            ['selected_values' => ['normalized_name' => 'Banana prata'], 'algorithm_version' => 2],
+        )->assertCreated()->assertJsonPath('review_pending', true);
+
+        $this->assertSame('BANANA', $product->fresh()->name);
+        $suggestion = ProductReviewSuggestion::query()->where('product_id', $product->id)->firstOrFail();
+        $this->assertSame('pending', $suggestion->status);
+
+        $this->actingAs($admin)->getJson('/api/admin/products?status=pendentes')
+            ->assertOk()
+            ->assertJsonPath('counts.pendentes', 1)
+            ->assertJsonPath('data.0.pending_suggestions.0.suggested_values.normalized_name', 'Banana prata');
+
+        $this->actingAs($admin)->postJson(
+            "/api/admin/product-review-suggestions/{$suggestion->id}/review",
+            ['decision' => 'approved'],
+        )->assertOk();
+
+        $this->assertSame('Banana prata', $product->fresh()->name);
+        $this->assertSame('approved', $suggestion->fresh()->status);
+        $this->actingAs($admin)->getJson('/api/admin/products?status=validados')
+            ->assertOk()
+            ->assertJsonPath('counts.pendentes', 0);
+    }
+
     public function test_quantity_and_unity_decision_is_applied_and_recorded(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $unity = Unity::factory()->create([
             'name' => 'gramas',
             'abbreviation' => 'g',
@@ -80,7 +118,7 @@ class ProductNormalizationDecisionTest extends TestCase
 
     public function test_repeated_correction_reaches_confidence_and_is_reused(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $unity = Unity::query()->updateOrCreate(
             ['abbreviation' => 'mg'],
             [
@@ -136,7 +174,7 @@ class ProductNormalizationDecisionTest extends TestCase
 
     public function test_numeric_product_requires_quantity_and_name_validation_in_sequence(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
         $unity = Unity::factory()->create([
             'name' => 'mililitros',
             'abbreviation' => 'ml',
