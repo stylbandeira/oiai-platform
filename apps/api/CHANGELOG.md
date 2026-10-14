@@ -2,6 +2,20 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [3.0.0](https://github.com/stylbandeira/oiai-platform/compare/api-v2.1.1...api-v3.0.0) (2026-10-14)
+
+### ⚠ BREAKING CHANGES
+
+* Sugestões de normalização enviadas por clientes agora aguardam aprovação administrativa.
+
+### Features
+
+* **api:** adicionar revisão administrativa de normalizações e identidade de produto por mercado ([692e85d](https://github.com/stylbandeira/oiai-platform/commit/692e85de3d1545114fc5b3873923459d44abc105))
+
+### Maintenance
+
+* documentar estratégia de rollback ([f49076d](https://github.com/stylbandeira/oiai-platform/commit/f49076d9eb6bf01490d3e0e2a9e8e1f5725e6829))
+
 ## [2.1.1](https://github.com/stylbandeira/oiai-platform/compare/api-v2.1.0...api-v2.1.1) (2026-10-13)
 
 

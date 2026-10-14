@@ -10,7 +10,7 @@ Alterações na API não devem consumir o CI do Web, e releases de um componente
 
 ## Decision
 
-Usar workflows filtrados por caminho, um `CI Gate` global, versões Semantic Versioning independentes e Release Please em modo monorepo.
+Usar workflows filtrados por caminho, um `CI Gate` global, versões Semantic Versioning independentes e Release Please em modo monorepo, com PRs de versão direcionados a `develop`. A implantação de produção continua restrita a pushes em `main`, após promoção explícita por PR.
 
 ## Alternatives considered
 
@@ -20,4 +20,4 @@ Usar workflows filtrados por caminho, um `CI Gate` global, versões Semantic Ver
 
 ## Consequences
 
-O pipeline economiza recursos e torna a proteção da branch confiável, mas arquivos compartilhados precisam ser mantidos nos filtros de ambos os componentes.
+O pipeline economiza recursos e torna a proteção da branch confiável, mas arquivos compartilhados precisam ser mantidos nos filtros de ambos os componentes. Tags e GitHub Releases são criadas quando os PRs de versão são integrados em `develop`; esses eventos não implantam produção. O PR `develop → main` é a fronteira de produção.
