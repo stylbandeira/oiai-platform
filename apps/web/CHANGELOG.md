@@ -2,6 +2,20 @@
 
 Todas as alterações relevantes do frontend são registradas neste arquivo.
 
+## [3.0.0](https://github.com/stylbandeira/oiai-platform/compare/web-v2.1.1...web-v3.0.0) (2026-10-14)
+
+### ⚠ BREAKING CHANGES
+
+* O usuário envia propostas de normalização para análise; elas não são aplicadas imediatamente.
+
+### Features
+
+* **web:** permitir revisão administrativa das sugestões de normalização na gestão de produtos ([692e85d](https://github.com/stylbandeira/oiai-platform/commit/692e85de3d1545114fc5b3873923459d44abc105))
+
+### Maintenance
+
+* documentar estratégia de rollback ([f49076d](https://github.com/stylbandeira/oiai-platform/commit/f49076d9eb6bf01490d3e0e2a9e8e1f5725e6829))
+
 ## [2.1.1](https://github.com/stylbandeira/oiai-platform/compare/web-v2.1.0...web-v2.1.1) (2026-10-13)
 
 
