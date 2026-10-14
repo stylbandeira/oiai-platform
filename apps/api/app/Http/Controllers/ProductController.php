@@ -20,6 +20,7 @@ use App\Http\Requests\Product\ProductUpdateRequest;
 use App\Http\Resources\AdminProductResource;
 use App\Http\Resources\ClientProductResource;
 use App\Models\Product;
+use App\Models\ProductReviewSuggestion;
 use App\Services\ExportService;
 use App\Services\Product\ProductNormalizationDecisionService;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -39,7 +40,8 @@ class ProductController extends Controller
         $products = $action->execute($user, $request->validated());
 
         if ($user->isAdmin()) {
-            return AdminProductResource::collection($products);
+            return AdminProductResource::collection($products)
+                ->additional(['counts' => $action->statusCounts()]);
         }
 
         return ClientProductResource::collection($products);
@@ -146,6 +148,29 @@ class ProductController extends Controller
         Product $product,
         ProductNormalizationDecisionService $decisions,
     ): Response {
+        if (! $request->user()->isAdmin()) {
+            $values = $request->validated('selected_values');
+            $type = isset($values['normalized_name']) ? 'name' : 'quantity';
+            $suggestion = ProductReviewSuggestion::updateOrCreate(
+                [
+                    'product_id' => $product->id,
+                    'submitted_by' => $request->user()->id,
+                    'type' => $type,
+                    'status' => 'pending',
+                ],
+                [
+                    'original_name' => (string) ($product->raw_name ?: $product->name),
+                    'suggested_values' => $values,
+                ],
+            );
+
+            return response([
+                'suggestion' => $suggestion,
+                'review_pending' => true,
+                'product' => ['id' => $product->id, 'name' => $product->name, 'review_pending' => true],
+            ], 201);
+        }
+
         $decision = $decisions->recordManualDecision(
             product: $product,
             selectedValues: $request->validated('selected_values'),

@@ -34,4 +34,9 @@ class IndexProductAction
 
         return $products;
     }
+
+    public function statusCounts(): array
+    {
+        return $this->productRepo->statusCounts();
+    }
 }

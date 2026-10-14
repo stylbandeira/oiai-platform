@@ -5,14 +5,17 @@ namespace App\Jobs;
 use App\Enums\ProductQuantitySource;
 use App\Models\Address;
 use App\Models\Company;
+use App\Models\CompanyProductCode;
 use App\Models\CompanyProducts;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\ProductReviewSuggestion;
 use App\Models\Unity;
 use App\Models\User;
 use App\Models\UserAddedProducts;
 use App\Repositories\UserRepository;
 use App\Services\NotificationService;
+use App\Services\Product\Gtin;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -20,6 +23,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ProcessInvoiceJob implements ShouldQueue
 {
@@ -133,34 +137,83 @@ class ProcessInvoiceJob implements ShouldQueue
         }
 
         foreach ($products_data as $productData) {
-            // VERIFICA SE É PRODUTO SEM EAN
-            $insert = ! is_numeric($productData->ean) ?
-                ['sku' => $productData->codigo] :
-                ['ean' => $productData->ean];
-
             $unity = $this->firstOrNewUnity($productData->unidade);
-            $quantitySource = ProductQuantitySource::DefaultExtraction;
+            $code = trim((string) ($productData->codigo ?? ''));
+            $gtin = Gtin::normalize(isset($productData->ean) ? (string) $productData->ean : null);
+            $merchantCode = $code !== ''
+                ? CompanyProductCode::query()->where('company_id', $company->id)->where('code', $code)->first()
+                : null;
+            $globalProduct = $gtin ? Product::query()->where('ean', $gtin)->first() : null;
+            $mappedProduct = $merchantCode?->product;
 
-            $insertedProduct = Product::updateOrCreate(
-                $insert,
-                [
-                    'sku' => $productData->codigo,
+            // A valid GTIN wins over a recycled merchant code. Without a GTIN,
+            // cProd is only meaningful within the issuing company.
+            $insertedProduct = $globalProduct;
+            if (! $insertedProduct && $mappedProduct && (
+                $gtin === null || $mappedProduct->ean === $gtin ||
+                ($mappedProduct->ean === null
+                    && strcasecmp((string) $mappedProduct->raw_name, (string) $productData->descricao) === 0
+                    && $mappedProduct->unit_id === $unity->id)
+            )) {
+                $insertedProduct = $mappedProduct;
+                if ($gtin && ! $insertedProduct->ean) {
+                    $insertedProduct->ean = $gtin;
+                    $insertedProduct->save();
+                }
+            }
+
+            $newProduct = $insertedProduct === null;
+            if ($newProduct) {
+                $quantitySource = ProductQuantitySource::DefaultExtraction;
+                $insertedProduct = Product::create([
+                    'sku' => 'AUTO-'.Str::uuid(),
+                    'ean' => $gtin,
                     'description' => $productData->descricao,
                     'name' => $productData->descricao,
                     'raw_name' => $productData->descricao,
                     'normalized_name' => $productData->descricao,
                     'search_description' => $productData->descricao,
-                    'normalized_quantity' => ($productData->quantidade ?? 1).' '.$productData->unidade,
                     'quantity_source' => $quantitySource->value,
                     'quantity_dimension' => $unity->dimension ?? 'unit',
                     'quantity_confidence' => $quantitySource->confidence(),
                     'unit_id' => $unity->id,
                     'quantity' => 1,
                     'created_by' => $user->id,
-                ],
-            );
+                ]);
+            }
 
-            if (! $insertedProduct->wasRecentlyCreated) {
+            if ($code !== '') {
+                CompanyProductCode::updateOrCreate(
+                    ['company_id' => $company->id, 'code' => $code],
+                    ['product_id' => $insertedProduct->id],
+                );
+            }
+
+            if ($newProduct && ! $gtin) {
+                $candidates = Product::query()
+                    ->where('unit_id', $unity->id)
+                    ->where('id', '!=', $insertedProduct->id)
+                    ->where(function ($query) use ($productData): void {
+                        $query->where('raw_name', $productData->descricao)
+                            ->orWhere('name', $productData->descricao);
+                    })
+                    ->limit(3)
+                    ->get();
+
+                foreach ($candidates as $candidate) {
+                    ProductReviewSuggestion::firstOrCreate(
+                        [
+                            'product_id' => $insertedProduct->id,
+                            'suggested_product_id' => $candidate->id,
+                            'type' => 'equivalence',
+                            'status' => 'pending',
+                        ],
+                        ['submitted_by' => $user->id, 'original_name' => $productData->descricao],
+                    );
+                }
+            }
+
+            if (! $newProduct) {
                 $insertedProduct->mentioned_quantity++;
                 $insertedProduct->save();
             }
