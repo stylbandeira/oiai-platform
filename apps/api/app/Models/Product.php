@@ -95,6 +95,33 @@ class Product extends BaseModel
         return $this->hasMany(UserAddedProducts::class, 'product_id');
     }
 
+    /** @return HasMany<CompanyProductCode, $this> */
+    public function companyCodes(): HasMany
+    {
+        return $this->hasMany(CompanyProductCode::class);
+    }
+
+    /** @return HasMany<ProductReviewSuggestion, $this> */
+    public function reviewSuggestions(): HasMany
+    {
+        return $this->hasMany(ProductReviewSuggestion::class);
+    }
+
+    /** @return HasMany<ProductReviewSuggestion, $this> */
+    public function pendingReviewSuggestions(): HasMany
+    {
+        return $this->reviewSuggestions()->where('status', 'pending');
+    }
+
+    public function reviewStatus(): string
+    {
+        $pending = $this->relationLoaded('pendingReviewSuggestions')
+            ? $this->pendingReviewSuggestions->isNotEmpty()
+            : $this->pendingReviewSuggestions()->exists();
+
+        return $pending ? 'pendentes' : ($this->validated ? 'validados' : 'invalidos');
+    }
+
     /** @return BelongsTo<ProductCategory, $this> */
     public function category(): BelongsTo
     {

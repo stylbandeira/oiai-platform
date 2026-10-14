@@ -17,6 +17,7 @@ interface ProductDecisionPopupProps {
   attribute: ProductDecisionAttribute;
   initialValue?: string | null;
   canSkip?: boolean;
+  approvalRequired?: boolean;
   onComplete: (product?: {
     id: number;
     name: string;
@@ -31,6 +32,7 @@ interface ProductDecisionPopupProps {
     normalization_next_attribute?: ProductDecisionAttribute | null;
     name_normalization_validated?: boolean;
     quantity_normalization_validated?: boolean;
+    review_pending?: boolean;
   }) => void;
 }
 
@@ -59,7 +61,7 @@ function levenshtein(a: string, b: string): number {
 }
 
 export function ProductDecisionPopup({
-  open, productId, rawName, attribute, initialValue = "", canSkip = false, onComplete,
+  open, productId, rawName, attribute, initialValue = "", canSkip = false, approvalRequired = false, onComplete,
 }: ProductDecisionPopupProps) {
   const [value, setValue] = useState(initialValue ?? "");
   const [unities, setUnities] = useState<Unity[]>([]);
@@ -142,6 +144,7 @@ export function ProductDecisionPopup({
     <DialogContent>
       <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
       <p className="text-sm text-muted-foreground">Valor original: <strong>{rawName}</strong></p>
+      {approvalRequired && <p className="text-sm text-muted-foreground">Sua sugestão será encaminhada para aprovação no painel administrativo. Você pode continuar sua lista normalmente.</p>}
       <div className="rounded-md border-2 border-primary bg-primary/5 p-4 space-y-3">
         <p className="text-sm font-semibold">{numericDecision ? "Quantidade e unidade" : "Nome normalizado"}</p>
         {!numericDecision && <>
@@ -177,7 +180,7 @@ export function ProductDecisionPopup({
       <div className="flex justify-end gap-2">
         {canSkip && <Button variant="outline" onClick={() => onComplete()}>Agora não</Button>}
         <Button disabled={saving || (!numericDecision && !value.trim()) || (numericDecision && !(quantityChoice && dimensionChoice))} onClick={() => submit()}>
-          Confirmar
+          {approvalRequired ? "Enviar sugestão" : "Confirmar"}
         </Button>
       </div>
     </DialogContent>

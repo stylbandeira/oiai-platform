@@ -33,6 +33,11 @@ class ProductRepository
     {
         $this->lastSearchTelemetry = null;
         $query = $this->product->with(['category', 'unity', 'companies']);
+
+        if ($user->isAdmin()) {
+            $query->whereNull('products.deleted_at');
+            $query->with(['pendingReviewSuggestions.suggestedProduct', 'pendingReviewSuggestions.submitter']);
+        }
         $searchResultIds = null;
 
         if (isset($data['search']) && trim($data['search']) !== '') {
@@ -63,13 +68,14 @@ class ProductRepository
             }
         }
 
-        if (isset($data['validated']) && ! $user->isClient()) {
-            if ($data['validated'] === 'pendentes') {
-                $query->where('validated', false);
-            }
-
-            if ($data['validated'] === 'validados') {
-                $query->where('validated', true);
+        $status = $data['status'] ?? $data['validated'] ?? null;
+        if ($user->isAdmin() && $status !== null) {
+            if ($status === 'pendentes') {
+                $query->whereHas('pendingReviewSuggestions');
+            } elseif ($status === 'validados') {
+                $query->where('validated', true)->whereDoesntHave('pendingReviewSuggestions');
+            } elseif ($status === 'invalidos') {
+                $query->where('validated', false)->whereDoesntHave('pendingReviewSuggestions');
             }
         }
 
@@ -91,6 +97,20 @@ class ProductRepository
     public function paginate(User $user, array $data)
     {
         return $this->list($user, $data)->paginate($data['per_page'] ?? 15);
+    }
+
+    public function statusCounts(): array
+    {
+        $pending = Product::query()->whereNull('products.deleted_at')->whereHas('pendingReviewSuggestions')->count();
+        $validated = Product::query()->whereNull('products.deleted_at')->where('validated', true)->whereDoesntHave('pendingReviewSuggestions')->count();
+        $invalid = Product::query()->whereNull('products.deleted_at')->where('validated', false)->whereDoesntHave('pendingReviewSuggestions')->count();
+
+        return [
+            'total' => $pending + $validated + $invalid,
+            'pendentes' => $pending,
+            'validados' => $validated,
+            'invalidos' => $invalid,
+        ];
     }
 
     /** @return array{engine: string, duration_ms: int, fallback_used: bool}|null */
@@ -117,26 +137,32 @@ class ProductRepository
         return $record;
     }
 
-    public function validateProducts(array $productIds, int $userId): Collection
+    public function validateProducts(array $productIds, int $userId, bool $validated): Collection
     {
-        try {
-            Product::whereIn('id', $productIds)
-                ->where('validated', false)
-                ->whereNull('validated_by')
-                ->whereNotNull('created_by')
-                ->update([
-                    'validated' => true,
-                    'validated_by' => $userId,
-                    'refined' => ProductRefinementStatus::AdminValidated->value,
-                    'quantity_source' => ProductQuantitySource::AdminValidated->value,
-                    'quantity_confidence' => ProductQuantitySource::AdminValidated->confidence(),
-                ]);
-            $validatedProducts = Product::whereIn('id', $productIds)->get();
-        } catch (\Throwable $th) {
-            throw $th;
+        $changedIds = Product::query()->whereIn('id', $productIds)
+            ->where('validated', ! $validated)
+            ->pluck('id');
+
+        if ($changedIds->isEmpty()) {
+            return collect();
         }
 
-        return $validatedProducts;
+        if ($validated) {
+            Product::whereIn('id', $changedIds)->update([
+                'validated' => true,
+                'validated_by' => $userId,
+                'refined' => ProductRefinementStatus::AdminValidated->value,
+                'quantity_source' => ProductQuantitySource::AdminValidated->value,
+                'quantity_confidence' => ProductQuantitySource::AdminValidated->confidence(),
+            ]);
+        } else {
+            Product::whereIn('id', $changedIds)->update([
+                'validated' => false,
+                'validated_by' => null,
+            ]);
+        }
+
+        return Product::whereIn('id', $changedIds)->get();
     }
 
     public function delete($id)

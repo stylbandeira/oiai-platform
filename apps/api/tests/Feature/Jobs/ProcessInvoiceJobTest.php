@@ -108,7 +108,7 @@ class ProcessInvoiceJobTest extends TestCase
                     'cep' => '56300000',
                 ],
                 'produtos' => [[
-                    'ean' => '7891234567890',
+                    'ean' => '7891234567895',
                     'codigo' => 'PRODUTO-KG',
                     'descricao' => 'Produto vendido por peso',
                     'unidade' => 'KG',
@@ -127,7 +127,7 @@ class ProcessInvoiceJobTest extends TestCase
 
         (new ProcessInvoiceJob($notificationService))->processInvoice($invoice);
 
-        $product = Product::where('ean', '7891234567890')->firstOrFail();
+        $product = Product::where('ean', '7891234567895')->firstOrFail();
         $this->assertSame($unity->id, $product->unit_id);
         $this->assertSame($unity->dimension, $product->quantity_dimension);
         $this->assertSame(ProductQuantitySource::DefaultExtraction, $product->quantity_source);

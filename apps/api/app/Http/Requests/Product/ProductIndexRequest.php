@@ -15,6 +15,7 @@ class ProductIndexRequest extends FormRequest
     {
         return [
             'search' => 'sometimes|string',
+            'status' => 'sometimes|in:pendentes,validados,invalidos',
             'validated' => 'sometimes|in:pendentes,validados',
             'per_page' => 'sometimes|integer|min:1|max:100',
             'category_id' => 'sometimes|integer|exists:product_category,id',
