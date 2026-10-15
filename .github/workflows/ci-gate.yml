@@ -9,6 +9,7 @@ on:
       - 'docker/**'
       - 'docker-compose.yml'
       - 'scripts/**'
+      - 'docs/**'
       - 'docs/openapi.yaml'
       - '.github/workflows/**'
   push:
@@ -20,6 +21,7 @@ on:
       - 'docker-compose.yml'
       - 'docker-compose.prod.yml'
       - 'scripts/**'
+      - 'docs/**'
       - 'docs/openapi.yaml'
       - '.github/workflows/**'
 

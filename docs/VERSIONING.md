@@ -31,9 +31,23 @@ Uma tag `api-v*` só deve ser criada quando houver release da API. Uma tag `web-
 
 ## Releases automáticas
 
-O workflow `Release Please` acompanha a branch `main` e usa os Conventional Commits para criar Pull Requests de release independentes. O estado atual fica em `.release-please-manifest.json`.
+O workflow `Release Please` acompanha `develop`, usa os Conventional Commits e cria PRs de release independentes com destino a `develop`. O estado atual fica em `.release-please-manifest.json`.
 
-Depois do merge de um PR de release, a automação atualiza a versão do componente, o CHANGELOG, cria a tag (`api-vX.Y.Z` ou `web-vX.Y.Z`) e publica o GitHub Release correspondente.
+Ao integrar um PR de release em `develop`, a automação atualiza os arquivos de versão e o CHANGELOG do componente, cria a tag (`api-vX.Y.Z` ou `web-vX.Y.Z`) e publica o GitHub Release. Isso não implanta em produção: somente um push em `main`, após o PR de promoção `develop → main`, ativa o CD no `CI Gate`.
+
+Fluxo normal:
+
+```text
+feature → PR/CI → develop → PR de release por componente → develop
+                                      ↓
+                              PR develop → main → CI/CD → produção
+```
+
+API e Web podem ter PRs e tags diferentes. `separate-pull-requests` mantém a aprovação independente, e o prefixo do componente nas tags impede colisões (`api-v...` e `web-v...`).
+
+### Transição do fluxo antigo
+
+As tags atuais `api-v3.0.0` e `web-v3.0.0` foram criadas pelo fluxo antigo em `main`. O manifesto, o arquivo de versão da API, o `package.json` do Web e os changelogs são alinhados em 3.0.0 nesta mudança. Assim, a próxima versão parte do estado já publicado, e os prefixos de componente mantêm as tags API/Web distintas. Não crie nem mova tags manualmente.
 
 ### Configuração da GitHub App de release
 
@@ -46,7 +60,7 @@ Configuração única, feita por quem administra o repositório:
 3. Na página da App, copie o **Client ID** e gere uma **private key** (`.pem`). Não adicione a chave ao repositório.
 4. Em **Repository → Settings → Secrets and variables → Actions → Variables**, crie `RELEASE_APP_CLIENT_ID` com o Client ID.
 5. Na aba **Secrets**, crie `RELEASE_APP_PRIVATE_KEY` com o conteúdo completo do `.pem`, incluindo as linhas `BEGIN` e `END`.
-6. Depois que este workflow estiver em `main`, abra **Actions → Release Please → Run workflow** (ou faça um novo merge em `main`). Confira se o `CI Gate` inicia nos PRs de release sem solicitar **Approve workflows to run**.
+6. Depois que este workflow estiver em `develop`, faça um novo merge em `develop` ou execute **Actions → Release Please → Run workflow** selecionando `develop`; confira se o `CI Gate` inicia nos PRs automáticos sem solicitar **Approve workflows to run**.
 
 O workflow falha se a variável ou o secret estiverem ausentes; não retorna silenciosamente ao `GITHUB_TOKEN`. PRs já abertos podem continuar exigindo aprovação até serem atualizados pela automação configurada. A política de aprovação de workflows de PRs vindos de *forks* é independente.
 

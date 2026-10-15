@@ -60,32 +60,29 @@ O `CI Gate` detecta os caminhos alterados:
 - ambos alterados → executa ambos;
 - arquivos compartilhados alterados → executa os pipelines afetados.
 
-O check obrigatório recomendado é `CI Gate / CI Gate result`. CI e Release são responsabilidades separadas: o CI valida o código; o Release Please só atua após alterações chegarem à branch principal.
+O check obrigatório recomendado é `CI Gate / CI Gate result`. CI e Release são responsabilidades separadas: o CI valida o código; o Release Please só atua depois que alterações chegam a `develop`.
 
 ## 5. Merge
 
 O merge ocorre somente após revisão aprovada e sucesso do gate. Não é necessário alterar versões manualmente durante o desenvolvimento.
 
-## 6. Promoção e release
+## 6. Versionamento e promoção
 
-Depois que as alterações forem integradas em `develop`, abra um PR de promoção de `develop` para `main`.
-Somente PRs de promoção/release entram em `main`; o merge em `main` representa a promoção para produção.
-
-Após o merge em `main`, o Release Please analisa os commits e cria PRs independentes:
+Depois que alterações forem integradas em `develop`, o Release Please analisa os commits e pode criar PRs de versão independentes para API e Web:
 
 ```text
 feat(api) → API release PR → api-vX.Y.Z → API GitHub Release
 feat(web) → Web release PR → web-vX.Y.Z → Web GitHub Release
 ```
 
-Ao fazer merge do PR de release, a automação atualiza a versão, CHANGELOG, tag e GitHub Release. Uma release de API não altera a versão do Web.
+Ao integrar cada PR de release em `develop`, a automação atualiza a versão, CHANGELOG, tag e GitHub Release. Esses PRs não fazem deploy. Depois de integrar os PRs de versão desejados, abra um PR de promoção de `develop` para `main`. O merge em `main` representa a publicação em produção e ativa o CD. Uma release de API não altera a versão do Web.
 
 ## 7. Rastreabilidade
 
 Uma alteração pode ser acompanhada por:
 
 ```text
-commit → PR para develop → CI Gate → merge em develop → promoção → main → produção → tag → CHANGELOG → GitHub Release
+commit → PR para develop → CI Gate → merge em develop → PR de release/tag → PR develop → main → deploy
 ```
 
 Consulte os [CHANGELOGs](../README.md#versioning), [guias de migração](releases/README.md) e [ADRs](architecture/overview.md) para entender a evolução e as decisões do sistema.
