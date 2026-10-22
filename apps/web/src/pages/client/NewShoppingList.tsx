@@ -64,6 +64,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [productsError, setProductsError] = useState(false);
   const [decisionItem, setDecisionItem] = useState<SelectedItem | null>(null);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
@@ -137,6 +138,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
   ) => {
     try {
       setLoading(true);
+      setProductsError(false);
       const params: QueryParams = { page };
 
       if (searchTerm) params.search = searchTerm;
@@ -146,6 +148,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
       setPaginationMeta(response.data.meta);
     } catch (error) {
       console.error('Erro ao carregar produtos:', error);
+      setProductsError(true);
     } finally {
       setLoading(false);
     }
@@ -289,16 +292,21 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Lista de Compras - vem PRIMEIRO em mobile (em cima) e à DIREITA em desktop */}
           <div className="lg:col-span-1 order-first lg:order-last">
-            <Card className="border-0 shadow-soft sticky top-6">
+            <Card className="border-0 shadow-soft sticky top-2 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center justify-between text-base sm:text-lg">
-                  <span>Minha Lista</span>
+                  <div className="min-w-0">
+                    <span>Minha Lista</span>
+                    <p className="text-xs font-normal text-muted-foreground truncate">
+                      {listName.trim() || "Dê um nome à sua lista"}
+                    </p>
+                  </div>
                   <Badge variant="secondary" className="text-xs">
                     {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'itens'}
                   </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 max-h-[60vh] overflow-y-auto">
+              <CardContent className="space-y-3 max-h-[38vh] lg:max-h-[60vh] overflow-y-auto">
                 {selectedItems.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8 text-sm">
                     Nenhum item adicionado
@@ -387,7 +395,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
 
           {/* Lista de Produtos - vem DEPOIS em mobile (embaixo) e à ESQUERDA em desktop */}
           <div className="lg:col-span-2 order-last lg:order-first">
-            <Card className="border-0 shadow-soft">
+            <Card className="border-0 shadow-soft scroll-mt-4">
               <CardHeader className="pb-2 sm:pb-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -402,6 +410,10 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
               <CardContent className="pt-0">
                 {loading ? (
                   <div className="text-center py-8">Carregando produtos...</div>
+                ) : productsError ? (
+                  <div className="text-center py-8 text-destructive">
+                    Não foi possível carregar os produtos. Tente novamente.
+                  </div>
                 ) : (
                   <>
                     <Tabs defaultValue="all" className="w-full">
@@ -416,7 +428,11 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
                       </TabsList>
 
                       <TabsContent value="all" className="space-y-3 mt-4">
-                        {products.map((product) => (
+                        {products.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground">
+                            Nenhum produto encontrado.
+                          </div>
+                        ) : products.map((product) => (
                           <div
                             key={product.id}
                             className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors gap-3"
@@ -479,7 +495,11 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
                       </TabsContent>
 
                       <TabsContent value="favorites" className="space-y-3 mt-4">
-                        {favoriteProducts.map((product) => (
+                        {favoriteProducts.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground">
+                            Nenhum produto favorito encontrado.
+                          </div>
+                        ) : favoriteProducts.map((product) => (
                           <div
                             key={product.id}
                             className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors gap-3"

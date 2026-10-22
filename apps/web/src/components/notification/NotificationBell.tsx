@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Bell, Check, X, Zap } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Bell, X, Zap } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import api from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 import { getNotificationLink } from "@/utils/notificationsLink";
 import { Notification } from '@/types/notification';
+import { toast } from 'sonner';
 
 interface Props {
     notifications: Notification[];
@@ -14,10 +15,60 @@ interface Props {
 
 const NotificationsBell: React.FC<Props> = ({ notifications, unreadCount }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [localNotifications, setLocalNotifications] = useState(notifications);
+    const [localUnreadCount, setLocalUnreadCount] = useState(unreadCount);
+    const [isMarkingAsRead, setIsMarkingAsRead] = useState(false);
+    const notificationRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        setLocalNotifications(notifications);
+        setLocalUnreadCount(unreadCount);
+    }, [notifications, unreadCount]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleClickOutside = (event: MouseEvent) => {
+            if (!notificationRef.current?.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen]);
+
+    const markNotificationsAsRead = async () => {
+        if (isMarkingAsRead || localUnreadCount === 0) return;
+
+        setIsMarkingAsRead(true);
+        try {
+            await api.post('events/check-all');
+            setLocalNotifications((current) => current.map((notification) => ({
+                ...notification,
+                checked: true,
+            })));
+            setLocalUnreadCount(0);
+        } catch {
+            toast.error('Não foi possível marcar as notificações como lidas.');
+        } finally {
+            setIsMarkingAsRead(false);
+        }
+    };
+
+    const handleToggle = () => {
+        const opening = !isOpen;
+        setIsOpen(opening);
+
+        if (opening) {
+            void markNotificationsAsRead();
+        }
+    };
+
     const handleMarkAsRead = (id: number) => {
-        const response = api.put(`events/${id}`, {
+        void api.put(`events/${id}`, {
             checked: true,
         });
     };
@@ -35,14 +86,6 @@ const NotificationsBell: React.FC<Props> = ({ notifications, unreadCount }) => {
         navigate(link);
     };
 
-    const handleMarkAllAsRead = () => {
-        // Aqui você chamaria sua API
-        const response = api.post(`events/check-all`, {
-            markAll: true,
-            notifications
-        });
-    };
-
     const formatDate = (dateString: string) => {
         try {
             return formatDistanceToNow(new Date(dateString), {
@@ -55,23 +98,23 @@ const NotificationsBell: React.FC<Props> = ({ notifications, unreadCount }) => {
     };
 
     return (
-        <div className="relative">
+        <div ref={notificationRef} className="relative">
             {/* Botão do sino */}
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={handleToggle}
                 className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-colors relative"
             >
-                <Bell className={`w-5 h-5 ${unreadCount > 0 ? 'text-red-500' : 'text-gray-600'}`} />
+                <Bell className={`w-5 h-5 ${localUnreadCount > 0 ? 'text-red-500' : 'text-gray-600'}`} />
 
-                {unreadCount > 0 && (
+                {localUnreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {unreadCount > 9 ? '9+' : unreadCount}
+                        {localUnreadCount > 9 ? '9+' : localUnreadCount}
                     </span>
                 )}
 
-                {unreadCount > 0 && (
+                {localUnreadCount > 0 && (
                     <span className="font-medium text-sm text-red-500">
-                        {unreadCount}
+                        {localUnreadCount}
                     </span>
                 )}
             </button>
@@ -83,14 +126,6 @@ const NotificationsBell: React.FC<Props> = ({ notifications, unreadCount }) => {
                     <div className="p-4 border-b flex justify-between items-center">
                         <h3 className="font-semibold">Notificações</h3>
                         <div className="flex gap-2">
-                            {unreadCount > 0 && (
-                                <button
-                                    onClick={handleMarkAllAsRead}
-                                    className="text-sm text-blue-600 hover:text-blue-800"
-                                >
-                                    Marcar todas
-                                </button>
-                            )}
                             <button
                                 onClick={() => setIsOpen(false)}
                                 className="text-gray-500 hover:text-gray-700"
@@ -102,13 +137,13 @@ const NotificationsBell: React.FC<Props> = ({ notifications, unreadCount }) => {
 
                     {/* Lista */}
                     <div className="max-h-96 overflow-y-auto">
-                        {notifications.length === 0 ? (
+                        {localNotifications.length === 0 ? (
                             <div className="p-6 text-center text-gray-500">
                                 <Bell className="w-10 h-10 mx-auto mb-2 text-gray-300" />
                                 <p>Nenhuma notificação</p>
                             </div>
                         ) : (
-                            notifications.map((notif) => (
+                            localNotifications.map((notif) => (
                                 <div
                                     key={notif.id}
                                     className={`p-4 border-b hover:bg-gray-50 cursor-pointer ${notif.checked ? 'opacity-70' : 'bg-blue-50'}`}

@@ -5,41 +5,22 @@ namespace Tests\Feature\Integration\EventController;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class EventCheckAllTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @dataProvider invalidNotificationsProvider
-     */
-    public function test_notifications_format_is_validated(array $payload, string $field): void
+    public function test_check_all_marks_only_authenticated_users_notifications_as_checked(): void
     {
         $user = User::factory()->client()->create();
+        $otherUser = User::factory()->client()->create();
+        $firstEvent = $this->createEvent(['user_id' => $user->id]);
+        $secondEvent = $this->createEvent(['user_id' => $user->id, 'checked' => true]);
+        $otherEvent = $this->createEvent(['user_id' => $otherUser->id]);
 
         $response = $this->actingAs($user)
-            ->postJson('/api/events/check-all', $payload);
-
-        $response
-            ->assertStatus(422)
-            ->assertJsonValidationErrorFor($field);
-    }
-
-    public function test_check_all_marks_notifications_as_checked_inside_transaction(): void
-    {
-        $user = User::factory()->client()->create();
-        $firstEvent = $this->createEvent();
-        $secondEvent = $this->createEvent();
-
-        $response = $this->actingAs($user)
-            ->postJson('/api/events/check-all', [
-                'notifications' => [
-                    ['id' => $firstEvent->id],
-                    ['id' => $secondEvent->id],
-                ],
-            ]);
+            ->postJson('/api/events/check-all', ['notifications' => [['id' => $otherEvent->id]]]);
 
         $response
             ->assertStatus(200)
@@ -55,47 +36,21 @@ class EventCheckAllTest extends TestCase
             'id' => $secondEvent->id,
             'checked' => true,
         ]);
+        $this->assertDatabaseHas('event', [
+            'id' => $otherEvent->id,
+            'checked' => false,
+        ]);
     }
 
-    public function test_check_all_starts_a_transaction_to_mark_notifications_as_checked(): void
+    public function test_check_all_is_idempotent_and_accepts_empty_payload(): void
     {
         $user = User::factory()->client()->create();
+        $event = $this->createEvent(['user_id' => $user->id]);
 
-        DB::shouldReceive('transaction')
-            ->once()
-            ->andReturn(null);
+        $this->actingAs($user)->postJson('/api/events/check-all')->assertOk();
+        $this->actingAs($user)->postJson('/api/events/check-all')->assertOk();
 
-        $response = $this->actingAs($user)
-            ->postJson('/api/events/check-all', [
-                'notifications' => [
-                    ['id' => 1],
-                    ['id' => 2],
-                ],
-            ]);
-
-        $response->assertStatus(200);
-    }
-
-    public function invalidNotificationsProvider(): array
-    {
-        return [
-            [
-                [],
-                'notifications',
-            ],
-            [
-                ['notifications' => 'not-an-array'],
-                'notifications',
-            ],
-            [
-                ['notifications' => [[]]],
-                'notifications.0.id',
-            ],
-            [
-                ['notifications' => [['id' => 'not-an-integer']]],
-                'notifications.0.id',
-            ],
-        ];
+        $this->assertDatabaseHas('event', ['id' => $event->id, 'checked' => true]);
     }
 
     private function createEvent(array $overrides = []): Event

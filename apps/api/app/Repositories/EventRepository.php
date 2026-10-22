@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Event;
+use App\Models\User;
 
 class EventRepository
 {
@@ -42,6 +43,14 @@ class EventRepository
             ->update($data);
 
         return $events;
+    }
+
+    public function markAllAsCheckedForUser(User $user): int
+    {
+        return Event::query()
+            ->where('user_id', $user->id)
+            ->where('checked', false)
+            ->update(['checked' => true]);
     }
 
     public function delete($id)
