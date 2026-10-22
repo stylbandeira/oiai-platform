@@ -282,7 +282,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
           <Button
             onClick={() => void saveList()}
             disabled={isSaving || !listName.trim() || selectedItems.length === 0}
-            className="bg-gradient-primary hover:shadow-glow transition-all duration-300 w-full sm:w-auto"
+            className="bg-primary hover:bg-primary/90 transition-all duration-300 w-full sm:w-auto"
           >
             {isSaving ? "Salvando..." : buttonText}
           </Button>

@@ -225,7 +225,7 @@ export function ClientDashboard() {
         <CardTitle className="text-xl font-bold">Minhas Listas</CardTitle>
         <Button
           onClick={() => navigate("/new-list")}
-          className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+          className="bg-primary hover:bg-primary/90 transition-all duration-300"
           size="sm"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -258,7 +258,7 @@ export function ClientDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant={list.status !== "active" ? "secondary" : "default"}>
+              <Badge variant={list.status !== "active" ? "completed" : "progress"}>
                 {list.status !== "active" ? "Concluída" : "Em Andamento"}
               </Badge>
               <Button variant="destructive" size="sm" onClick={(e) => handleDelete(list.id, e)}>
@@ -337,7 +337,7 @@ export function ClientDashboard() {
                     <span className="font-medium">{list.name}</span>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span>{list.productsQuantity} itens</span>
-                      <Badge variant={list.status !== "active" ? "secondary" : "default"} className="text-xs">
+                      <Badge variant={list.status !== "active" ? "completed" : "progress"} className="text-xs">
                         {list.status !== "active" ? "Concluída" : "Em Andamento"}
                       </Badge>
                     </div>
@@ -373,7 +373,7 @@ export function ClientDashboard() {
       <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Button
           onClick={() => navigate("/new-list")}
-          className="h-12 sm:col-span-2 lg:col-span-2 bg-gradient-primary hover:shadow-glow transition-all duration-300"
+          className="h-12 sm:col-span-2 lg:col-span-2 bg-primary hover:bg-primary/90 transition-all duration-300"
         >
           <Plus className="w-5 h-5 mr-2" />
           Criar nova lista
