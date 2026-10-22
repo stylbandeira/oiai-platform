@@ -58,6 +58,39 @@ eles não substituem os secrets de deploy.
 
 ## Preparar a VPS e Docker
 
+### Firewall e SSH
+
+A VPS deve bloquear conexões de entrada por padrão e expor somente o SSH e o
+reverse proxy. Antes de ativar o firewall, confirme que a sessão SSH atual usa
+uma chave autorizada e que a porta correta está definida em `VPS_SSH_PORT`.
+
+Na raiz do projeto, execute na VPS:
+
+```bash
+sudo VPS_SSH_PORT=22 ./scripts/configure-vps-firewall.sh
+```
+
+O script libera a porta SSH informada, `80/tcp` e `443/tcp`, bloqueia as demais
+conexões de entrada e permite conexões de saída. Ele pede confirmação antes de
+ativar o UFW. Não publique as portas do MySQL, Redis ou dos containers; elas
+devem permanecer acessíveis somente pela rede interna ou em `127.0.0.1` quando
+necessário para a operação local.
+
+Depois da ativação, valide na VPS:
+
+```bash
+sudo ufw status verbose
+sudo ss -lntup
+```
+
+Faça também um teste a partir de uma rede externa, por exemplo `nmap -Pn
+<IP-da-VPS>`, confirmando que somente as portas públicas esperadas respondem.
+
+Para desabilitar autenticação SSH por senha, primeiro confirme uma segunda
+sessão funcionando por chave e então configure `PasswordAuthentication no` e
+`KbdInteractiveAuthentication no` em `/etc/ssh/sshd_config`, valide com
+`sudo sshd -t` e recarregue com `sudo systemctl reload ssh`.
+
 Instale Docker Engine com o plugin Docker Compose, Git e Nginx no host. Clone o
 repositório e prepare os arquivos de ambiente a partir dos exemplos:
 
