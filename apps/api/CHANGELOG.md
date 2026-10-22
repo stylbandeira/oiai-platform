@@ -2,6 +2,14 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [3.1.3](https://github.com/stylbandeira/oiai-platform/compare/api-v3.1.2...api-v3.1.3) (2026-10-22)
+
+
+### Bug Fixes
+
+* remove random collision ([b0651dd](https://github.com/stylbandeira/oiai-platform/commit/b0651dd7b59d9c9b30d6ee888e7b9de5464ca217))
+* remove random collision ([f71b7f4](https://github.com/stylbandeira/oiai-platform/commit/f71b7f436b134e1e5e125988fc66cdcb733e73ce))
+
 ## [3.1.2](https://github.com/stylbandeira/oiai-platform/compare/api-v3.1.1...api-v3.1.2) (2026-10-22)
 
 
