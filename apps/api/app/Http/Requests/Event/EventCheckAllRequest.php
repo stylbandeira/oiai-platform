@@ -13,9 +13,6 @@ class EventCheckAllRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            'notifications' => 'required|array',
-            'notifications.*.id' => 'required|integer',
-        ];
+        return [];
     }
 }
