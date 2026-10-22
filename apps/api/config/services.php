@@ -2,6 +2,13 @@
 
 return [
 
+    'product_data' => [
+        'enabled' => (bool) env(
+            'PRODUCT_DATA_PROVIDERS_ENABLED',
+            env('APP_ENV') === 'production',
+        ),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
