@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Authorization\UserPermissions;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -38,7 +39,7 @@ class ProductPolicy
      */
     public function create(User $user)
     {
-        return $user->isAdmin();
+        return $user->hasPermission(UserPermissions::PRODUCT_CREATE);
     }
 
     /**

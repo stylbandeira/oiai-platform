@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Authorization\UserPermissions;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
@@ -215,6 +216,17 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->type === self::TYPE_ADMIN;
+    }
+
+    /** @return list<string> */
+    public function permissions(): array
+    {
+        return UserPermissions::for($this);
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        return UserPermissions::allows($this, $permission);
     }
 
     public function isCompany(): bool
