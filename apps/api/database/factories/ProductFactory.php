@@ -38,10 +38,10 @@ class ProductFactory extends Factory
             'quantity_source' => $quantitySource->value,
             'quantity_confidence' => $quantitySource->confidence(),
             'refined' => ProductRefinementStatus::Unrefined->value,
-            'sku' => fake()->unique()->numberBetween(1, 999999),
+            'sku' => fake()->numberBetween(1, 999999),
             'average_price' => fake()->randomFloat(2, 1, 1000),
             'category_id' => ProductCategory::factory()->create()->id,
-            'ean' => fake()->unique()->numberBetween(1, 999999),
+            'ean' => fake()->numberBetween(1, 999999),
             'ncm' => fake()->numerify('########'),
             'description' => fake()->text(),
         ];
