@@ -13,7 +13,7 @@ mkdir -p /var/www/html/storage/logs
 
 # AGUARDAR MySQL ficar pronto
 echo "Aguardando MySQL ficar disponível..."
-while ! mysqladmin ping -h"db" -u"root" -p"secret" --silent; do
+while ! mysqladmin ping -h"${DB_HOST:-db}" -u"${DB_USERNAME:?DB_USERNAME is required}" -p"${DB_PASSWORD:?DB_PASSWORD is required}" --silent; do
     echo "MySQL não está pronto... aguardando 5 segundos"
     sleep 5
 done
