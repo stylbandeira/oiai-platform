@@ -51,9 +51,8 @@ const App = () => (
                   <UserCompanyAccessRequest />
                 </ProtectedRoute>} />
 
-                {/* USUÁRIOS TIPO CLIENTE */}
-                {/* PRODUTOS */}
-                <Route path="/products/edit/:id" element={<ProtectedRoute allowedTypes={['client']}>
+                {/* Edição de produtos é exclusiva do fluxo administrativo. */}
+                <Route path="/products/edit/:id" element={<ProtectedRoute allowedTypes={['admin']}>
                   <EditProduct />
                 </ProtectedRoute>} />
 
