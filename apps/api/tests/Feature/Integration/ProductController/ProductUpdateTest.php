@@ -45,6 +45,22 @@ class ProductUpdateTest extends TestCase
             ->assertStatus(403);
     }
 
+    public function test_client_cannot_set_validation_fields_through_payload(): void
+    {
+        $client = User::factory()->client()->create();
+        $product = Product::factory()->create(['validated' => false]);
+
+        $this->actingAs($client)
+            ->putJson('/api/products/'.$product->id, ['validated' => true])
+            ->assertStatus(422)
+            ->assertJsonValidationErrorFor('validated');
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'validated' => false,
+        ]);
+    }
+
     public function test_changed_data_reflects_on_database_after_refresh(): void
     {
         $admin = User::factory()->admin()->create();
