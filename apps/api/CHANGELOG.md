@@ -2,6 +2,19 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [3.2.0](https://github.com/stylbandeira/oiai-platform/compare/api-v3.1.3...api-v3.2.0) (2026-10-22)
+
+
+### Features
+
+* centers and adjusts users permissions ([d25d9db](https://github.com/stylbandeira/oiai-platform/commit/d25d9db6112a5a8706f3fb1471d4381049606e54))
+* implements auth on product operations ([34f5976](https://github.com/stylbandeira/oiai-platform/commit/34f5976f3ac3b6cd19503e8abe54abb842ec4ca0))
+
+
+### Bug Fixes
+
+* Pint corrections ([b2dc2fa](https://github.com/stylbandeira/oiai-platform/commit/b2dc2faef3f8213433c0c959fbb9edfeedf5439f))
+
 ## [3.1.3](https://github.com/stylbandeira/oiai-platform/compare/api-v3.1.2...api-v3.1.3) (2026-10-22)
 
 
