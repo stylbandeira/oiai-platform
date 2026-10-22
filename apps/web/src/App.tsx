@@ -53,9 +53,6 @@ const App = () => (
 
                 {/* USUÁRIOS TIPO CLIENTE */}
                 {/* PRODUTOS */}
-                <Route path="/products/new" element={<ProtectedRoute allowedTypes={['client']}>
-                  <AddProduct />
-                </ProtectedRoute>} />
                 <Route path="/products/edit/:id" element={<ProtectedRoute allowedTypes={['client']}>
                   <EditProduct />
                 </ProtectedRoute>} />

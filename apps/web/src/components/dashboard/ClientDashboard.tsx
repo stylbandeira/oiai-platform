@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Plus, ShoppingCart, MapPin, Star, QrCode, Receipt, Package,
   Table, Edit3, Trash2, Trash, Edit, Code, Library,
-  ChevronDown, ChevronUp, Grid, List, Layers
+  ChevronDown, List, Layers
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api";
@@ -98,7 +98,6 @@ export function ClientDashboard() {
     quantity_normalization_validated?: boolean;
   } | null>(null);
   const [isListsSheetOpen, setIsListsSheetOpen] = useState(false);
-  const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false);
 
   const [notificationData, setNotificationData] = useState<NotificationData>(defaultNotificationData);
   const [showNotification, setShowNotification] = useState(false);
@@ -156,10 +155,6 @@ export function ClientDashboard() {
   const handlePageChange = (page: number) => {
     fetchItensLists(page);
     window.scrollTo(0, 0);
-  };
-
-  const handleAddProduct = () => {
-    navigate("/products/new");
   };
 
   // Cards de métricas em grid responsivo
@@ -298,7 +293,7 @@ export function ClientDashboard() {
         </SheetDescription>
 
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-4 pr-16 border-b">
             <div className="flex items-center gap-2">
               <Layers className="w-5 h-5" />
               <h2 className="text-lg font-bold">Minhas Listas</h2>
@@ -367,92 +362,39 @@ export function ClientDashboard() {
     </Sheet>
   );
 
-  // Ações rápidas colapsáveis para mobile
-  const QuickActionsCollapsible = () => (
-    <Collapsible open={isQuickActionsOpen} onOpenChange={setIsQuickActionsOpen} className="lg:hidden">
-      <CollapsibleTrigger asChild>
-        <Button variant="outline" className="w-full justify-between h-12">
-          <div className="flex items-center gap-2">
-            <Grid className="w-4 h-4" />
-            <span>Ações Rápidas</span>
-          </div>
-          {isQuickActionsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </Button>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="mt-3 space-y-2">
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-3 h-12"
-          onClick={handleQRScanClick}
-        >
-          <QrCode className="w-5 h-5" />
-          Escanear Nota Fiscal
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-3 h-12"
-          onClick={handleCodeInsertClick}
-        >
-          <Library className="w-5 h-5" />
-          Digitar Código da NFCe
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-3 h-12"
-          onClick={handleAddProduct}
-        >
-          <Plus className="w-5 h-5" />
-          Adicionar Produto
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-3 h-12"
-        >
-          <MapPin className="w-5 h-5" />
-          Otimizar Rota
-        </Button>
-      </CollapsibleContent>
-    </Collapsible>
-  );
-
-  // Ações rápidas para desktop
-  const DesktopQuickActions = () => (
-    <Card className="border-0 shadow-soft hidden lg:block">
-      <CardHeader>
-        <CardTitle>Ações Rápidas</CardTitle>
+  const PrimaryActions = () => (
+    <Card className="border-0 shadow-soft">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg sm:text-xl">Comece por aqui</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Crie uma lista ou importe os produtos da sua nota fiscal.
+        </p>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <Button
+          onClick={() => navigate("/new-list")}
+          className="h-12 sm:col-span-2 lg:col-span-2 bg-gradient-primary hover:shadow-glow transition-all duration-300"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Criar nova lista
+        </Button>
         <Button
           variant="outline"
-          className="w-full justify-start gap-3 h-12"
+          className="h-12 justify-start gap-3 border-primary/30 font-medium hover:bg-primary/5"
           onClick={handleQRScanClick}
         >
           <QrCode className="w-5 h-5" />
-          Escanear Nota Fiscal
+          Escanear nota fiscal
         </Button>
         <Button
           variant="outline"
-          className="w-full justify-start gap-3 h-12"
+          className="h-12 justify-start gap-3 border-secondary/30 font-medium hover:bg-secondary/5"
           onClick={handleCodeInsertClick}
         >
           <Library className="w-5 h-5" />
-          Digitar Código da NFCe
+          Digitar código da NFCe
         </Button>
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-3 h-12"
-          onClick={handleAddProduct}
-        >
-          <Plus className="w-5 h-5" />
-          Adicionar Produto
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-3 h-12"
-        >
-          <MapPin className="w-5 h-5" />
-          Otimizar Rota
-        </Button>
+
       </CardContent>
     </Card>
   );
@@ -470,6 +412,8 @@ export function ClientDashboard() {
       {/* Métricas - sempre visíveis em grid responsivo */}
       <MetricsCards />
 
+      <PrimaryActions />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Coluna esquerda: Listas de Compra */}
         <div className="lg:col-span-2 space-y-4">
@@ -486,39 +430,38 @@ export function ClientDashboard() {
 
         {/* Coluna direita: Ações Rápidas e Atividade Recente */}
         <div className="space-y-4 sm:space-y-6">
-          {/* Desktop: Ações Rápidas fixas */}
-          <DesktopQuickActions />
-
-          {/* Mobile: Ações Rápidas colapsáveis */}
-          <QuickActionsCollapsible />
-
           {/* Atividade Recente - mantida em todos os dispositivos */}
-          <Card className="border-0 shadow-soft">
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Atividade Recente</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {dashboardData.recentActivity.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Nenhuma atividade recente</p>
-                </div>
-              )}
-              {dashboardData.recentActivity.map((activity) => (
-                <div key={activity.id} className="space-y-1 p-2 hover:bg-muted/50 rounded-lg transition-colors">
-                  <p className="text-sm font-medium">{activity.description}</p>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{formatarData(activity.created_at)}</span>
-                    <Badge variant="secondary" className="text-xs">
-                      +{activity.points} pts
-                    </Badge>
+          <Collapsible defaultOpen={false} className="border-0 shadow-soft rounded-lg bg-card">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between h-auto p-4 sm:p-6">
+                <span className="text-lg sm:text-xl font-semibold">Atividade Recente</span>
+                <ChevronDown className="w-5 h-5 transition-transform" />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="space-y-3 pt-0">
+                {dashboardData.recentActivity.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Nenhuma atividade recente</p>
                   </div>
-                  {activity.where && (
-                    <p className="text-xs text-muted-foreground">{activity.where}</p>
-                  )}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+                )}
+                {dashboardData.recentActivity.map((activity) => (
+                  <div key={activity.id} className="space-y-1 p-2 hover:bg-muted/50 rounded-lg transition-colors">
+                    <p className="text-sm font-medium">{activity.description}</p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{formatarData(activity.created_at)}</span>
+                      <Badge variant="secondary" className="text-xs">
+                        +{activity.points} pts
+                      </Badge>
+                    </div>
+                    {activity.where && (
+                      <p className="text-xs text-muted-foreground">{activity.where}</p>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       </div>
 

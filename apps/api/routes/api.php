@@ -99,7 +99,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // PRODUCTS
     Route::get('/products', [ProductController::class, 'index']);
-    Route::post('/products', [ProductController::class, 'store']);
+    Route::post('/products', [ProductController::class, 'store'])
+        ->middleware('role:company,admin');
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::put('/products/{product}', [ProductController::class, 'update']);
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);

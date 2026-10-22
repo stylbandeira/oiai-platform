@@ -40,6 +40,11 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
 
     // Limpar recursos quando o modal fechar
     useEffect(() => {
+        if (isOpen) {
+            setMode('camera');
+            return;
+        }
+
         if (!isOpen) {
             stopCamera();
             setMode('choice');

@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useUser } from "@/contexts/UserContext";
 import api from "@/lib/api";
 import { useState } from "react";
 import { ProductForm, type ProductFormData } from "@/components/forms/ProductForm";
@@ -8,7 +7,6 @@ import { useNotification } from "@/contexts/NotificationContext";
 
 export default function AddProduct() {
     const navigate = useNavigate();
-    const { user } = useUser();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { showNotification } = useNotification();
     const [formKey, setFormKey] = useState(0);
@@ -30,13 +28,13 @@ export default function AddProduct() {
                     }
                 });
 
-                await api.post("/products", formDataToSend, {
+                await api.post("/admin/products", formDataToSend, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
                 });
             } else {
-                const response = await api.post("/products", formData);
+                const response = await api.post("/admin/products", formData);
                 console.log('Resposta da API:', response);
             }
 
@@ -44,7 +42,7 @@ export default function AddProduct() {
 
             setFormKey(prev => prev + 1);
 
-            navigate(user.type === 'admin' ? "/admin/products/new" : "/products/new", {
+            navigate("/admin/products/new", {
                 replace: true
             });
 
