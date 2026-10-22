@@ -424,8 +424,8 @@ export function ClientDashboard() {
         onOpenChange={setTourOpen}
         steps={[
           { target: "#tour-new-list", title: "Crie uma lista", description: "Comece uma lista de compras e adicione os produtos que você precisa." },
-          { target: "#tour-scan", title: "Escaneie a nota fiscal", description: "Este botão abre a câmera para ler o QR Code da nota. Durante o tutorial, toque nele para conhecer a próxima opção." },
-          { target: "#tour-invoice-code", title: "Ou digite o código", description: "Se preferir, use o código da NFCe para consultar sua nota fiscal." },
+          { target: "#tour-scan", title: "Escaneie a nota fiscal", description: "Toque em Escanear nota fiscal para abrir a câmera e aponte para o QR Code impresso na parte inferior da NFC-e. Aqui no tutorial, o toque apenas avança.", illustration: "receipt" },
+          { target: "#tour-invoice-code", title: "Ou digite o código", description: "Sem câmera ou permissão? Procure a chave de acesso numérica de 44 dígitos na parte inferior da NFC-e e toque em Digitar código da NFCe. Digite o código no campo que abrirá após o tutorial." },
           { target: "#tour-lists-mobile, #tour-lists-desktop", title: "Acompanhe suas listas", description: "Aqui você encontra suas listas, itens e o andamento de cada compra." },
         ]}
       />

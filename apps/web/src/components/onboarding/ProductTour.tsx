@@ -9,6 +9,7 @@ interface TourStep {
   description: string;
   allowAction?: boolean;
   advanceOnClick?: boolean;
+  illustration?: "receipt";
 }
 
 interface ProductTourProps {
@@ -107,6 +108,7 @@ export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChang
           <Button variant="ghost" size="icon" onClick={close} aria-label="Fechar tutorial"><X /></Button>
         </div>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">{steps[step].description}</p>
+        {steps[step].illustration === "receipt" && <ReceiptIllustration />}
         <p className="mt-2 text-xs font-medium text-primary">Clique no elemento destacado ou use “Avançar”.</p>
         <div className="mt-5 flex items-center justify-between gap-2">
           <Button variant="link" className="px-0" onClick={close}>Pular tutorial</Button>
@@ -119,5 +121,27 @@ export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChang
         </div>
       </section>
     </>, document.body
+  );
+}
+
+function ReceiptIllustration() {
+  return (
+    <figure className="mt-4 rounded-xl border bg-muted/50 p-3">
+      <svg viewBox="0 0 300 145" role="img" aria-labelledby="receipt-title receipt-desc" className="mx-auto h-auto w-full max-w-[300px]">
+        <title id="receipt-title">Exemplo de nota fiscal de consumidor eletrônica</title>
+        <desc id="receipt-desc">Na parte inferior da NFC-e, o QR Code aparece à direita, destacado por um contorno e uma seta. A chave numérica de acesso aparece logo abaixo.</desc>
+        <rect x="28" y="5" width="178" height="135" rx="6" fill="white" stroke="currentColor" strokeOpacity=".25" />
+        <text x="117" y="24" textAnchor="middle" fontSize="11" fontWeight="bold" fill="currentColor">NFC-e · Nota fiscal</text>
+        <path d="M43 33h148M43 41h105M43 49h132M43 57h114M43 67h148" stroke="currentColor" strokeOpacity=".35" strokeWidth="2" />
+        <text x="43" y="84" fontSize="9" fill="currentColor">Consulte sua nota pelo QR Code</text>
+        <rect x="143" y="88" width="50" height="40" rx="3" fill="white" stroke="#b45309" strokeWidth="3" />
+        <path d="M149 94h10v10h-10zM176 94h10v10h-10zM149 111h10v10h-10z" fill="none" stroke="currentColor" strokeWidth="3" />
+        <path d="M166 96h4v4h-4zM166 106h6v4h-6zM178 113h7v7h-7zM164 117h6v5h-6z" fill="currentColor" />
+        <text x="43" y="119" fontSize="8" fill="currentColor">Chave de acesso: 44 dígitos</text>
+        <path d="M205 93l22-17h18" fill="none" stroke="#b45309" strokeWidth="2" />
+        <text x="247" y="69" fontSize="11" fontWeight="bold" fill="#92400e">QR Code</text>
+      </svg>
+      <figcaption className="mt-1 text-center text-xs text-muted-foreground">Exemplo ilustrativo: procure o QR Code na parte inferior da nota.</figcaption>
+    </figure>
   );
 }
