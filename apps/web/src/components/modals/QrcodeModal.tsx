@@ -8,6 +8,10 @@ import axios from "axios";
 import { getApiErrorMessage } from "@/utils/apiError";
 import type { InvoiceProcessResponse } from "./InvoiceCodeModal";
 
+// Temporariamente desabilitado no frontend; a implementação permanece preservada
+// para reativação futura sem alterações no fluxo de câmera ou no backend.
+const QR_CODE_IMAGE_UPLOAD_ENABLED = false;
+
 interface QRCodeModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -482,18 +486,20 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
                 <div className="space-y-4">
                     {mode === 'choice' && (
                         <div className="grid grid-cols-1 gap-3">
-                            <Button
-                                onClick={() => setMode('upload')}
-                                className="h-14 justify-start gap-3 text-base"
-                                variant="outline"
-                                disabled={loading}
-                            >
-                                <Upload className="h-5 w-5" />
-                                <div className="text-left">
-                                    <div className="font-semibold">Enviar arquivo</div>
-                                    <div className="text-xs text-muted-foreground">JPG, PNG, JPEG</div>
-                                </div>
-                            </Button>
+                            {QR_CODE_IMAGE_UPLOAD_ENABLED && (
+                                <Button
+                                    onClick={() => setMode('upload')}
+                                    className="h-14 justify-start gap-3 text-base"
+                                    variant="outline"
+                                    disabled={loading}
+                                >
+                                    <Upload className="h-5 w-5" />
+                                    <div className="text-left">
+                                        <div className="font-semibold">Enviar arquivo</div>
+                                        <div className="text-xs text-muted-foreground">JPG, PNG, JPEG</div>
+                                    </div>
+                                </Button>
+                            )}
 
                             <Button
                                 onClick={() => {
@@ -634,7 +640,7 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
                             <div className="flex-1">
                                 <p className="font-medium">Atenção</p>
                                 <div className="text-sm mt-1">{error}</div>
-                                {permissionStatus === 'denied' && (
+                                {permissionStatus === 'denied' && QR_CODE_IMAGE_UPLOAD_ENABLED && (
                                     <Button
                                         variant="outline"
                                         size="sm"
