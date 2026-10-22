@@ -34,9 +34,11 @@ use Illuminate\Support\Facades\Route;
 // Rotas públicas
 Route::get('/health', HealthController::class);
 
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware('throttle:register');
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:login');
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::prefix('admin')->group(function () {
@@ -74,11 +76,11 @@ Route::get('/email/verify', [AuthController::class, 'sendVerificationNotice'])
     ->name('verification.notice');
 
 Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
-    ->middleware(['auth:sanctum', 'throttle:6,1'])
+    ->middleware(['auth:sanctum', 'throttle:email-verification'])
     ->name('verification.resend');
 
 Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
-    ->middleware(['auth:sanctum', 'throttle:6,1'])
+    ->middleware(['auth:sanctum', 'throttle:email-verification'])
     ->name('verification.send');
 // Rotas autenticadas
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -99,7 +101,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // PRODUCTS
     Route::get('/products', [ProductController::class, 'index']);
-    Route::post('/products', [ProductController::class, 'store']);
+    Route::post('/products', [ProductController::class, 'store'])
+        ->middleware('role:company,admin');
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::put('/products/{product}', [ProductController::class, 'update']);
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);

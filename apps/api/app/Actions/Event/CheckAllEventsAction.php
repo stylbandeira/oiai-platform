@@ -5,7 +5,6 @@ namespace App\Actions\Event;
 use App\Http\Requests\Event\EventCheckAllRequest;
 use App\Repositories\EventRepository;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class CheckAllEventsAction
 {
@@ -13,17 +12,9 @@ class CheckAllEventsAction
 
     public function execute(EventCheckAllRequest $request)
     {
-        $notificationsIds = collect($request->validated()['notifications'])
-            ->pluck('id')
-            ->toArray();
-
-        try {
-            DB::transaction(function () use ($notificationsIds) {
-                $this->eventRepository->updateAll($notificationsIds, ['checked' => true]);
-            });
-        } catch (\Throwable $th) {
-            Log::alert($th);
-        }
+        DB::transaction(function () use ($request) {
+            $this->eventRepository->markAllAsCheckedForUser($request->user());
+        });
 
         return response([
             'message' => 'Todas as notificações marcadas como lidas.',

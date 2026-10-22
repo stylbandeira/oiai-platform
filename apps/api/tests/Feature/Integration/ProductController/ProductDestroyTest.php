@@ -42,4 +42,16 @@ class ProductDestroyTest extends TestCase
             'id' => $product->id,
         ]);
     }
+
+    public function test_non_admin_cannot_delete_a_product(): void
+    {
+        $client = User::factory()->client()->create();
+        $product = Product::factory()->create();
+
+        $this->actingAs($client)
+            ->deleteJson('/api/products/'.$product->id)
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('products', ['id' => $product->id]);
+    }
 }

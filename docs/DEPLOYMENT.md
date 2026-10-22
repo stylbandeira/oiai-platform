@@ -58,6 +58,66 @@ eles não substituem os secrets de deploy.
 
 ## Preparar a VPS e Docker
 
+### Firewall e SSH
+
+A VPS deve bloquear conexões de entrada por padrão e expor somente o SSH e o
+reverse proxy. Antes de ativar o firewall, confirme que a sessão SSH atual usa
+uma chave autorizada e que a porta correta está definida em `VPS_SSH_PORT`.
+
+Na raiz do projeto, execute na VPS:
+
+```bash
+sudo VPS_SSH_PORT=22 ./scripts/configure-vps-firewall.sh
+```
+
+O script libera a porta SSH informada, `80/tcp` e `443/tcp`, bloqueia as demais
+conexões de entrada e permite conexões de saída. Ele pede confirmação antes de
+ativar o UFW. Não publique as portas do MySQL, Redis ou dos containers; elas
+devem permanecer acessíveis somente pela rede interna ou em `127.0.0.1` quando
+necessário para a operação local.
+
+Depois da ativação, valide na VPS:
+
+```bash
+sudo ufw status verbose
+sudo ss -lntup
+```
+
+Faça também um teste a partir de uma rede externa, por exemplo `nmap -Pn
+<IP-da-VPS>`, confirmando que somente as portas públicas esperadas respondem.
+
+Para desabilitar autenticação SSH por senha, primeiro confirme uma segunda
+sessão funcionando por chave e então configure `PasswordAuthentication no` e
+`KbdInteractiveAuthentication no` em `/etc/ssh/sshd_config`, valide com
+`sudo sshd -t` e recarregue com `sudo systemctl reload ssh`.
+
+### Backup e restauração do banco
+
+Configure um job diário na VPS usando `scripts/backup-mysql.sh`. As variáveis
+`DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` e `DB_PASSWORD` devem vir de
+um arquivo de ambiente protegido, fora do Git, com modo `600`. O script grava
+em `/backups/oiai`, aplica modo `700` no diretório e modo `600` nos arquivos,
+registra falhas em `/var/log/oiai-backup.log` e mantém aproximadamente 7
+backups diários, 4 semanais e 3 mensais.
+
+Exemplo de cron, usando um arquivo de ambiente protegido:
+
+```cron
+15 3 * * * . /etc/oiai/backup.env && /opt/oiai/app/scripts/backup-mysql.sh
+```
+
+Valide o ciclo completo restaurando em um banco temporário:
+
+```bash
+set -a; . /etc/oiai/backup.env; set +a
+RESTORE_TEST_CONFIRM=YES ./scripts/restore-mysql-backup-test.sh \
+  /backups/oiai/oiai-AAAA-MM-DD-HHMM.sql.gz
+```
+
+O teste cria e remove apenas o banco temporário indicado; não o execute
+apontando para produção. Mantenha também uma cópia externa e criptografada,
+pois backups somente no mesmo disco não cobrem a perda da VPS.
+
 Instale Docker Engine com o plugin Docker Compose, Git e Nginx no host. Clone o
 repositório e prepare os arquivos de ambiente a partir dos exemplos:
 
@@ -116,6 +176,28 @@ e o domínio da API para `http://127.0.0.1:8001`, preservando os cabeçalhos
 frontend já encaminha `/api/` para a API quando `VITE_API_URL` está vazio; se o
 frontend chamar o subdomínio de API diretamente, configure CORS para a origem
 HTTPS exata do frontend.
+
+O Nginx externo deve aceitar HTTP apenas para redirecionar para HTTPS e terminar
+TLS com certificados válidos para os dois domínios:
+
+```nginx
+server {
+    listen 80;
+    server_name oiai.stylbandeira.tech api.oiai.stylbandeira.tech;
+    return 301 https://$host$request_uri;
+}
+```
+
+Mantenha blocos HTTPS separados para cada domínio, com `listen 443 ssl` e os
+certificados correspondentes do Let's Encrypt, encaminhando para as portas
+locais acima. Configure renovação automática com `certbot renew` via timer do
+systemd e valide a configuração com `certbot renew --dry-run`.
+
+Os Nginx internos de produção também adicionam headers de segurança. O Nginx
+externo deve preservar esses headers (ou defini-los novamente) e só deve enviar
+`Strict-Transport-Security` depois que HTTPS estiver validado nos dois domínios.
+Não habilite HSTS em um ambiente que ainda aceite acesso público por HTTP sem
+redirecionamento correto.
 
 Instale e renove certificados TLS no host (por exemplo, com Certbot/Let's
 Encrypt, se esse for o método escolhido). Habilite redirecionamento HTTP para

@@ -5,13 +5,15 @@ namespace App\Actions\CompanyOwners;
 use App\Models\Company;
 use App\Repositories\CompanyOwnerRepository;
 use App\Services\NotificationService;
+use App\Services\UserApprovalAuditService;
 use Illuminate\Http\Request;
 
 class RequestCompanyAccessAction
 {
     public function __construct(
         private NotificationService $notificationService,
-        private CompanyOwnerRepository $companyOwnerRepository
+        private CompanyOwnerRepository $companyOwnerRepository,
+        private UserApprovalAuditService $audit
     ) {}
 
     public function execute(Request $request, Company $company)
@@ -25,6 +27,9 @@ class RequestCompanyAccessAction
         }
 
         $this->notificationService->createOwnershipRequestEvent($request->user(), $company);
+        $this->audit->record($request->user(), $request->user(), 'access_requested', [
+            'company_id' => $company->id,
+        ]);
 
         return response([
             'message' => 'Solicitação feita com sucesso!',

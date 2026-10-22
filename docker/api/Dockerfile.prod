@@ -15,7 +15,7 @@ COPY apps/api /var/www/html
 
 RUN composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader \
     && chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 770 storage bootstrap/cache
 
 COPY docker/api/entrypoint.prod.sh /usr/local/bin/entrypoint.prod.sh
 RUN chmod +x /usr/local/bin/entrypoint.prod.sh

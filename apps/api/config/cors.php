@@ -1,5 +1,24 @@
 <?php
 
+$configuredFrontendOrigins = array_values(array_filter(array_map(
+    static fn (string $origin): string => rtrim(trim($origin), '/'),
+    explode(',', (string) env('FRONTEND_URLS', env('FRONTEND_URL', '')))
+)));
+
+$localFrontendOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+];
+
+$allowedFrontendOrigins = env('APP_ENV', 'production') === 'production'
+    ? $configuredFrontendOrigins
+    : array_values(array_unique([
+        ...$localFrontendOrigins,
+        ...$configuredFrontendOrigins,
+    ]));
+
 return [
 
     /*
@@ -20,14 +39,8 @@ return [
     'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 
     'allowed_origins' => [
-        env('FRONTEND_URL', 'http://localhost:3000'),
-        'http://localhost:3000',
-        'http://127.0.0.1:3000',
-        'https://worrisome-green-moneywise.ngrok-free.dev/',  // Adicione seu link ngrok
-        'https://*.ngrok-free.dev',  // Ou use coringa para qualquer ngrok
-        'https://*.serveo.net',  // Permite qualquer subdomínio do Serveo
-        'https://*.serveousercontent.com',
-    ], // Específico para seu frontend
+        ...$allowedFrontendOrigins,
+    ],
 
     'allowed_origins_patterns' => [],
 

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Auth;
 
+use App\Services\Auth\AuthAuditLogger;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -10,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 class StoreNewPasswordAction
 {
-    public function execute(array $data)
+    public function execute(array $data, AuthAuditLogger $audit)
     {
         $status = Password::reset(
             [
@@ -19,19 +20,22 @@ class StoreNewPasswordAction
                 'password_confirmation' => $data['password_confirmation'],
                 'token' => $data['token'],
             ],
-            function ($user) use ($data) {
+            function ($user) use ($data, $audit) {
                 $user->forceFill([
                     'password' => Hash::make($data['password']),
                     'remember_token' => Str::random(60),
                 ])->save();
 
                 event(new PasswordReset($user));
+                $audit->record('password_reset', 'success', $user);
             }
         );
 
         if ($status == Password::PASSWORD_RESET) {
             return redirect()->route('login')->with('status', __($status));
         }
+
+        $audit->record('password_reset', 'failure');
 
         throw ValidationException::withMessages([
             'email' => [trans($status)],

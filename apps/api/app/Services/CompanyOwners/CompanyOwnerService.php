@@ -5,22 +5,46 @@ namespace App\Services\CompanyOwners;
 use App\Models\Company;
 use App\Models\User;
 use App\Services\NotificationService;
+use App\Services\UserApprovalAuditService;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class CompanyOwnerService
 {
     public function __construct(
-        private NotificationService $notificationService
+        private NotificationService $notificationService,
+        private ?UserApprovalAuditService $audit = null,
     ) {}
 
     public function sync(User $user, array $companies, ?int $approvedBy): void
     {
-        $oldCompanyIds = $user->companies
-            ->pluck('id')
-            ->toArray();
+        $oldStatuses = [];
+        foreach ($user->companies as $company) {
+            /** @var Pivot $pivot */
+            $pivot = $company->getRelationValue('pivot');
+            $oldStatuses[(int) $company->getKey()] = $pivot->getAttribute('status');
+        }
 
         $syncData = $this->normalizeForSync($user, $companies, $approvedBy);
 
         $user->companies()->sync($syncData);
+
+        foreach ($syncData as $companyId => $pivot) {
+            $previousStatus = $oldStatuses[$companyId] ?? null;
+            $action = match ($pivot['status']) {
+                'active' => 'approved',
+                'inactive' => 'rejected',
+                default => 'access_requested',
+            };
+
+            if ($previousStatus !== $pivot['status']) {
+                $this->audit?->record($user, $approvedBy ? User::find($approvedBy) : null, $action, [
+                    'company_id' => (int) $companyId,
+                    'status' => $pivot['status'],
+                ]);
+            }
+        }
+
+        $oldCompanyIds = array_keys($oldStatuses);
 
         $newCompanyIds = array_values(array_diff(
             array_keys($syncData),

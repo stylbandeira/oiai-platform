@@ -29,6 +29,17 @@ class ListOptimizeTest extends TestCase
         $response->assertStatus(404);
     }
 
+    public function test_cannot_optimize_another_users_list(): void
+    {
+        $owner = User::factory()->client()->create();
+        $otherUser = User::factory()->client()->create();
+        $list = $this->createList($owner);
+
+        $this->actingAs($otherUser)
+            ->postJson('/api/lists/'.$list->id.'/optimize')
+            ->assertForbidden();
+    }
+
     public function test_company_product_id_is_filled_with_cheapest_or_only_company_product(): void
     {
         $user = User::factory()->client()->create();

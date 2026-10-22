@@ -30,7 +30,7 @@ class ProductStoreTest extends TestCase
             ->assertJsonValidationErrorFor($field);
     }
 
-    public function test_client_created_product_is_saved_as_not_validated(): void
+    public function test_client_cannot_create_products(): void
     {
         $client = User::factory()->client()->create();
         $payload = $this->validPayload();
@@ -38,15 +38,9 @@ class ProductStoreTest extends TestCase
         $response = $this->actingAs($client)
             ->postJson('/api/products', $payload);
 
-        $response
-            ->assertStatus(200)
-            ->assertJsonPath('product.validated', false);
+        $response->assertForbidden();
 
-        $this->assertDatabaseHas('products', [
-            'name' => $payload['name'],
-            'validated' => false,
-            'created_by' => $client->id,
-        ]);
+        $this->assertDatabaseMissing('products', ['name' => $payload['name']]);
     }
 
     public function test_company_created_product_is_attached_to_its_own_company(): void

@@ -13,7 +13,7 @@ mkdir -p /var/www/html/storage/logs
 
 # AGUARDAR MySQL ficar pronto
 echo "Aguardando MySQL ficar disponível..."
-while ! mysqladmin ping -h"db" -u"root" -p"secret" --silent; do
+while ! mysqladmin ping -h"${DB_HOST:-db}" -u"${DB_USERNAME:?DB_USERNAME is required}" -p"${DB_PASSWORD:?DB_PASSWORD is required}" --silent; do
     echo "MySQL não está pronto... aguardando 5 segundos"
     sleep 5
 done
@@ -27,10 +27,6 @@ php artisan migrate --force
 php artisan config:clear
 php artisan cache:clear
 php artisan view:clear
-
-echo "Iniciando Queue Worker em background..."
-# Worker rodando EM BACKGROUND (não controlado pelo Supervisor)
-php artisan queue:listen --daemon --sleep=3 --tries=3 --timeout=60 > /var/www/html/storage/logs/worker.log 2>&1 &
 
 echo "Tudo pronto! Iniciando Supervisor..."
 exec /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
