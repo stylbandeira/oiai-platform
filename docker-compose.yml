@@ -31,6 +31,7 @@ services:
             dockerfile: docker/api/Dockerfile
         container_name: oiai-queue
         working_dir: /var/www/html
+        user: "www-data"
         entrypoint: []
         command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
         volumes:
@@ -47,6 +48,7 @@ services:
             dockerfile: docker/api/Dockerfile
         container_name: oiai-scheduler
         working_dir: /var/www/html
+        user: "www-data"
         entrypoint: []
         command: php artisan schedule:work
         volumes:
