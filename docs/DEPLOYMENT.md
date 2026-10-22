@@ -91,6 +91,33 @@ sessão funcionando por chave e então configure `PasswordAuthentication no` e
 `KbdInteractiveAuthentication no` em `/etc/ssh/sshd_config`, valide com
 `sudo sshd -t` e recarregue com `sudo systemctl reload ssh`.
 
+### Backup e restauração do banco
+
+Configure um job diário na VPS usando `scripts/backup-mysql.sh`. As variáveis
+`DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` e `DB_PASSWORD` devem vir de
+um arquivo de ambiente protegido, fora do Git, com modo `600`. O script grava
+em `/backups/oiai`, aplica modo `700` no diretório e modo `600` nos arquivos,
+registra falhas em `/var/log/oiai-backup.log` e mantém aproximadamente 7
+backups diários, 4 semanais e 3 mensais.
+
+Exemplo de cron, usando um arquivo de ambiente protegido:
+
+```cron
+15 3 * * * . /etc/oiai/backup.env && /opt/oiai/app/scripts/backup-mysql.sh
+```
+
+Valide o ciclo completo restaurando em um banco temporário:
+
+```bash
+set -a; . /etc/oiai/backup.env; set +a
+RESTORE_TEST_CONFIRM=YES ./scripts/restore-mysql-backup-test.sh \
+  /backups/oiai/oiai-AAAA-MM-DD-HHMM.sql.gz
+```
+
+O teste cria e remove apenas o banco temporário indicado; não o execute
+apontando para produção. Mantenha também uma cópia externa e criptografada,
+pois backups somente no mesmo disco não cobrem a perda da VPS.
+
 Instale Docker Engine com o plugin Docker Compose, Git e Nginx no host. Clone o
 repositório e prepare os arquivos de ambiente a partir dos exemplos:
 
