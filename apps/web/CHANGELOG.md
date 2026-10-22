@@ -2,6 +2,14 @@
 
 Todas as alterações relevantes do frontend são registradas neste arquivo.
 
+## [3.2.1](https://github.com/stylbandeira/oiai-platform/compare/web-v3.2.0...web-v3.2.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* correct geolocation permissions ([82997b1](https://github.com/stylbandeira/oiai-platform/commit/82997b1ac96e69e1f810fc04006b6e82da063c63))
+* correct geolocation permissions ([0c57e1f](https://github.com/stylbandeira/oiai-platform/commit/0c57e1f5af8e60e9d404a05d798658801940c891))
+
 ## [3.2.0](https://github.com/stylbandeira/oiai-platform/compare/web-v3.1.2...web-v3.2.0) (2026-10-22)
 
 
