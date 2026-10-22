@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, DollarSign, Edit, Trash2, Share2, Package, Store, MoreVertical, TrendingUp, LocateFixed, Search } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { ProductTour } from "@/components/onboarding/ProductTour";
 import api from "@/lib/api";
 import {
   DropdownMenu,
@@ -96,6 +97,8 @@ interface ShoppingList {
 
 export default function ViewShoppingList() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showOptimizeTour, setShowOptimizeTour] = useState(Boolean(location.state?.showOptimizeTour));
   const { id } = useParams();
   const [shoppingList, setShoppingList] = useState<ShoppingList | null>(null);
   const [loading, setLoading] = useState(true);
@@ -554,6 +557,18 @@ export default function ViewShoppingList() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {!isCompleted && showOptimizeTour && (
+        <ProductTour
+          storageKey="oiai.client.optimize.tour.v1"
+          open={showOptimizeTour}
+          onOpenChange={setShowOptimizeTour}
+          steps={[{
+            target: "#tour-optimize-list",
+            title: "Otimize sua lista",
+            description: "Este botão procura uma combinação de estabelecimentos e organiza a rota conforme sua localização e a distância escolhida. Toque para conhecer a ação; a otimização só começa quando você confirmar os dados no formulário.",
+          }]}
+        />
+      )}
       <div className="container mx-auto px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header - Versão mais sutil e elegante */}
         <div className="flex items-center justify-between">
@@ -671,6 +686,7 @@ export default function ViewShoppingList() {
           <Card className="border-0 shadow-sm bg-white">
             <CardContent className="p-4 sm:p-6">
               <Button
+                id="tour-optimize-list"
                 onClick={openOptimizeDialog}
                 className="w-full bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg transition-all"
                 disabled={isOptimizing}

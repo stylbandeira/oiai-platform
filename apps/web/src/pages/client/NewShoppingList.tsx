@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Search, Plus, Minus, Heart, MapPin, DollarSign } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
 import { CustomPagination } from "@/components/oiai_ui/CustomPagination";
 import { ProductDecisionPopup } from "@/components/modals/ProductDecisionPopup";
@@ -55,6 +55,7 @@ interface NewShoppingListProps {
 
 export default function NewShoppingList({ isEditMode = false, listId }: NewShoppingListProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const params = useParams();
   const actualListId = listId || (params.listId ? parseInt(params.listId) : undefined);
 
@@ -247,10 +248,14 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
         });
 
       } else {
-        await api.post("/lists", {
+        const response = await api.post("/lists", {
           products: toCreateListItems(itemsToSave),
           name: listName
         });
+        if (location.state?.showOptimizeTourAfterCreate && response.data?.list?.id) {
+          navigate(`/list/${response.data.list.id}`, { replace: true, state: { showOptimizeTour: true } });
+          return;
+        }
       }
       navigate("/");
     } catch (error) {
@@ -282,7 +287,7 @@ export default function NewShoppingList({ isEditMode = false, listId }: NewShopp
           <Button
             onClick={() => void saveList()}
             disabled={isSaving || !listName.trim() || selectedItems.length === 0}
-            className="bg-gradient-primary hover:shadow-glow transition-all duration-300 w-full sm:w-auto"
+            className="bg-primary hover:bg-primary/90 transition-all duration-300 w-full sm:w-auto"
           >
             {isSaving ? "Salvando..." : buttonText}
           </Button>

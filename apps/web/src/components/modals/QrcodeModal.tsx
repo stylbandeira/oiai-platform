@@ -481,7 +481,7 @@ export function QRCodeModal({ isOpen, onClose, onSuccess, onError }: QRCodeModal
                 stopCamera();
             }
         }}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent id="tour-scan-popup" className="z-[120] sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>
                         <span>Escanear QR Code</span>

@@ -30,6 +30,9 @@ class UserUpdateRequest extends FormRequest
             'cpf' => 'sometimes|string',
             'status' => 'sometimes|in:active,inactive,suspended',
             ...UserCompaniesRules::companies(),
+            'role' => ['prohibited'],
+            'permissions' => ['prohibited'],
+            'is_admin' => ['prohibited'],
         ];
     }
 }

@@ -2,8 +2,7 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
-
+use App\Authorization\UserPermissions;
 use App\Models\Address;
 use App\Models\Company;
 use App\Models\CompanyOwners;
@@ -19,6 +18,7 @@ use App\Policies\ItensListPolicy;
 use App\Policies\ProductPolicy;
 use App\Policies\UsersPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -46,6 +46,8 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        foreach (UserPermissions::all() as $permission) {
+            Gate::define($permission, fn (User $user): bool => $user->hasPermission($permission));
+        }
     }
 }
