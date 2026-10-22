@@ -54,6 +54,8 @@ class ProductController extends Controller
      */
     public function store(ProductStoreRequest $request, StoreProductAction $action)
     {
+        $this->authorize('product.create');
+
         $user = $request->user();
 
         if ($request->company_id && ! $user->hasAccessToCompany($request->company_id)) {
@@ -108,6 +110,8 @@ class ProductController extends Controller
 
     public function import(ProductImportRequest $request, ImportProductAction $action)
     {
+        $this->authorize('product.create');
+
         return $action->execute($request);
     }
 
@@ -136,6 +140,8 @@ class ProductController extends Controller
 
     public function bulkValidate(ProductBulkValidateRequest $request, BulkValidateProductAction $action)
     {
+        $this->authorize('product.create');
+
         $affectedProducts = $action->execute($request->user(), $request->validated());
 
         return response([

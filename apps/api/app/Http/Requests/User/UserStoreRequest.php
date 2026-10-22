@@ -31,6 +31,9 @@ class UserStoreRequest extends FormRequest
             'cpf' => 'string|required',
             'status' => 'sometimes|in:'.implode(',', User::VALID_STATUSES),
             ...UserCompaniesRules::companies(),
+            'role' => ['prohibited'],
+            'permissions' => ['prohibited'],
+            'is_admin' => ['prohibited'],
         ];
     }
 }

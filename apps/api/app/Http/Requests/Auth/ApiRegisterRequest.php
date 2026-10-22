@@ -20,6 +20,9 @@ class ApiRegisterRequest extends FormRequest
             'cpf' => 'required|string',
             'password' => ['required', 'confirmed', Password::min(8)],
             'user_type' => 'required|string|in:client,company',
+            'role' => ['prohibited'],
+            'permissions' => ['prohibited'],
+            'is_admin' => ['prohibited'],
         ];
     }
 }
