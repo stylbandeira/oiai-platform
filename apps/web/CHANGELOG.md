@@ -2,6 +2,21 @@
 
 Todas as alterações relevantes do frontend são registradas neste arquivo.
 
+## [3.2.0](https://github.com/stylbandeira/oiai-platform/compare/web-v3.1.2...web-v3.2.0) (2026-10-22)
+
+
+### Features
+
+* add NFCe image on tutorial ([dafcdca](https://github.com/stylbandeira/oiai-platform/commit/dafcdca2dbd4f2514664295379e30b44c39eed54))
+* implements tutorial ([1692e3d](https://github.com/stylbandeira/oiai-platform/commit/1692e3d2a3eba7bfe2ceeb580d7730d9e0ee98f0))
+* landing page and modify buttons and badges colors ([7de411a](https://github.com/stylbandeira/oiai-platform/commit/7de411a06c3e095b186ef7f2f13cb4b18f876b2e))
+* take user to a new list with tutorial ([6040171](https://github.com/stylbandeira/oiai-platform/commit/6040171345c3f2de4f206bfa688215045e8da330))
+
+
+### Tests
+
+* validate tutorial ([1c0828c](https://github.com/stylbandeira/oiai-platform/commit/1c0828c43f1deabbdf8cdf5b68b272171b4d36a6))
+
 ## [3.1.2](https://github.com/stylbandeira/oiai-platform/compare/web-v3.1.1...web-v3.1.2) (2026-10-22)
 
 
