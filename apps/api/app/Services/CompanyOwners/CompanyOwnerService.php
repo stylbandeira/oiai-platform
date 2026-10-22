@@ -5,22 +5,42 @@ namespace App\Services\CompanyOwners;
 use App\Models\Company;
 use App\Models\User;
 use App\Services\NotificationService;
+use App\Services\UserApprovalAuditService;
 
 class CompanyOwnerService
 {
     public function __construct(
-        private NotificationService $notificationService
+        private NotificationService $notificationService,
+        private UserApprovalAuditService $audit,
     ) {}
 
     public function sync(User $user, array $companies, ?int $approvedBy): void
     {
-        $oldCompanyIds = $user->companies
-            ->pluck('id')
-            ->toArray();
+        $oldStatuses = $user->companies->mapWithKeys(fn (Company $company) => [
+            $company->id => $company->pivot->status,
+        ])->all();
 
         $syncData = $this->normalizeForSync($user, $companies, $approvedBy);
 
         $user->companies()->sync($syncData);
+
+        foreach ($syncData as $companyId => $pivot) {
+            $previousStatus = $oldStatuses[$companyId] ?? null;
+            $action = match ($pivot['status']) {
+                'active' => 'approved',
+                'inactive' => 'rejected',
+                default => 'access_requested',
+            };
+
+            if ($previousStatus !== $pivot['status']) {
+                $this->audit->record($user, $approvedBy ? User::find($approvedBy) : null, $action, [
+                    'company_id' => (int) $companyId,
+                    'status' => $pivot['status'],
+                ]);
+            }
+        }
+
+        $oldCompanyIds = array_keys($oldStatuses);
 
         $newCompanyIds = array_values(array_diff(
             array_keys($syncData),

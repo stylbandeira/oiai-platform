@@ -19,6 +19,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\CompanyOwners\CompanyOwnerService;
 use App\Services\ExportService;
+use App\Services\UserApprovalAuditService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
@@ -84,11 +85,19 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UserUpdateRequest $request, User $user, UpdateUserAction $action): Response
+    public function update(UserUpdateRequest $request, User $user, UpdateUserAction $action, UserApprovalAuditService $audit): Response
     {
+        $oldStatus = $user->status;
         $companies = $request->companies ?? [];
 
         $updatedUser = $action->execute($request->validated(), $user->id);
+
+        if ($oldStatus !== $updatedUser->status) {
+            $audit->record($updatedUser, $request->user(), $updatedUser->status === 'suspended' ? 'blocked' : 'status_changed', [
+                'previous_status' => $oldStatus,
+                'status' => $updatedUser->status,
+            ]);
+        }
 
         $company_owner_service = app(CompanyOwnerService::class);
 
@@ -131,7 +140,7 @@ class UserController extends Controller
     /**
      * Função para reverter deleção de usuário
      */
-    public function revertDestroy(User $user, RevertDestroyUserAction $action): Response
+    public function revertDestroy(User $user, RevertDestroyUserAction $action, UserApprovalAuditService $audit): Response
     {
         if (! $user->deleted_at) {
             return response([
@@ -140,6 +149,7 @@ class UserController extends Controller
         }
 
         $revertedUser = $action->execute($user);
+        $audit->record($revertedUser, request()->user(), 'reactivated');
 
         return response([
             'message' => 'Usuário revertido',
