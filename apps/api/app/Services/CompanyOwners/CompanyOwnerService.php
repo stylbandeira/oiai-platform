@@ -12,7 +12,7 @@ class CompanyOwnerService
 {
     public function __construct(
         private NotificationService $notificationService,
-        private UserApprovalAuditService $audit,
+        private ?UserApprovalAuditService $audit = null,
     ) {}
 
     public function sync(User $user, array $companies, ?int $approvedBy): void
@@ -37,7 +37,7 @@ class CompanyOwnerService
             };
 
             if ($previousStatus !== $pivot['status']) {
-                $this->audit->record($user, $approvedBy ? User::find($approvedBy) : null, $action, [
+                $this->audit?->record($user, $approvedBy ? User::find($approvedBy) : null, $action, [
                     'company_id' => (int) $companyId,
                     'status' => $pivot['status'],
                 ]);
