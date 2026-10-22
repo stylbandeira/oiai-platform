@@ -117,6 +117,22 @@ frontend já encaminha `/api/` para a API quando `VITE_API_URL` está vazio; se 
 frontend chamar o subdomínio de API diretamente, configure CORS para a origem
 HTTPS exata do frontend.
 
+O Nginx externo deve aceitar HTTP apenas para redirecionar para HTTPS e terminar
+TLS com certificados válidos para os dois domínios:
+
+```nginx
+server {
+    listen 80;
+    server_name oiai.stylbandeira.tech api.oiai.stylbandeira.tech;
+    return 301 https://$host$request_uri;
+}
+```
+
+Mantenha blocos HTTPS separados para cada domínio, com `listen 443 ssl` e os
+certificados correspondentes do Let's Encrypt, encaminhando para as portas
+locais acima. Configure renovação automática com `certbot renew` via timer do
+systemd e valide a configuração com `certbot renew --dry-run`.
+
 Instale e renove certificados TLS no host (por exemplo, com Certbot/Let's
 Encrypt, se esse for o método escolhido). Habilite redirecionamento HTTP para
 HTTPS e valide a renovação automática. O workflow faz o teste de saúde em
