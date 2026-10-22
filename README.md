@@ -23,6 +23,7 @@ apps/web/                  Frontend React/Vite
 docs/openapi.yaml          Contrato OpenAPI
 docs/CONTRIBUTING.md       Commits e contribuição
 docs/VERSIONING.md         Versões e tags
+docs/DEPLOYMENT.md         Deploy, VPS, persistência e rollback
 .github/workflows/         CI, gate e releases
 docker-compose.yml         Ambiente local
 ```
@@ -103,6 +104,20 @@ npm run check:api
 
 `ci-api.yml` valida o Backend e `ci-web.yml` valida o Web. Os filtros por caminho evitam pipelines desnecessários. Alterações em `docker/**`, `docker-compose.yml`, `docs/openapi.yaml` ou workflows podem afetar ambas as aplicações. O `ci-gate.yml` detecta os componentes necessários e publica o check global `CI Gate / CI Gate result`, recomendado como obrigatório na proteção da branch.
 
+## Environments
+
+| Branch | Ambiente | Deploy |
+| --- | --- | --- |
+| `feature/*`, `fix/*`, etc. | Desenvolvimento local / revisão | Não; PR para `develop` executa CI |
+| `develop` | Integração | Não; CI e Release Please podem executar |
+| `main` | Produção (VPS) | Automático após push, se o CI Gate passar |
+
+O deploy de produção ocorre no merge/push em `main` apenas quando as alterações
+estão dentro dos caminhos monitorados pelo workflow. Pull requests, inclusive
+PRs automáticos do Release Please, não fazem deploy. Consulte
+[Deploy e operação em produção](docs/DEPLOYMENT.md) para configuração da VPS e
+detalhes do pipeline.
+
 ## Versioning
 
 API e Web usam Semantic Versioning independentemente:
@@ -126,6 +141,7 @@ GitHub Releases é o registro oficial das versões publicadas. Cada release iden
 - [OpenAPI/Swagger](docs/openapi.yaml) · [Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/stylbandeira/oiai-platform/main/docs/openapi.yaml);
 - [Contributing e Conventional Commits](CONTRIBUTING.md);
 - [Versionamento](docs/VERSIONING.md);
+- [Deploy e operação em produção](docs/DEPLOYMENT.md);
 - [CI API](.github/workflows/ci-api.yml) · [CI Web](.github/workflows/ci-web.yml) · [CI Gate](.github/workflows/ci-gate.yml);
 - [GitHub Releases](https://github.com/stylbandeira/oiai-platform/releases).
 - [Guias de migração e breaking changes](docs/releases/README.md).

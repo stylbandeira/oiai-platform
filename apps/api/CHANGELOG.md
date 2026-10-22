@@ -4,28 +4,17 @@ Todas as alterações relevantes da API são registradas neste arquivo.
 
 ## [3.0.0](https://github.com/stylbandeira/oiai-platform/compare/api-v2.1.1...api-v3.0.0) (2026-10-14)
 
-
 ### ⚠ BREAKING CHANGES
 
-* **api,web:** implements admin validation of client normalization
-* **api,web:** implements admin validation of client normalization
-* **api,web:** implements admin validation of client normalization
-* **api,web:** implements admin validation of client normalization
-* **api,web:** implements admin validation of client normalization
+* Sugestões de normalização enviadas por clientes agora aguardam aprovação administrativa.
 
 ### Features
 
-* **api,web:** implements admin validation of client normalization ([4e84c11](https://github.com/stylbandeira/oiai-platform/commit/4e84c1178c68e3aeec1c5dfb503acb8977b98ade))
-* **api,web:** implements admin validation of client normalization ([4e84c11](https://github.com/stylbandeira/oiai-platform/commit/4e84c1178c68e3aeec1c5dfb503acb8977b98ade))
-* **api,web:** implements admin validation of client normalization ([d80d724](https://github.com/stylbandeira/oiai-platform/commit/d80d724ab6a59a7b764d64a39708182ac3b783fe))
-* **api,web:** implements admin validation of client normalization ([d80d724](https://github.com/stylbandeira/oiai-platform/commit/d80d724ab6a59a7b764d64a39708182ac3b783fe))
-* **api,web:** implements admin validation of client normalization ([692e85d](https://github.com/stylbandeira/oiai-platform/commit/692e85de3d1545114fc5b3873923459d44abc105))
-
+* **api:** adicionar revisão administrativa de normalizações e identidade de produto por mercado ([692e85d](https://github.com/stylbandeira/oiai-platform/commit/692e85de3d1545114fc5b3873923459d44abc105))
 
 ### Maintenance
 
-* rollback strategy ([f49076d](https://github.com/stylbandeira/oiai-platform/commit/f49076d9eb6bf01490d3e0e2a9e8e1f5725e6829))
-* rollback strategy ([f49076d](https://github.com/stylbandeira/oiai-platform/commit/f49076d9eb6bf01490d3e0e2a9e8e1f5725e6829))
+* documentar estratégia de rollback ([f49076d](https://github.com/stylbandeira/oiai-platform/commit/f49076d9eb6bf01490d3e0e2a9e8e1f5725e6829))
 
 ## [2.1.1](https://github.com/stylbandeira/oiai-platform/compare/api-v2.1.0...api-v2.1.1) (2026-10-13)
 
