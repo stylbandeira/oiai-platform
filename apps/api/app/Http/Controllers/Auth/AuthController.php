@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ApiLoginRequest;
 use App\Http\Requests\Auth\ApiRegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Services\Auth\AuthAuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -22,9 +23,9 @@ class AuthController extends Controller
         return $action->execute($id, $hash);
     }
 
-    public function login(ApiLoginRequest $request, ApiLoginAction $action)
+    public function login(ApiLoginRequest $request, ApiLoginAction $action, AuthAuditLogger $audit)
     {
-        return $action->execute($request->validated());
+        return $action->execute($request->validated(), $audit);
     }
 
     public function user(Request $request, GetAuthenticatedUserAction $action)
