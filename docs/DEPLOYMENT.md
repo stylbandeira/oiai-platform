@@ -133,6 +133,12 @@ certificados correspondentes do Let's Encrypt, encaminhando para as portas
 locais acima. Configure renovação automática com `certbot renew` via timer do
 systemd e valide a configuração com `certbot renew --dry-run`.
 
+Os Nginx internos de produção também adicionam headers de segurança. O Nginx
+externo deve preservar esses headers (ou defini-los novamente) e só deve enviar
+`Strict-Transport-Security` depois que HTTPS estiver validado nos dois domínios.
+Não habilite HSTS em um ambiente que ainda aceite acesso público por HTTP sem
+redirecionamento correto.
+
 Instale e renove certificados TLS no host (por exemplo, com Certbot/Let's
 Encrypt, se esse for o método escolhido). Habilite redirecionamento HTTP para
 HTTPS e valide a renovação automática. O workflow faz o teste de saúde em
