@@ -2,6 +2,25 @@
 
 Todas as alterações relevantes do frontend são registradas neste arquivo.
 
+## [3.1.1](https://github.com/stylbandeira/oiai-platform/compare/web-v3.1.0...web-v3.1.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* **web:** disable QRCode img send button ([387fa1d](https://github.com/stylbandeira/oiai-platform/commit/387fa1d9c4edc25773e94cd2780342c45064bce0))
+
+
+### Refactoring
+
+* **web,api:** remove not used buttons and routes ([dbf01dd](https://github.com/stylbandeira/oiai-platform/commit/dbf01dd77073bb9f84b59043edff92079c4d05f8))
+* **web:** mobile first on list creation ([b778654](https://github.com/stylbandeira/oiai-platform/commit/b778654d0a07e99523e09e497c2d567fee370dea))
+
+
+### Maintenance
+
+* configure nginx security headers ([74a8acc](https://github.com/stylbandeira/oiai-platform/commit/74a8acca7dc4599e42dccbe65e48e6d055d4275e))
+* production security hardening ([ca0df0e](https://github.com/stylbandeira/oiai-platform/commit/ca0df0e2f08a84450f8ed3a864939a76a83c9bde))
+
 ## [3.1.0](https://github.com/stylbandeira/oiai-platform/compare/web-v3.0.0...web-v3.1.0) (2026-10-22)
 
 
