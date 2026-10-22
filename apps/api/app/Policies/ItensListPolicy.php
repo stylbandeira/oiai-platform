@@ -28,7 +28,7 @@ class ItensListPolicy
      */
     public function view(User $user, ItensList $itensList)
     {
-        return true;
+        return $user->isAdmin() || ($user->isClient() && $itensList->user_id === $user->id);
     }
 
     /**
@@ -86,11 +86,7 @@ class ItensListPolicy
      */
     public function restore(User $user, ItensList $itensList)
     {
-        if ($user->isAdmin()) {
-            return true;
-        } else {
-            return true;
-        }
+        return $user->isAdmin() || ($user->isClient() && $itensList->user_id === $user->id);
     }
 
     /**
@@ -100,10 +96,6 @@ class ItensListPolicy
      */
     public function forceDelete(User $user, ItensList $itensList)
     {
-        if ($user->isAdmin()) {
-            return true;
-        } else {
-            return true;
-        }
+        return $user->isAdmin();
     }
 }

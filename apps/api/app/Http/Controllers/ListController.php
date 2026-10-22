@@ -54,6 +54,8 @@ class ListController extends Controller
 
     public function optimize(ListOptimizeRequest $request, ItensList $list, OptimizeListAction $action)
     {
+        $this->authorize('update', $list);
+
         $locationData = $request->safe()->only([
             'latitude',
             'longitude',
