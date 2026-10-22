@@ -3,16 +3,12 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Psr\Log\LogLevel;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
-    /**
-     * A list of exception types with their corresponding custom log levels.
-     *
-     * @var array<class-string<Throwable>, LogLevel::*>
-     */
     protected $levels = [
         //
     ];
@@ -46,6 +42,24 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (Throwable $exception, Request $request) {
+            if (! app()->environment('production') || ! $request->expectsJson()) {
+                return null;
+            }
+
+            $status = $exception instanceof HttpExceptionInterface
+                ? $exception->getStatusCode()
+                : 500;
+
+            if ($status < 500) {
+                return null;
+            }
+
+            return response()->json([
+                'message' => 'Ocorreu um erro interno. Tente novamente mais tarde.',
+            ], 500);
         });
     }
 }

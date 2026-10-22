@@ -34,7 +34,11 @@ class ProductUpdateRequest extends FormRequest
                 Rule::unique('products', 'ean')->ignore($product?->id),
             ],
             'description' => 'nullable|string',
-            'validated' => 'boolean',
+            'validated' => [
+                'sometimes',
+                'boolean',
+                Rule::prohibitedIf(fn (): bool => ! $this->user()?->isAdmin()),
+            ],
         ];
     }
 }

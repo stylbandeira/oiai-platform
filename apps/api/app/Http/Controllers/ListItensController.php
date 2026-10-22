@@ -15,6 +15,8 @@ class ListItensController extends Controller
      */
     public function update(ListItensUpdateRequest $request, ItensList $list, UpdateListItensAction $action)
     {
+        $this->authorize('update', $list);
+
         return $action->execute($request, $list);
     }
 }

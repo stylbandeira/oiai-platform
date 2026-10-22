@@ -21,6 +21,9 @@ services:
             APACHE_RUN_GROUP: www-data
             FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
             MEILISEARCH_HOST: http://meilisearch:7700
+            DB_HOST: db
+            DB_USERNAME: oiai
+            DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
         depends_on:
             db:
                 condition: service_healthy
@@ -31,12 +34,16 @@ services:
             dockerfile: docker/api/Dockerfile
         container_name: oiai-queue
         working_dir: /var/www/html
+        user: "www-data"
         entrypoint: []
         command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
         volumes:
             - ./apps/api:/var/www/html
         environment:
             MEILISEARCH_HOST: http://meilisearch:7700
+            DB_HOST: db
+            DB_USERNAME: oiai
+            DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
         depends_on:
             db:
                 condition: service_healthy
@@ -47,12 +54,16 @@ services:
             dockerfile: docker/api/Dockerfile
         container_name: oiai-scheduler
         working_dir: /var/www/html
+        user: "www-data"
         entrypoint: []
         command: php artisan schedule:work
         volumes:
             - ./apps/api:/var/www/html
         environment:
             MEILISEARCH_HOST: http://meilisearch:7700
+            DB_HOST: db
+            DB_USERNAME: oiai
+            DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
         depends_on:
             db:
                 condition: service_healthy
@@ -82,13 +93,12 @@ services:
         image: mysql:5.7
         container_name: oiai-db
         environment:
-            MYSQL_ROOT_PASSWORD: root
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
             MYSQL_DATABASE: oiai
-            MYSQL_PASSWORD: root
+            MYSQL_USER: ${DB_USERNAME:-oiai}
+            MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
         volumes:
             - dbdata:/var/lib/mysql
-        ports:
-            - "3306:3306"
         healthcheck:
             test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
             interval: 5s

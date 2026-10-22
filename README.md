@@ -142,6 +142,7 @@ GitHub Releases é o registro oficial das versões publicadas. Cada release iden
 - [Contributing e Conventional Commits](CONTRIBUTING.md);
 - [Versionamento](docs/VERSIONING.md);
 - [Deploy e operação em produção](docs/DEPLOYMENT.md);
+- [Checklist de validação de produção](docs/PRODUCTION_SECURITY_CHECKLIST.md);
 - [CI API](.github/workflows/ci-api.yml) · [CI Web](.github/workflows/ci-web.yml) · [CI Gate](.github/workflows/ci-gate.yml);
 - [GitHub Releases](https://github.com/stylbandeira/oiai-platform/releases).
 - [Guias de migração e breaking changes](docs/releases/README.md).

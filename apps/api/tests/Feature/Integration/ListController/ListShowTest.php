@@ -15,7 +15,7 @@ class ListShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_unauthenticated_user_can_view(): void
+    public function test_only_the_owner_or_admin_can_view(): void
     {
         $owner = User::factory()->client()->create();
         $otherClient = User::factory()->client()->create();
@@ -32,10 +32,10 @@ class ListShowTest extends TestCase
 
         $this->actingAs($otherClient)
             ->getJson('/api/lists/'.$list->id)
-            ->assertStatus(200);
+            ->assertForbidden();
 
         $this->getJson('/api/lists/'.$list->id)
-            ->assertStatus(200);
+            ->assertForbidden();
     }
 
     public function test_not_found_returns_error(): void

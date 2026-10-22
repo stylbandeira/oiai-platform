@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProductStoreRequest extends FormRequest
 {
@@ -36,7 +37,11 @@ class ProductStoreRequest extends FormRequest
             'average_price' => ['nullable', 'numeric'],
             'ean' => ['nullable', 'string', 'unique:products,ean'],
             'description' => ['nullable', 'string'],
-            'validated' => ['sometimes', 'boolean'],
+            'validated' => [
+                'sometimes',
+                'boolean',
+                Rule::prohibitedIf(fn (): bool => ! $this->user()?->isAdmin()),
+            ],
             'img' => ['nullable', 'image'],
             'company_id' => ['sometimes', 'exists:company,id'],
         ];
