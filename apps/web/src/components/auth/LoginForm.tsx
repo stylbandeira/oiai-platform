@@ -148,7 +148,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             type="submit"
             className={`w-full transition-all duration-300 ${isLoading
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-primary hover:shadow-glow"}`}
+              : "bg-primary hover:bg-primary/90"}`}
             disabled={isLoading}
           >
             {isLoading ? (
