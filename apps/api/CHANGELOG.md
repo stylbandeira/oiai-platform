@@ -2,6 +2,19 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [3.1.0](https://github.com/stylbandeira/oiai-platform/compare/api-v3.0.0...api-v3.1.0) (2026-10-22)
+
+
+### Features
+
+* product normalization with admin ([bb1a38d](https://github.com/stylbandeira/oiai-platform/commit/bb1a38d7c4856bb8cce7af95dff1d68d00491022))
+
+
+### CI
+
+* adjusts ci version and docs new flow ([e092a2b](https://github.com/stylbandeira/oiai-platform/commit/e092a2b1e8087d31bd5c8be6b423e94e91b1bbc9))
+* adjusts ci version and docs new flow ([ccd1c2e](https://github.com/stylbandeira/oiai-platform/commit/ccd1c2e6a9cbe2e2b2f1eb3520001f2891c702d3))
+
 ## [3.0.0](https://github.com/stylbandeira/oiai-platform/compare/api-v2.1.1...api-v3.0.0) (2026-10-14)
 
 ### ⚠ BREAKING CHANGES
