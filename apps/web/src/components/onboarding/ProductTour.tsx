@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { moveTourStep } from "./tourDestination";
 
 interface TourStep {
   target: string;
@@ -18,9 +19,11 @@ interface ProductTourProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onStepChange?: (step: number) => void;
+  onFinish?: () => void;
+  finishLabel?: string;
 }
 
-export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChange }: ProductTourProps) {
+export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChange, onFinish, finishLabel = "Concluir" }: ProductTourProps) {
   const [step, setStep] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [rect, setRect] = useState<DOMRect | null>(null);
@@ -33,6 +36,10 @@ export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChang
     setIsOpen(false);
     setStep(0);
     onOpenChange?.(false);
+  };
+  const finish = () => {
+    close();
+    onFinish?.();
   };
 
   useEffect(() => {
@@ -58,8 +65,8 @@ export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChang
         event.stopImmediatePropagation();
       }
       if (steps[step].advanceOnClick === false) return;
-      if (step === steps.length - 1) close();
-      else goTo(step + 1);
+      if (step === steps.length - 1) finish();
+      else goTo(moveTourStep(step, 1, steps.length));
     };
     document.addEventListener("click", handleClick, true);
     return () => {
@@ -74,8 +81,8 @@ export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChang
     if (!isOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
-      if (event.key === "ArrowRight") goTo(Math.min(step + 1, steps.length - 1));
-      if (event.key === "ArrowLeft") goTo(Math.max(step - 1, 0));
+      if (event.key === "ArrowRight") goTo(moveTourStep(step, 1, steps.length));
+      if (event.key === "ArrowLeft") goTo(moveTourStep(step, -1, steps.length));
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
@@ -113,9 +120,9 @@ export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChang
         <div className="mt-5 flex items-center justify-between gap-2">
           <Button variant="link" className="px-0" onClick={close}>Pular tutorial</Button>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => goTo(step - 1)} disabled={step === 0}>Voltar</Button>
-            <Button onClick={() => step === steps.length - 1 ? close() : goTo(step + 1)}>
-              {step === steps.length - 1 ? "Concluir" : "Avançar"}
+            <Button variant="outline" onClick={() => goTo(moveTourStep(step, -1, steps.length))} disabled={step === 0}>Voltar</Button>
+            <Button onClick={() => step === steps.length - 1 ? finish() : goTo(moveTourStep(step, 1, steps.length))}>
+              {step === steps.length - 1 ? finishLabel : "Avançar"}
             </Button>
           </div>
         </div>

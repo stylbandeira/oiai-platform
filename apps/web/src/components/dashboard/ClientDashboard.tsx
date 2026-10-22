@@ -20,6 +20,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { components } from "@/types/api.generated";
 import { ProductTour } from "@/components/onboarding/ProductTour";
+import { getListTourDestination } from "@/components/onboarding/tourDestination";
 
 interface ItensList {
   id: number;
@@ -422,8 +423,13 @@ export function ClientDashboard() {
         storageKey="oiai.client.dashboard.tour.v1"
         open={tourOpen}
         onOpenChange={setTourOpen}
+        finishLabel={itensLists.some((list) => list.status === "active") ? "Ver otimização" : "Criar nova lista"}
+        onFinish={() => {
+          const destination = getListTourDestination(itensLists);
+          navigate(destination.path, { state: destination.state });
+        }}
         steps={[
-          { target: "#tour-new-list", title: "Crie uma lista", description: "Comece uma lista de compras e adicione os produtos que você precisa." },
+          { target: "#tour-new-list", title: "Crie uma lista", description: "Toque em Criar nova lista para escolher produtos e quantidades. Durante o passeio, o toque apenas avança; ao final você poderá abrir o formulário." },
           { target: "#tour-scan", title: "Escaneie a nota fiscal", description: "Toque em Escanear nota fiscal para abrir a câmera e aponte para o QR Code impresso na parte inferior da NFC-e. Aqui no tutorial, o toque apenas avança.", illustration: "receipt" },
           { target: "#tour-invoice-code", title: "Ou digite o código", description: "Sem câmera ou permissão? Procure a chave de acesso numérica de 44 dígitos na parte inferior da NFC-e e toque em Digitar código da NFCe. Digite o código no campo que abrirá após o tutorial." },
           { target: "#tour-lists-mobile, #tour-lists-desktop", title: "Acompanhe suas listas", description: "Aqui você encontra suas listas, itens e o andamento de cada compra." },
