@@ -2,6 +2,13 @@
 
 Todas as alterações relevantes do frontend são registradas neste arquivo.
 
+## [3.1.2](https://github.com/stylbandeira/oiai-platform/compare/web-v3.1.1...web-v3.1.2) (2026-10-22)
+
+
+### Bug Fixes
+
+* only admin can edit products ([ae3e9c8](https://github.com/stylbandeira/oiai-platform/commit/ae3e9c8cb3c0696ba6d543c3faa2f7a9ec592b2a))
+
 ## [3.1.1](https://github.com/stylbandeira/oiai-platform/compare/web-v3.1.0...web-v3.1.1) (2026-10-22)
 
 
