@@ -19,6 +19,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { components } from "@/types/api.generated";
+import { ProductTour } from "@/components/onboarding/ProductTour";
 
 interface ItensList {
   id: number;
@@ -98,6 +99,7 @@ export function ClientDashboard() {
     quantity_normalization_validated?: boolean;
   } | null>(null);
   const [isListsSheetOpen, setIsListsSheetOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState<boolean | undefined>(undefined);
 
   const [notificationData, setNotificationData] = useState<NotificationData>(defaultNotificationData);
   const [showNotification, setShowNotification] = useState(false);
@@ -220,7 +222,7 @@ export function ClientDashboard() {
 
   // Componente das listas para desktop
   const DesktopLists = () => (
-    <Card className="border-0 shadow-soft">
+    <Card id="tour-lists-desktop" className="border-0 shadow-soft">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-xl font-bold">Minhas Listas</CardTitle>
         <Button
@@ -275,7 +277,7 @@ export function ClientDashboard() {
   const MobileListsSheet = () => (
     <Sheet open={isListsSheetOpen} onOpenChange={setIsListsSheetOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="w-full justify-between h-12">
+        <Button id="tour-lists-mobile" variant="outline" className="w-full justify-between h-12">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4" />
             <span>Minhas Listas</span>
@@ -365,13 +367,26 @@ export function ClientDashboard() {
   const PrimaryActions = () => (
     <Card className="border-0 shadow-soft">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg sm:text-xl">Comece por aqui</CardTitle>
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-lg sm:text-xl">Comece por aqui</CardTitle>
+          <Button
+            variant="link"
+            className="h-auto px-0 text-xs sm:text-sm"
+            onClick={() => {
+              localStorage.removeItem("oiai.client.dashboard.tour.v1");
+              setTourOpen(true);
+            }}
+          >
+            Ver tutorial
+          </Button>
+        </div>
         <p className="text-sm text-muted-foreground">
           Crie uma lista ou importe os produtos da sua nota fiscal.
         </p>
       </CardHeader>
       <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Button
+          id="tour-new-list"
           onClick={() => navigate("/new-list")}
           className="h-12 sm:col-span-2 lg:col-span-2 bg-primary hover:bg-primary/90 transition-all duration-300"
         >
@@ -379,17 +394,19 @@ export function ClientDashboard() {
           Criar nova lista
         </Button>
         <Button
-          variant="outline"
-          className="h-12 justify-start gap-3 border-primary/30 font-medium hover:bg-primary/5"
+          id="tour-scan"
+          variant="secondary"
+          className="h-12 justify-start gap-3 font-medium"
           onClick={handleQRScanClick}
         >
           <QrCode className="w-5 h-5" />
           Escanear nota fiscal
         </Button>
         <Button
-          variant="outline"
-          className="h-12 justify-start gap-3 border-secondary/30 font-medium hover:bg-secondary/5"
+          variant="secondary"
+          className="h-12 justify-start gap-3 font-medium"
           onClick={handleCodeInsertClick}
+          id="tour-invoice-code"
         >
           <Library className="w-5 h-5" />
           Digitar código da NFCe
@@ -401,6 +418,17 @@ export function ClientDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <ProductTour
+        storageKey="oiai.client.dashboard.tour.v1"
+        open={tourOpen}
+        onOpenChange={setTourOpen}
+        steps={[
+          { target: "#tour-new-list", title: "Crie uma lista", description: "Comece uma lista de compras e adicione os produtos que você precisa." },
+          { target: "#tour-scan", title: "Escaneie a nota fiscal", description: "Este botão abre a câmera para ler o QR Code da nota. Durante o tutorial, toque nele para conhecer a próxima opção." },
+          { target: "#tour-invoice-code", title: "Ou digite o código", description: "Se preferir, use o código da NFCe para consultar sua nota fiscal." },
+          { target: "#tour-lists-mobile, #tour-lists-desktop", title: "Acompanhe suas listas", description: "Aqui você encontra suas listas, itens e o andamento de cada compra." },
+        ]}
+      />
       {showNotification && (
         <NotificationToast
           message={notificationData.message}
