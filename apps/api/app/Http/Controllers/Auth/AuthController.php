@@ -13,6 +13,7 @@ use App\Http\Requests\Auth\ApiLoginRequest;
 use App\Http\Requests\Auth\ApiRegisterRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -40,18 +41,21 @@ class AuthController extends Controller
 
     public function resendVerificationEmail(Request $request)
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'E-mail já verificado',
-                'email_verified' => true,
-            ], 409);
+        $user = $request->user();
+        $alreadyVerified = $user->hasVerifiedEmail();
+
+        Log::info('Verification email resend requested', [
+            'user_id' => $user->id,
+            'already_verified' => $alreadyVerified,
+        ]);
+
+        if (! $alreadyVerified) {
+            $user->sendEmailVerificationNotification();
         }
 
-        $request->user()->sendEmailVerificationNotification();
-
         return response()->json([
-            'message' => 'E-mail de verificação enviado',
-        ]);
+            'message' => 'Se existir uma conta associada a este endereço, enviaremos as instruções necessárias.',
+        ], 202);
     }
 
     public function logout(Request $request, LogoutAction $action)

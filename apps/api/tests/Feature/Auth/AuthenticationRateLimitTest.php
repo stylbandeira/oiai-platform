@@ -64,6 +64,17 @@ class AuthenticationRateLimitTest extends TestCase
             ->assertTooManyRequests();
     }
 
+    public function test_login_does_not_reveal_when_email_is_not_registered(): void
+    {
+        $this->postJson('/api/login', [
+            'email' => 'not-registered@example.com',
+            'password' => 'wrong-password',
+            'user_type' => 'client',
+        ])
+            ->assertUnauthorized()
+            ->assertJson(['message' => 'Credenciais inválidas']);
+    }
+
     public function test_email_verification_resend_is_rate_limited(): void
     {
         $user = User::factory()->client()->create([
@@ -74,12 +85,27 @@ class AuthenticationRateLimitTest extends TestCase
             $this->actingAs($user)
                 ->withServerVariables(['REMOTE_ADDR' => '198.51.100.12'])
                 ->postJson('/api/email/verification-notification')
-                ->assertOk();
+                ->assertStatus(202);
         }
 
         $this->actingAs($user)
             ->withServerVariables(['REMOTE_ADDR' => '198.51.100.12'])
             ->postJson('/api/email/verification-notification')
             ->assertTooManyRequests();
+    }
+
+    public function test_verified_account_has_the_same_generic_resend_response(): void
+    {
+        $user = User::factory()->client()->create([
+            'email_verified_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->postJson('/api/email/verification-notification')
+            ->assertStatus(202)
+            ->assertJson([
+                'message' => 'Se existir uma conta associada a este endereço, enviaremos as instruções necessárias.',
+            ])
+            ->assertJsonMissing(['email_verified' => true]);
     }
 }
