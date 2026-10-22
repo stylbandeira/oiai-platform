@@ -2,6 +2,44 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [3.1.1](https://github.com/stylbandeira/oiai-platform/compare/api-v3.1.0...api-v3.1.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* correct lack of ownership validation on endpoints ([b55917d](https://github.com/stylbandeira/oiai-platform/commit/b55917d45f22641aa585043b984a50a244ea5673))
+* PHPStan corrections ([480c543](https://github.com/stylbandeira/oiai-platform/commit/480c5432b9bc5bec4ee689a159eafe6b6191a8cb))
+* validated field on product is now not allowed to other users ([6126ec2](https://github.com/stylbandeira/oiai-platform/commit/6126ec24eb5c7b68a985228a73e8c6fbbc033e57))
+
+
+### Refactoring
+
+* **api:** adjusts on mark notifications as readed ([ae71e84](https://github.com/stylbandeira/oiai-platform/commit/ae71e8477b0f05918da2b4463792dc9ddad68615))
+* **api:** prevent user enumeration ([691f25d](https://github.com/stylbandeira/oiai-platform/commit/691f25d56f182484f572d4843817bfd82648dcda))
+* **web,api:** remove not used buttons and routes ([dbf01dd](https://github.com/stylbandeira/oiai-platform/commit/dbf01dd77073bb9f84b59043edff92079c4d05f8))
+
+
+### Tests
+
+* adjusts tests to new ownership validation ([610bcfc](https://github.com/stylbandeira/oiai-platform/commit/610bcfc863b50e63f6828fbe8af1f1420b3edec9))
+* create security regression test ([029ca75](https://github.com/stylbandeira/oiai-platform/commit/029ca7526b747b319b8eeda3519508f8736e9f19))
+
+
+### Build
+
+* remove ngrok and serveo wildcards ([8398d09](https://github.com/stylbandeira/oiai-platform/commit/8398d09619819c6b6e3196b06a3a5c83f839fe15))
+
+
+### Maintenance
+
+* **api:** implements rate limit on sensible endpoints ([6d71ffc](https://github.com/stylbandeira/oiai-platform/commit/6d71ffc47ab78a8e980264313ca0e202e4909a41))
+* configure https and secure cookies ([7f189ec](https://github.com/stylbandeira/oiai-platform/commit/7f189ec9cb6cb8ffde171c3874165d021a7ebadf))
+* create auth log for audition ([3d01e2e](https://github.com/stylbandeira/oiai-platform/commit/3d01e2eb232c26829421e7e12202d20fd4eae8c2))
+* create private beta approval and logging ([5473ba1](https://github.com/stylbandeira/oiai-platform/commit/5473ba11bd7de9e85ea4813e99e5112d243b6273))
+* harden production secutiry ([9b7cc75](https://github.com/stylbandeira/oiai-platform/commit/9b7cc75f6ecd9a0a1ffb5334f5d36faae5782b94))
+* production security hardening ([ca0df0e](https://github.com/stylbandeira/oiai-platform/commit/ca0df0e2f08a84450f8ed3a864939a76a83c9bde))
+* remove password from archives ([7495d48](https://github.com/stylbandeira/oiai-platform/commit/7495d4805d4b4cdfc85ea71063d6a78c92dffcc6))
+
 ## [3.1.0](https://github.com/stylbandeira/oiai-platform/compare/api-v3.0.0...api-v3.1.0) (2026-10-22)
 
 
