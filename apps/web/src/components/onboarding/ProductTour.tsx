@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
@@ -27,25 +27,30 @@ export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChang
   const [step, setStep] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [rect, setRect] = useState<DOMRect | null>(null);
-  const goTo = (next: number) => {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const goTo = useCallback((next: number) => {
     setStep(next);
     onStepChange?.(next);
-  };
-  const close = () => {
+  }, [onStepChange]);
+  const close = useCallback(() => {
     localStorage.setItem(storageKey, "completed");
     setIsOpen(false);
     setStep(0);
     onOpenChange?.(false);
-  };
-  const finish = () => {
+  }, [storageKey, onOpenChange]);
+  const finish = useCallback(() => {
     close();
     onFinish?.();
-  };
+  }, [close, onFinish]);
 
   useEffect(() => {
     setIsOpen(open ?? !localStorage.getItem(storageKey));
     if (open) setStep(0);
   }, [open, storageKey]);
+
+  useEffect(() => {
+    if (isOpen) titleRef.current?.focus();
+  }, [isOpen, step]);
 
   useEffect(() => {
     if (!isOpen || !steps[step]) return;
@@ -68,14 +73,14 @@ export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChang
       if (step === steps.length - 1) finish();
       else goTo(moveTourStep(step, 1, steps.length));
     };
-    document.addEventListener("click", handleClick, true);
+    window.addEventListener("click", handleClick, true);
     return () => {
-      document.removeEventListener("click", handleClick, true);
+      window.removeEventListener("click", handleClick, true);
       window.clearInterval(interval);
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update, true);
     };
-  }, [isOpen, step, steps]);
+  }, [isOpen, step, steps, finish, goTo]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -86,7 +91,7 @@ export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChang
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isOpen, step, steps.length]);
+  }, [isOpen, step, steps.length, close, goTo]);
 
   if (!isOpen || !steps[step]) return null;
   const left = rect ? Math.max(0, rect.left - 6) : 0;
@@ -110,7 +115,7 @@ export function ProductTour({ steps, storageKey, open, onOpenChange, onStepChang
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">Passo {step + 1} de {steps.length}</p>
-            <h2 id="tour-title" className="mt-1 text-lg font-bold">{steps[step].title}</h2>
+            <h2 id="tour-title" ref={titleRef} tabIndex={-1} className="mt-1 rounded text-lg font-bold focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-primary">{steps[step].title}</h2>
           </div>
           <Button variant="ghost" size="icon" onClick={close} aria-label="Fechar tutorial"><X /></Button>
         </div>
