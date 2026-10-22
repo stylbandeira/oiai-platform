@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Authorization\UserPermissions;
-
 use App\Models\Address;
 use App\Models\Company;
 use App\Models\CompanyOwners;
