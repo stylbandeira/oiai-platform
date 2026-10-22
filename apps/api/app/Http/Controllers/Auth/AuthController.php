@@ -20,7 +20,7 @@ class AuthController extends Controller
 {
     public function verifyEmail(int $id, string $hash, VerifyEmailAction $action)
     {
-        return $action->execute($id, $hash);
+        return $action->execute($id, $hash, app(AuthAuditLogger::class));
     }
 
     public function login(ApiLoginRequest $request, ApiLoginAction $action, AuthAuditLogger $audit)
@@ -61,7 +61,7 @@ class AuthController extends Controller
 
     public function logout(Request $request, LogoutAction $action)
     {
-        return $action->execute($request);
+        return $action->execute($request, app(AuthAuditLogger::class));
     }
 
     public function notice(NoticeAction $action)

@@ -20,7 +20,7 @@ class StoreNewPasswordAction
                 'password_confirmation' => $data['password_confirmation'],
                 'token' => $data['token'],
             ],
-            function ($user) use ($data) {
+            function ($user) use ($data, $audit) {
                 $user->forceFill([
                     'password' => Hash::make($data['password']),
                     'remember_token' => Str::random(60),

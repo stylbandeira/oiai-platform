@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\UserApprovalAuditService;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class CompanyOwnerService
 {
@@ -16,9 +17,12 @@ class CompanyOwnerService
 
     public function sync(User $user, array $companies, ?int $approvedBy): void
     {
-        $oldStatuses = $user->companies->mapWithKeys(fn (Company $company) => [
-            $company->id => $company->pivot->status,
-        ])->all();
+        $oldStatuses = [];
+        foreach ($user->companies as $company) {
+            /** @var Pivot $pivot */
+            $pivot = $company->getRelationValue('pivot');
+            $oldStatuses[(int) $company->getKey()] = $pivot->getAttribute('status');
+        }
 
         $syncData = $this->normalizeForSync($user, $companies, $approvedBy);
 
