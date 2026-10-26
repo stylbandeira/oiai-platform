@@ -20,8 +20,11 @@ afterEach(() => {
 
 describe("landing pública", () => {
   it("carrega sem sessão e abre cadastro pelo CTA principal", () => {
-    render(<MemoryRouter><Index /></MemoryRouter>);
+    const { container } = render(<MemoryRouter><Index /></MemoryRouter>);
     expect(screen.getByRole("heading", { name: "Compre melhor e gaste menos." })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Oiaí, início" }).querySelector("img")?.getAttribute("src")).toBe("/logos/logo_secondary.svg");
+    expect(screen.getByLabelText("Resumo das funcionalidades do Oiaí").className).toContain("bg-[#B75A4B]");
+    expect(container.querySelector('img[src="/oiai-map-home.png"]')?.getAttribute("aria-hidden")).toBe("true");
     expect(screen.getByText(/encontrar cada produto mais barato/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /Criar minha conta/ }));
     expect(screen.getByText("Formulário: register")).toBeTruthy();
