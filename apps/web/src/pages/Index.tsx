@@ -9,6 +9,7 @@ import { NotificationToast } from "@/components/notification/NotificationToast";
 import { useUser } from "@/contexts/UserContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import { CustomLogo } from "@/components/oiai_ui/CustomLogo";
 import { ArrowRight, BadgeDollarSign, Check, ListChecks, MapPinned, ShoppingCart } from "lucide-react";
 
 const Index = () => {
@@ -42,12 +43,21 @@ const Index = () => {
     return (
       <main className="min-h-screen bg-background text-foreground">
         <header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
-          <a href="/" className="text-2xl font-black tracking-tight text-primary" aria-label="Oiaí, início">Oiaí</a>
-          <Button variant="ghost" onClick={() => setAuthMode("login")}>Entrar</Button>
+          <a href="/" className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" aria-label="Oiaí, início">
+            <CustomLogo className="h-12 w-12" alt="" />
+          </a>
+          <nav className="hidden items-center gap-10 text-sm font-semibold text-foreground md:flex" aria-label="Navegação principal">
+            <a href="#como-funciona" className="transition-opacity hover:opacity-70">Como funciona</a>
+            <a href="#recursos" className="transition-opacity hover:opacity-70">Recursos</a>
+          </nav>
+          <div className="flex items-center gap-5">
+            <Button variant="ghost" onClick={() => setAuthMode("login")}>Entrar</Button>
+            <Button variant="outline" className="hidden rounded-xl border-primary px-5 text-primary hover:bg-primary/5 sm:inline-flex" onClick={() => setAuthMode("register")}>Criar minha conta</Button>
+          </div>
         </header>
 
         <section className="mx-auto grid max-w-7xl gap-12 px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:pb-24 lg:pt-20">
-          <div>
+          <div className="relative isolate">
             <p className="mb-5 inline-flex rounded-full bg-secondary/30 px-3 py-1 text-sm font-semibold text-foreground">
               Monte sua lista. Encontre o menor preço. Economize.
             </p>
@@ -67,39 +77,20 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="relative rounded-3xl bg-gradient-primary p-6 shadow-glow sm:p-10" aria-label="Resumo das funcionalidades do Oiaí">
-            <div className="rounded-2xl bg-card p-5 shadow-medium sm:p-7">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-secondary p-3"><ShoppingCart className="h-6 w-6" aria-hidden="true" /></div>
-                <div><p className="font-bold">Lista inteligente</p><p className="text-sm text-muted-foreground">Organizada para economizar</p></div>
-              </div>
-              <div className="mt-6 space-y-3">
-                {["Arroz, feijão e café", "Frutas e verduras", "Itens de limpeza"].map((item) => (
-                  <div key={item} className="flex items-center gap-3 rounded-xl border border-border p-3 text-sm">
-                    <span className="rounded-full bg-correct p-1"><Check className="h-3 w-3" aria-hidden="true" /></span>{item}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-correct/20 p-3">
-                  <BadgeDollarSign className="h-5 w-5 text-correct-foreground" aria-hidden="true" />
-                  <p className="mt-2 text-xs text-muted-foreground">Economia estimada</p>
-                  <p className="font-bold text-correct-foreground">R$ 42,80</p>
-                </div>
-                <div className="rounded-xl bg-secondary/30 p-3">
-                  <MapPinned className="h-5 w-5 text-foreground" aria-hidden="true" />
-                  <p className="mt-2 text-xs text-muted-foreground">Melhor opção</p>
-                  <p className="font-bold">3 locais próximos</p>
-                </div>
-              </div>
+          <div className="relative min-h-[420px] rounded-[2.5rem] bg-[#fbf5e9] p-5 shadow-[0_18px_50px_rgba(117,38,31,0.08)] sm:min-h-[520px] sm:p-8" aria-label="Mapa de comparação de preços do Oiaí">
+            <img src="/oiai-map-home.png" alt="Mapa ilustrado com caminhos e pontos de compra" className="h-full min-h-[390px] w-full object-contain sm:min-h-[480px]" />
+            <div className="absolute -bottom-8 right-4 w-[min(285px,calc(100%-2rem))] rounded-3xl bg-card p-5 shadow-[0_18px_40px_rgba(47,24,22,0.14)] sm:-right-8 sm:bottom-[-38px] sm:p-6">
+              <div className="mb-4 flex items-center gap-3"><div className="rounded-xl bg-secondary p-3"><ShoppingCart className="h-6 w-6" aria-hidden="true" /></div><p className="font-bold">Sua lista</p></div>
+              <div className="space-y-2">{["Arroz", "Feijão", "Café"].map((item) => <div key={item} className="flex items-center gap-3 rounded-xl border border-border px-3 py-2 text-sm"><span className="h-3 w-3 rounded-full bg-correct" />{item}<span className="ml-auto text-muted-foreground">›</span></div>)}</div>
+              <div className="mt-3 rounded-xl bg-correct/20 p-3"><p className="text-xs text-muted-foreground">Economia estimada</p><p className="font-bold text-correct-foreground">R$ 42,80</p></div>
             </div>
           </div>
         </section>
 
-        <section className="border-t border-border bg-card px-5 py-14 sm:px-8 sm:py-20">
+        <section id="como-funciona" className="border-t border-border bg-card px-5 py-14 sm:px-8 sm:py-20">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-2xl"><p className="font-semibold text-primary">Como funciona</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">Do começo ao mercado sem complicação.</h2></div>
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
+            <div id="recursos" className="mt-10 grid gap-4 md:grid-cols-3">
               <Feature icon={<ListChecks />} title="Crie sua lista automaticamente" text="Adicione o que precisa e deixe o Oiaí organizar produtos e quantidades para você." />
               <Feature icon={<MapPinned />} title="Encontre onde é mais barato" text="Compare os preços e veja a localização dos lugares onde vale mais a pena comprar." />
               <Feature icon={<BadgeDollarSign />} title="Economize em cada compra" text="Planeje melhor, evite compras desnecessárias e acompanhe quanto pode economizar." />
