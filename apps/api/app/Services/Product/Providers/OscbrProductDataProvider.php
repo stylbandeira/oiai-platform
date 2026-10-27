@@ -7,6 +7,7 @@ use App\Enums\ProductQuantitySource;
 use App\Enums\ProductRefinementStatus;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Services\ExternalCallTelemetry;
 
 class OscbrProductDataProvider extends AbstractProductDataProvider implements ProductDataProvider
 {
@@ -37,7 +38,8 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
 
     public function getProductData(string $ean): array
     {
-        $token = $this->authenticate();
+        $correlationId = app(ExternalCallTelemetry::class)->correlationId();
+        $token = $this->authenticate($correlationId);
 
         if ($token === null) {
             return [];
@@ -47,12 +49,14 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
             .'/'.rawurlencode($ean);
         Log::info('Consultando dados do produto na OSCBR.', ['ean' => $ean, 'url' => $url]);
 
+        $startedAt = microtime(true);
         try {
             $response = Http::withToken($token)
                 ->acceptJson()
                 ->timeout(20)
                 ->get($url);
         } catch (\Throwable $exception) {
+            $this->recordCall('product.lookup', $this->exceptionResult($exception), null, $startedAt, $correlationId, $exception);
             Log::warning('Falha de conexão com a OSCBR.', [
                 'ean' => $ean,
                 'url' => $url,
@@ -64,6 +68,7 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
         }
 
         if (! $response->successful()) {
+            $this->recordCall('product.lookup', $response->status() === 404 ? 'not_found' : 'http_error', $response->status(), $startedAt, $correlationId);
             $context = $this->responseContext($ean, $url, $response);
 
             if ($response->status() === 404) {
@@ -82,6 +87,7 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
         $data = is_array($payload) ? $this->normalize($payload) : [];
 
         if ($data === []) {
+            $this->recordCall('product.lookup', 'invalid_payload', $response->status(), $startedAt, $correlationId);
             Log::warning('Resposta da OSCBR não contém os campos mínimos esperados.', [
                 'ean' => $ean,
                 'url' => $url,
@@ -92,6 +98,8 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
             return [];
         }
 
+        $this->recordCall('product.lookup', 'success', $response->status(), $startedAt, $correlationId);
+
         if (! blank($data['image_url'] ?? null)) {
             $data['_image_headers'] = ['Authorization' => 'Bearer '.$token];
         }
@@ -99,7 +107,7 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
         return $data + $this->lookupResult('found', $response->status());
     }
 
-    private function authenticate(): ?string
+    private function authenticate(string $correlationId): ?string
     {
         $login = (string) config('services.oscbr.login');
         $password = (string) config('services.oscbr.password');
@@ -112,12 +120,14 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
 
         $url = (string) config('services.oscbr.auth_url');
 
+        $startedAt = microtime(true);
         try {
             $response = Http::withBasicAuth($login, $password)
                 ->acceptJson()
                 ->timeout(20)
                 ->post($url);
         } catch (\Throwable $exception) {
+            $this->recordCall('auth.token', $this->exceptionResult($exception), null, $startedAt, $correlationId, $exception);
             Log::warning('Falha ao autenticar na OSCBR.', [
                 'url' => $url,
                 'exception' => $exception::class,
@@ -128,6 +138,7 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
         }
 
         if (! $response->successful()) {
+            $this->recordCall('auth.token', 'http_error', $response->status(), $startedAt, $correlationId);
             Log::warning(
                 'Autenticação recusada pela OSCBR; consulta ao produto não foi realizada.',
                 $this->responseContext('authentication', $url, $response),
@@ -139,12 +150,36 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
         $token = $response->json('token') ?? $response->json('access_token');
 
         if (! is_string($token) || $token === '') {
+            $this->recordCall('auth.token', 'invalid_payload', $response->status(), $startedAt, $correlationId);
             Log::warning('A OSCBR não retornou um token válido.');
 
             return null;
         }
 
+        $this->recordCall('auth.token', 'success', $response->status(), $startedAt, $correlationId);
         return $token;
+    }
+
+    private function recordCall(string $operation, string $result, ?int $status, float $startedAt, string $correlationId, ?\Throwable $exception = null): void
+    {
+        app(ExternalCallTelemetry::class)->record([
+            'provider' => 'oscbr',
+            'operation' => $operation,
+            'result' => $result,
+            'http_status' => $status,
+            'duration_ms' => (microtime(true) - $startedAt) * 1000,
+            'failure_type' => $exception ? ($result === 'timeout' ? 'timeout' : 'connection') : ($result === 'http_error' ? 'http' : ($result === 'invalid_payload' ? 'invalid_payload' : null)),
+            'correlation_id' => $correlationId,
+            'error_class' => $exception ? $exception::class : null,
+        ]);
+    }
+
+    private function exceptionResult(\Throwable $exception): string
+    {
+        return str_contains(strtolower($exception->getMessage()), 'timed out')
+            || str_contains(strtolower($exception->getMessage()), 'timeout')
+            ? 'timeout'
+            : 'connection_error';
     }
 
     public function normalize(array $payload): array
