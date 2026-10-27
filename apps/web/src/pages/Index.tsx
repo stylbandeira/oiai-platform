@@ -58,15 +58,6 @@ const Index = () => {
 
         <section className="mx-auto grid max-w-7xl gap-12 px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:pb-24 lg:pt-20">
           <div className="relative isolate">
-            <img
-              src="/oiai-map-home.png"
-              alt=""
-              aria-hidden="true"
-              width="400"
-              height="400"
-              decoding="async"
-              className="pointer-events-none absolute right-0 top-1/2 -z-10 h-56 w-56 -translate-y-1/2 object-contain opacity-[0.14] sm:h-72 sm:w-72"
-            />
             <p className="mb-5 inline-flex rounded-full bg-secondary/30 px-3 py-1 text-sm font-semibold text-foreground">
               Monte sua lista. Encontre o menor preço. Economize.
             </p>
