@@ -2,6 +2,18 @@
 
 Todas as alterações relevantes do frontend são registradas neste arquivo.
 
+## [3.3.0](https://github.com/stylbandeira/oiai-platform/compare/web-v3.2.1...web-v3.3.0) (2026-10-27)
+
+
+### Features
+
+* update UI, landing page and icons ([903dc0f](https://github.com/stylbandeira/oiai-platform/commit/903dc0f09bb0e205018ae8a40734b26ae6b72799))
+
+
+### Bug Fixes
+
+* update test ([21aba46](https://github.com/stylbandeira/oiai-platform/commit/21aba467ea4a2f6d8fce02fc9728096088066733))
+
 ## [3.2.1](https://github.com/stylbandeira/oiai-platform/compare/web-v3.2.0...web-v3.2.1) (2026-10-22)
 
 
