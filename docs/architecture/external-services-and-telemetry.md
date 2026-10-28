@@ -140,3 +140,46 @@ Os valores devem ser configuráveis na regra do Sentry, não hard-coded na aplic
 
 O dashboard deve ser criado no projeto Sentry da equipe, compartilhado com o grupo responsável pela API e vinculado às regras de alerta. O uso diário é: selecionar `environment=production`, filtrar `provider`, comparar volume/taxa de erro e abrir o evento agrupado para consultar `correlation_id`, operação e classe da exceção. O código não contém DSN nem permissões de acesso ao projeto.
 
+## Validação ponta a ponta e triagem
+
+### Configuração por ambiente
+
+- **Desenvolvimento:** deixe `SENTRY_LARAVEL_DSN` vazio; métricas e eventos não são enviados. Use `Log::spy()`/`Http::fake()` nos testes.
+- **Homologação:** use um projeto ou DSN separado, `SENTRY_ENVIRONMENT=staging`, `SENTRY_SEND_DEFAULT_PII=false` e uma taxa de tracing baixa. Nunca reutilize o DSN de produção se alertas estiverem ativos.
+- **Produção:** configure o DSN no secret manager/container, `SENTRY_ENVIRONMENT=production`, `SENTRY_RELEASE` com o SHA do deploy e mantenha `SENTRY_SEND_DEFAULT_PII=false`.
+
+Após alterar variáveis, limpe o cache de configuração (`php artisan config:clear` ou recrie a imagem) e valide que nenhum DSN aparece em `git diff`, logs ou respostas HTTP.
+
+### Cenários reproduzíveis
+
+`tests/Unit/Services/ExternalCallTelemetryTest.php` cobre, sem rede externa:
+
+1. autenticação e consulta OSCBR com sucesso;
+2. resposta HTTP 503;
+3. falha de conexão;
+4. payload inválido através do caminho de normalização;
+5. reporter Sentry configurado, sem permitir que falha de observabilidade escape para o fluxo.
+
+Para executar no container/API:
+
+```bash
+docker compose exec -T api php artisan test tests/Unit/Services/ExternalCallTelemetryTest.php
+```
+
+O teste deve confirmar eventos `external_call` com `provider=oscbr`, operação, duração e correlação. Também deve falhar se o contexto contiver tokens, senhas ou e-mails sentinela. Não use credenciais ou URLs reais no `Http::fake()`.
+
+### Investigação de um alerta
+
+1. No Sentry, filtre `environment=production`, `provider=oscbr` e o período do alerta.
+2. Identifique se o agrupamento é `auth.token` ou `product.lookup` e observe `result`, `failure_type`, status HTTP e p95 de duração.
+3. Copie o `correlation_id` do evento e procure o mesmo valor no log estruturado `external_call` e no job/request correspondente.
+4. Diferencie `timeout`/`connection_error` (rede, DNS, indisponibilidade ou limite) de `http_error` (resposta do provedor) e `invalid_payload` (contrato alterado).
+5. Verifique se a fila está acumulando tentativas e se o limite/recorrência da OSCBR está provocando rate limit.
+6. Faça uma chamada sintética apenas em homologação. Não repita chamadas reais em produção para “testar” o incidente.
+7. Se a OSCBR estiver indisponível, mantenha o fluxo de produto e deixe o job reprocessar conforme a política existente. Se houver payload inválido persistente, suspenda temporariamente o provider e abra incidente com o exemplo sanitizado.
+8. Após recuperação, confirme queda de `external.timeouts`, retorno do p95 e sucesso de `auth.token`/`product.lookup` no dashboard.
+
+### Segurança da validação
+
+Os testes usam `test-login`, `test-password`, `secret-token` e e-mail sintético apenas como sentinelas. Esses valores nunca devem aparecer nos eventos. O DSN de homologação/produção é segredo de ambiente; testes não inicializam envio externo porque `app()->environment('testing')` bloqueia Sentry.
+
