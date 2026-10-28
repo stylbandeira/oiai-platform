@@ -74,7 +74,7 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
             return [];
         }
 
-        if (! $response->successful()) {
+        if ($response->successful() === false) {
             $this->recordCall('product.lookup', $response->status() === 404 ? 'not_found' : 'http_error', $response->status(), $startedAt, $correlationId);
             $context = $this->responseContext($ean, $url, $response);
 
@@ -107,7 +107,7 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
 
         $this->recordCall('product.lookup', 'success', $response->status(), $startedAt, $correlationId);
 
-        if (! blank($data['image_url'] ?? null)) {
+        if (blank($data['image_url'] ?? null) === false) {
             $data['_image_headers'] = ['Authorization' => 'Bearer '.$token];
         }
 
@@ -151,7 +151,7 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
             return null;
         }
 
-        if (! $response->successful()) {
+        if ($response->successful() === false) {
             $this->recordCall('auth.token', 'http_error', $response->status(), $startedAt, $correlationId);
             Log::warning(
                 'Autenticação recusada pela OSCBR; consulta ao produto não foi realizada.',
@@ -163,7 +163,7 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
 
         $token = $response->json('token') ?? $response->json('access_token');
 
-        if (! is_string($token) || $token === '') {
+        if (is_string($token) === false || $token === '') {
             $this->recordCall('auth.token', 'invalid_payload', $response->status(), $startedAt, $correlationId);
             Log::warning('A OSCBR não retornou um token válido.');
 

@@ -61,7 +61,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (Throwable $exception, Request $request) {
-            if (! app()->environment('production') || ! $request->expectsJson()) {
+            if (app()->environment('production') === false || $request->expectsJson() === false) {
                 return null;
             }
 

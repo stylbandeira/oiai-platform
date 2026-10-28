@@ -86,7 +86,7 @@ final class ExternalCallTelemetry
     /** @param array<string, mixed> $event */
     private function shouldReport(array $event): bool
     {
-        return ! app()->environment('testing')
+        return app()->environment('testing') === false
             && filled(config('sentry.dsn'))
             && ($event['result'] ?? null) !== 'success'
             && ($event['result'] ?? null) !== 'not_found';
