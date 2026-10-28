@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Sentry\Severity;
+use Sentry\State\Scope;
+use Throwable;
+use function Sentry\captureMessage;
+use function Sentry\configureScope;
+use function Sentry\traceMetrics;
 
 final class ExternalCallTelemetry
 {
@@ -33,7 +38,7 @@ final class ExternalCallTelemetry
             if ($this->shouldReport($event)) {
                 $this->reportToSentry($event);
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Observability must never interrupt the business call.
         }
     }
@@ -47,7 +52,7 @@ final class ExternalCallTelemetry
             if (is_string($correlationId) && $correlationId !== '') {
                 return Str::limit($correlationId, 128, '');
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Queue and console contexts may not have a request.
         }
         return $fallback ?: (string) Str::ulid();
@@ -81,7 +86,7 @@ final class ExternalCallTelemetry
     /** @param array<string, mixed> $event */
     private function shouldReport(array $event): bool
     {
-        return ! app()->environment('testing')
+        return !app()->environment('testing')
             && filled(config('sentry.dsn'))
             && ($event['result'] ?? null) !== 'success'
             && ($event['result'] ?? null) !== 'not_found';
@@ -91,7 +96,7 @@ final class ExternalCallTelemetry
     private function reportToSentry(array $event): void
     {
         try {
-            \Sentry\configureScope(function (\Sentry\State\Scope $scope) use ($event): void {
+            configureScope(function (Scope $scope) use ($event): void {
                 $scope->setTag('provider', (string) $event['provider']);
                 $scope->setTag('operation', (string) $event['operation']);
                 $scope->setTag('result', (string) $event['result']);
@@ -112,8 +117,8 @@ final class ExternalCallTelemetry
                     'error_class' => $event['error_class'] ?? null,
                 ]);
             });
-            \Sentry\captureMessage('External integration failure', Severity::warning());
-        } catch (\Throwable) {
+            captureMessage('External integration failure', Severity::warning());
+        } catch (Throwable) {
             // Sentry outages must not affect the integration.
         }
     }
@@ -133,13 +138,13 @@ final class ExternalCallTelemetry
                 'result' => (string) $event['result'],
                 'failure_type' => (string) ($event['failure_type'] ?? 'none'),
             ];
-            \Sentry\traceMetrics()->count('external.calls', 1, $attributes);
-            \Sentry\traceMetrics()->distribution('external.duration_ms', (float) ($event['duration_ms'] ?? 0), $attributes);
+            traceMetrics()->count('external.calls', 1, $attributes);
+            traceMetrics()->distribution('external.duration_ms', (float) ($event['duration_ms'] ?? 0), $attributes);
 
             if (in_array($event['result'], ['timeout', 'connection_error'], true)) {
-                \Sentry\traceMetrics()->count('external.timeouts', 1, $attributes);
+                traceMetrics()->count('external.timeouts', 1, $attributes);
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Metrics are best effort and must not affect the integration.
         }
     }

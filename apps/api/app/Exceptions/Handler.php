@@ -2,10 +2,14 @@
 
 namespace App\Exceptions;
 
+use App\Services\ExternalCallTelemetry;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
+use Sentry\State\Scope;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
+use function Sentry\captureException;
+use function Sentry\configureScope;
 
 class Handler extends ExceptionHandler
 {
@@ -46,18 +50,18 @@ class Handler extends ExceptionHandler
             }
 
             try {
-                \Sentry\configureScope(function (\Sentry\State\Scope $scope): void {
+                configureScope(function (Scope $scope): void {
                     $scope->setTag('environment', (string) config('app.env'));
-                    $scope->setTag('correlation_id', app(\App\Services\ExternalCallTelemetry::class)->correlationId());
+                    $scope->setTag('correlation_id', app(ExternalCallTelemetry::class)->correlationId());
                 });
-                \Sentry\captureException($e);
+                captureException($e);
             } catch (Throwable) {
                 // Error tracking must never replace the application's error handling.
             }
         });
 
         $this->renderable(function (Throwable $exception, Request $request) {
-            if (! app()->environment('production') || ! $request->expectsJson()) {
+            if (!app()->environment('production') || !$request->expectsJson()) {
                 return null;
             }
 
