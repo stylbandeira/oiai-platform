@@ -28,6 +28,8 @@ final class ExternalCallTelemetry
             $event = $this->sanitize($event);
             Log::log($this->levelFor($event['result']), 'external_call', $event);
 
+            $this->recordMetrics($event);
+
             if ($this->shouldReport($event)) {
                 $this->reportToSentry($event);
             }
@@ -113,6 +115,32 @@ final class ExternalCallTelemetry
             \Sentry\captureMessage('External integration failure', Severity::warning());
         } catch (\Throwable) {
             // Sentry outages must not affect the integration.
+        }
+    }
+
+    /** @param array<string, mixed> $event */
+    private function recordMetrics(array $event): void
+    {
+        if (app()->environment('testing') || blank(config('sentry.dsn'))) {
+            return;
+        }
+
+        try {
+            $attributes = [
+                'environment' => (string) $event['environment'],
+                'provider' => (string) $event['provider'],
+                'operation' => (string) $event['operation'],
+                'result' => (string) $event['result'],
+                'failure_type' => (string) ($event['failure_type'] ?? 'none'),
+            ];
+            \Sentry\traceMetrics()->count('external.calls', 1, $attributes);
+            \Sentry\traceMetrics()->distribution('external.duration_ms', (float) ($event['duration_ms'] ?? 0), $attributes);
+
+            if (in_array($event['result'], ['timeout', 'connection_error'], true)) {
+                \Sentry\traceMetrics()->count('external.timeouts', 1, $attributes);
+            }
+        } catch (\Throwable) {
+            // Metrics are best effort and must not affect the integration.
         }
     }
 }

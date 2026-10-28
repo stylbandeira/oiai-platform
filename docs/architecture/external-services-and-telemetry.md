@@ -103,3 +103,40 @@ Antes de instrumentar, substituir os logs atuais que incluem `url`, `image_url`,
 - O Sentry usa `SENTRY_LARAVEL_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_SAMPLE_RATE` e `SENTRY_TRACES_SAMPLE_RATE` somente via ambiente/secret manager. `SENTRY_SEND_DEFAULT_PII=false` é obrigatório.
 - Alertas recomendados no projeto Sentry: `external-call` com `provider=oscbr` e `result` em `http_error`, `timeout`, `connection_error` ou `invalid_payload`; separar por ambiente e usar a fingerprint do evento para agrupar repetições.
 
+## Dashboard e métricas no Sentry
+
+O reporter publica métricas Sentry com somente labels de baixa cardinalidade:
+
+- `external.calls`: contador de chamadas por `environment`, `provider`, `operation`, `result` e `failure_type`;
+- `external.duration_ms`: distribuição de duração com os mesmos atributos;
+- `external.timeouts`: contador de `timeout` e `connection_error`.
+
+Não são usados `correlation_id`, usuário, EAN, URL, request ID ou qualquer valor por chamada como dimensão de métrica. A correlação permanece disponível apenas no evento de erro/log estruturado.
+
+### Visão inicial recomendada
+
+Criar no projeto Sentry um dashboard **External integrations** com widgets filtráveis por `environment` e `provider`:
+
+1. volume: `external.calls` por hora, agrupado por `provider` e `operation`;
+2. sucesso/erro: `external.calls` filtrando `result=success` versus demais resultados;
+3. latência: p50/p95/p99 de `external.duration_ms`;
+4. indisponibilidade: `external.timeouts` e `result in (timeout, connection_error)`;
+5. OSCBR: filtro fixo `provider=oscbr`, com operações `auth.token` e `product.lookup`.
+
+### Limiares iniciais de alerta
+
+Os limiares abaixo são pontos de partida para produção e devem ser ajustados após uma semana de baseline. Todos usam janela de 15 minutos e exigem pelo menos 20 chamadas na janela, evitando ruído em baixo volume:
+
+| Alerta | Condição inicial | Severidade |
+|---|---|---|
+| Taxa de erro externa | `(http_error + timeout + connection_error + invalid_payload) / calls >= 10%` e `calls >= 20` | warning |
+| OSCBR indisponível | `timeout + connection_error >= 5` em 15 min | error |
+| Latência OSCBR | p95 de `external.duration_ms >= 10s` para `provider=oscbr` | warning |
+| Falha crítica persistente | taxa de erro `>= 50%` por 30 min e `calls >= 20` | critical |
+
+Os valores devem ser configuráveis na regra do Sentry, não hard-coded na aplicação. Em ambientes diferentes de produção, começar com alertas desabilitados ou com janela/limiar mais altos.
+
+### Acesso e operação
+
+O dashboard deve ser criado no projeto Sentry da equipe, compartilhado com o grupo responsável pela API e vinculado às regras de alerta. O uso diário é: selecionar `environment=production`, filtrar `provider`, comparar volume/taxa de erro e abrir o evento agrupado para consultar `correlation_id`, operação e classe da exceção. O código não contém DSN nem permissões de acesso ao projeto.
+
