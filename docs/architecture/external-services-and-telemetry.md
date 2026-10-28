@@ -4,7 +4,7 @@
 
 Este documento inventaria as integrações externas encontradas no API do Óiaí e define o contrato que deverá ser usado nas próximas tarefas de instrumentação. A análise cobre `apps/api/app`, jobs, services, clients, configurações e filas.
 
-Não foi encontrada uma integração ativa com Sentry, Bugsnag, OpenTelemetry ou outro APM no código/configuração atual. O projeto já possui logging Laravel/Monolog, testes de observabilidade do Meilisearch e comandos operacionais para busca. A decisão para esta etapa é **não adicionar dependência ainda**: primeiro padronizar eventos no logger existente e manter a implementação desacoplada de fornecedor. Se for necessário rastreamento distribuído depois, a primeira opção a avaliar é OpenTelemetry via collector da infraestrutura, sem enviar credenciais ao repositório; Sentry/Bugsnag só devem ser escolhidos após confirmar requisitos de retenção, região e custo.
+Não havia uma integração ativa com Sentry, Bugsnag, OpenTelemetry ou outro APM no código/configuração inicial. A ferramenta escolhida para rastreamento central é **Sentry**, usando `sentry/sentry-laravel` e o mecanismo de exceções do Laravel. O logging estruturado local continua sendo a fonte operacional de baixo nível; o Sentry recebe exceções não tratadas e falhas externas relevantes, com agrupamento por fingerprint e sem PII.
 
 ## Inventário
 
@@ -87,7 +87,7 @@ Antes de instrumentar, substituir os logs atuais que incluem `url`, `image_url`,
 
 ## Pontos de instrumentação para as próximas tarefas
 
-1. Criar um `ExternalCallTelemetry`/`ExternalCallRecorder` pequeno sobre o logger Laravel, sem acoplar os providers a Sentry ou outro fornecedor.
+1. O `ExternalCallTelemetry` registra o evento no logger Laravel e, quando há `SENTRY_LARAVEL_DSN` fora de testes, envia falhas relevantes ao Sentry.
 2. Instrumentar primeiro os limites de rede: OSCBR, Cosmos, os três providers NFC-e, Nominatim e `ImageFromUrl`.
 3. Instrumentar Meilisearch separando `search`, `health`, `metrics` e `index`; manter gravação no MySQL independente.
 4. Instrumentar mail apenas no boundary do Laravel Mail, registrando provedor/resultado/duração, nunca conteúdo da mensagem.
@@ -100,5 +100,6 @@ Antes de instrumentar, substituir os logs atuais que incluem `url`, `image_url`,
 - Não adicionar credenciais, URLs secretas ou tokens em código, fixtures, logs ou documentação de deploy.
 - Manter segredos em `.env`/secret manager: `OSCBR_API_LOGIN`, `OSCBR_API_PASSWORD`, `COSMOS_API_TOKEN`, `MEILISEARCH_KEY`, credenciais de e-mail e eventual chave HMAC de correlação.
 - Adicionar flags de controle por ambiente, por exemplo `EXTERNAL_TELEMETRY_ENABLED` e `EXTERNAL_TELEMETRY_SAMPLE_RATE`, com produção habilitada e desenvolvimento ajustável.
-- Se OpenTelemetry for adotado, configurar exporter/collector por ambiente e manter `OTEL_EXPORTER_OTLP_ENDPOINT` e headers fora do repositório; não introduzir o SDK como parte desta tarefa de inventário.
+- O Sentry usa `SENTRY_LARAVEL_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_SAMPLE_RATE` e `SENTRY_TRACES_SAMPLE_RATE` somente via ambiente/secret manager. `SENTRY_SEND_DEFAULT_PII=false` é obrigatório.
+- Alertas recomendados no projeto Sentry: `external-call` com `provider=oscbr` e `result` em `http_error`, `timeout`, `connection_error` ou `invalid_payload`; separar por ambiente e usar a fingerprint do evento para agrupar repetições.
 

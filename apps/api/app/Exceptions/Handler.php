@@ -41,7 +41,19 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+            if (app()->environment('testing') || blank(config('sentry.dsn'))) {
+                return;
+            }
+
+            try {
+                \Sentry\configureScope(function (\Sentry\State\Scope $scope): void {
+                    $scope->setTag('environment', (string) config('app.env'));
+                    $scope->setTag('correlation_id', app(\App\Services\ExternalCallTelemetry::class)->correlationId());
+                });
+                \Sentry\captureException($e);
+            } catch (Throwable) {
+                // Error tracking must never replace the application's error handling.
+            }
         });
 
         $this->renderable(function (Throwable $exception, Request $request) {
