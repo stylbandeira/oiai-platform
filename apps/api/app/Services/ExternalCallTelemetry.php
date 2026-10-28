@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Sentry\Severity;
 use Sentry\State\Scope;
 use Throwable;
+
 use function Sentry\captureMessage;
 use function Sentry\configureScope;
 use function Sentry\traceMetrics;
@@ -55,6 +56,7 @@ final class ExternalCallTelemetry
         } catch (Throwable) {
             // Queue and console contexts may not have a request.
         }
+
         return $fallback ?: (string) Str::ulid();
     }
 
@@ -71,6 +73,7 @@ final class ExternalCallTelemetry
         if (isset($event['error']) && is_string($event['error'])) {
             $event['error'] = Str::limit(preg_replace('/\s+/', ' ', $event['error']) ?? '', 240);
         }
+
         return $event;
     }
 

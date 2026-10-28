@@ -171,6 +171,7 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
         }
 
         $this->recordCall('auth.token', 'success', $response->status(), $startedAt, $correlationId);
+
         return $token;
     }
 

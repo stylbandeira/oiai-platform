@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Sentry\State\Scope;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
+
 use function Sentry\captureException;
 use function Sentry\configureScope;
 
