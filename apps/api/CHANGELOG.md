@@ -2,6 +2,27 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [3.3.0](https://github.com/stylbandeira/oiai-platform/compare/api-v3.2.0...api-v3.3.0) (2026-11-03)
+
+
+### Features
+
+* create external call telemetry service and set it on OSCBR Data Provider ([0853de9](https://github.com/stylbandeira/oiai-platform/commit/0853de91d639b391dfb247abbab013a74c9ee9b5))
+* implements Sentry metrics ([0ffe3db](https://github.com/stylbandeira/oiai-platform/commit/0ffe3db9203f33fbc58b5a7b9d69f005b61bcaf0))
+
+
+### Bug Fixes
+
+* PINT corrections ([b3598f8](https://github.com/stylbandeira/oiai-platform/commit/b3598f8060ee50732414af7e62b1104e40d65093))
+* PINT corrections ([2145f55](https://github.com/stylbandeira/oiai-platform/commit/2145f55216e49b6c984a71b851740bd787427581))
+* PINT corrections ([837191c](https://github.com/stylbandeira/oiai-platform/commit/837191c24c15d9a9de294f3142759c0cb7918fea))
+* PINT corrections ([327737e](https://github.com/stylbandeira/oiai-platform/commit/327737e771960b1aa85f7357cba78e70ed79589b))
+
+
+### Tests
+
+* texts external call telemetry ([47b429d](https://github.com/stylbandeira/oiai-platform/commit/47b429d39b63d729697aca6281c6b5ceecebc0f6))
+
 ## [3.2.0](https://github.com/stylbandeira/oiai-platform/compare/api-v3.1.3...api-v3.2.0) (2026-10-22)
 
 
