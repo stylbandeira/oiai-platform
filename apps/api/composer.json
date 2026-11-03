@@ -15,6 +15,7 @@
         "laravel/scout": "^10.11",
         "laravel/tinker": "^2.8",
         "meilisearch/meilisearch-php": "^1.11",
+        "sentry/sentry-laravel": "^4.29",
         "symfony/dom-crawler": "^7.4",
         "tightenco/ziggy": "^1.0"
     },
