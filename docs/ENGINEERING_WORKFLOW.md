@@ -57,6 +57,7 @@ O `CI Gate` detecta os caminhos alterados:
 
 - API alterada → executa API CI;
 - Web alterado → executa Web CI;
+- Buras alterado → executa Buras CI;
 - ambos alterados → executa ambos;
 - arquivos compartilhados alterados → executa os pipelines afetados.
 
@@ -68,11 +69,12 @@ O merge ocorre somente após revisão aprovada e sucesso do gate. Não é necess
 
 ## 6. Versionamento e promoção
 
-Depois que alterações forem integradas em `develop`, o Release Please analisa os commits e pode criar PRs de versão independentes para API e Web:
+Depois que alterações forem integradas em `develop`, o Release Please analisa os commits e pode criar PRs de versão independentes para API, Web e Buras:
 
 ```text
 feat(api) → API release PR → api-vX.Y.Z → API GitHub Release
 feat(web) → Web release PR → web-vX.Y.Z → Web GitHub Release
+feat(buras) → Buras release PR → buras-vX.Y.Z → Buras GitHub Release
 ```
 
 Ao integrar cada PR de release em `develop`, a automação atualiza a versão, CHANGELOG, tag e GitHub Release. Esses PRs não fazem deploy. Depois de integrar os PRs de versão desejados, abra um PR de promoção de `develop` para `main`. O merge em `main` representa a publicação em produção e ativa o CD. Uma release de API não altera a versão do Web.

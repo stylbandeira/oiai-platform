@@ -4,7 +4,7 @@
 
 Oiaí é uma plataforma colaborativa para pesquisa de preços. Usuários podem processar NFC-e, consultar produtos, criar listas de compras e encontrar opções considerando preço e distância.
 
-O monorepo contém uma API Laravel e uma aplicação Web React/TypeScript, versionadas e publicadas independentemente.
+O monorepo contém uma API Laravel, uma aplicação Web React/TypeScript e o Buras (observabilidade Go/SQLite), versionados e publicados independentemente.
 
 ## Architecture
 
@@ -12,7 +12,8 @@ O monorepo contém uma API Laravel e uma aplicação Web React/TypeScript, versi
 React/TypeScript Web (apps/web) ── HTTP/JSON + Sanctum ──> Laravel API (apps/api)
                                                               ├─ MySQL
                                                               ├─ Meilisearch
-                                                              └─ Jobs/Scheduler e serviços NFC-e
+                                                              ├─ Jobs/Scheduler e serviços NFC-e
+                                                              └─ Buras (eventos sanitizados → SQLite)
 ```
 
 ## Monorepo Structure
@@ -20,6 +21,7 @@ React/TypeScript Web (apps/web) ── HTTP/JSON + Sanctum ──> Laravel API (
 ```text
 apps/api/                  Backend Laravel
 apps/web/                  Frontend React/Vite
+apps/buras/                Observabilidade Go/SQLite
 docs/openapi.yaml          Contrato OpenAPI
 docs/CONTRIBUTING.md       Commits e contribuição
 docs/VERSIONING.md         Versões e tags
@@ -31,15 +33,16 @@ docker-compose.yml         Ambiente local
 ## Tech Stack
 
 - PHP/Laravel, Sanctum, Scout e Meilisearch;
+- Go e SQLite (Buras);
 - MySQL;
 - React, TypeScript, Vite e Tailwind CSS;
 - Docker Compose;
-- PHPUnit, Pint, PHPStan e ESLint;
+- PHPUnit, Pint, PHPStan, Go test/vet e ESLint;
 - OpenAPI, `openapi-typescript`, GitHub Actions e Release Please.
 
 ## Requirements
 
-Docker, Docker Compose e Git. Para execução fora dos containers: PHP 8.2+, Composer 2 e Node.js 20+.
+Docker, Docker Compose e Git. Para execução fora dos containers: PHP 8.2+, Composer 2, Node.js 20+ e Go 1.27+.
 
 ## Getting Started
 
@@ -64,6 +67,7 @@ docker compose up -d --build
 - Meilisearch: http://localhost:7700
 - phpMyAdmin: http://localhost:8080
 - MailHog: http://localhost:8025
+- Buras (perfil opcional): http://127.0.0.1:8002/dashboard
 
 ```bash
 docker compose logs -f app
@@ -88,6 +92,15 @@ docker compose exec app vendor/bin/pint --test
 docker compose exec app vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=512M
 ```
 
+### Buras
+
+```bash
+cd apps/buras
+go vet ./...
+go test -race ./...
+go build ./cmd/buras
+```
+
 ### Web
 
 ```bash
@@ -102,7 +115,7 @@ npm run check:api
 
 ## Continuous Integration
 
-`ci-api.yml` valida o Backend e `ci-web.yml` valida o Web. Os filtros por caminho evitam pipelines desnecessários. Alterações em `docker/**`, `docker-compose.yml`, `docs/openapi.yaml` ou workflows podem afetar ambas as aplicações. O `ci-gate.yml` detecta os componentes necessários e publica o check global `CI Gate / CI Gate result`, recomendado como obrigatório na proteção da branch.
+`ci-api.yml` valida o Backend, `ci-web.yml` valida o Web e `ci-buras.yml` valida o Buras. Os filtros por caminho evitam pipelines desnecessários. Alterações em `docker/**`, `docker-compose.yml`, `docker-compose.prod.yml`, `docs/openapi.yaml` ou workflows podem afetar mais de uma aplicação. O `ci-gate.yml` detecta os componentes necessários e publica o check global `CI Gate / CI Gate result`, recomendado como obrigatório na proteção da branch.
 
 ## Environments
 
@@ -120,21 +133,23 @@ detalhes do pipeline.
 
 ## Versioning
 
-API e Web usam Semantic Versioning independentemente:
+API, Web e Buras usam Semantic Versioning independentemente:
 
 - API: [apps/api/VERSION](apps/api/VERSION);
 - Web: [apps/web/package.json](apps/web/package.json);
+- Buras: [apps/buras/VERSION](apps/buras/VERSION);
 - CHANGELOG da API: [apps/api/CHANGELOG.md](apps/api/CHANGELOG.md);
 - CHANGELOG do Web: [apps/web/CHANGELOG.md](apps/web/CHANGELOG.md);
+- CHANGELOG do Buras: [apps/buras/CHANGELOG.md](apps/buras/CHANGELOG.md);
 - guia: [docs/VERSIONING.md](docs/VERSIONING.md).
 
-Tags: `api-v1.0.0` e `web-v1.0.0`.
+Tags: `api-vX.Y.Z`, `web-vX.Y.Z` e `buras-vX.Y.Z`.
 
 ## Releases
 
 O [Release Please](.github/workflows/release.yml) interpreta Conventional Commits, cria PRs de release separados, atualiza versões e changelogs, cria tags e publica GitHub Releases.
 
-GitHub Releases é o registro oficial das versões publicadas. Cada release identifica explicitamente o componente (`API` ou `Web`), aponta para a tag correspondente e contém notas agrupadas em Features, Bug Fixes, Performance, Documentation e demais categorias configuradas.
+GitHub Releases é o registro oficial das versões publicadas. Cada release identifica explicitamente o componente (`API`, `Web` ou `Buras`), aponta para a tag correspondente e contém notas agrupadas em Features, Bug Fixes, Performance, Documentation e demais categorias configuradas.
 
 ## Documentation
 
@@ -143,13 +158,15 @@ GitHub Releases é o registro oficial das versões publicadas. Cada release iden
 - [Versionamento](docs/VERSIONING.md);
 - [Deploy e operação em produção](docs/DEPLOYMENT.md);
 - [Checklist de validação de produção](docs/PRODUCTION_SECURITY_CHECKLIST.md);
-- [CI API](.github/workflows/ci-api.yml) · [CI Web](.github/workflows/ci-web.yml) · [CI Gate](.github/workflows/ci-gate.yml);
+- [CI API](.github/workflows/ci-api.yml) · [CI Web](.github/workflows/ci-web.yml) · [CI Buras](.github/workflows/ci-buras.yml) · [CI Gate](.github/workflows/ci-gate.yml);
 - [GitHub Releases](https://github.com/stylbandeira/oiai-platform/releases).
 - [Guias de migração e breaking changes](docs/releases/README.md).
 - [Documentação arquitetural e ADRs](docs/architecture/overview.md).
+- [Observabilidade e telemetria das integrações](docs/architecture/external-services-and-telemetry.md);
+- [Buras: uso, contrato e operação](apps/buras/README.md) · [OpenAPI do Buras](apps/buras/openapi.yaml) · [ADR](docs/architecture/decisions/0005-buras-observability.md).
 - [Fluxo de engenharia](docs/ENGINEERING_WORKFLOW.md).
 
-Os [releases da API](https://github.com/stylbandeira/oiai-platform/releases?q=api-) e os [releases do Web](https://github.com/stylbandeira/oiai-platform/releases?q=web-) são publicados separadamente. O Release Please atualiza os CHANGELOGs junto com os PRs de release.
+Os [releases da API](https://github.com/stylbandeira/oiai-platform/releases?q=api-), [do Web](https://github.com/stylbandeira/oiai-platform/releases?q=web-) e [do Buras](https://github.com/stylbandeira/oiai-platform/releases?q=buras-) são publicados separadamente. O Release Please atualiza os CHANGELOGs junto com os PRs de release.
 
 ## Contributing
 
