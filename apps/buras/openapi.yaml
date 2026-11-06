@@ -1,0 +1,120 @@
+openapi: 3.0.3
+info:
+  title: Buras API
+  version: v1
+  description: Observabilidade independente do Óiaí. Todos os eventos devem ser sanitizados.
+servers:
+  - url: http://127.0.0.1:8002
+paths:
+  /healthz:
+    get:
+      summary: Saúde do processo e do SQLite
+      responses:
+        '200': {description: Disponível}
+        '503': {description: Indisponível}
+  /v1/events:
+    post:
+      summary: Receber evento estruturado
+      security: [{ingestToken: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Event'}
+      responses:
+        '202': {description: Aceito ou duplicado}
+        '400': {description: Evento inválido ou campo não permitido}
+        '401': {description: Token inválido}
+    get:
+      summary: Consultar eventos recentes
+      security: [{adminToken: []}, {adminBasic: []}]
+      parameters:
+        - {$ref: '#/components/parameters/Environment'}
+        - {$ref: '#/components/parameters/Provider'}
+        - {name: correlation_id, in: query, schema: {type: string}}
+      responses:
+        '200':
+          description: Até 100 eventos
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: '#/components/schemas/Event'}}
+  /v1/summary:
+    get:
+      summary: Volume, erros e latência por provedor e operação
+      security: [{adminToken: []}, {adminBasic: []}]
+      parameters:
+        - {$ref: '#/components/parameters/Environment'}
+        - {$ref: '#/components/parameters/Provider'}
+        - {$ref: '#/components/parameters/Period'}
+      responses:
+        '200':
+          description: Resumo
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: '#/components/schemas/Summary'}}
+  /v1/checks:
+    get:
+      summary: Resultados recentes das camadas passiva e ativa
+      security: [{adminToken: []}, {adminBasic: []}]
+      parameters:
+        - {$ref: '#/components/parameters/Environment'}
+        - {$ref: '#/components/parameters/Provider'}
+      responses:
+        '200': {description: Até 50 checagens}
+  /v1/alerts:
+    get:
+      summary: Alertas emitidos e resolvidos
+      security: [{adminToken: []}, {adminBasic: []}]
+      parameters:
+        - {$ref: '#/components/parameters/Environment'}
+        - {$ref: '#/components/parameters/Provider'}
+      responses:
+        '200': {description: Até 100 alertas}
+  /dashboard:
+    get:
+      summary: Painel HTML protegido por Basic Auth
+      security: [{adminBasic: []}]
+      parameters:
+        - {$ref: '#/components/parameters/Environment'}
+        - {$ref: '#/components/parameters/Provider'}
+        - {$ref: '#/components/parameters/Period'}
+      responses:
+        '200': {description: Painel HTML}
+components:
+  securitySchemes:
+    ingestToken: {type: http, scheme: bearer}
+    adminToken: {type: http, scheme: bearer}
+    adminBasic: {type: http, scheme: basic}
+  parameters:
+    Environment: {name: environment, in: query, schema: {type: string}}
+    Provider: {name: provider, in: query, schema: {type: string}}
+    Period: {name: period, in: query, schema: {type: string, default: 24h}}
+  schemas:
+    Event:
+      type: object
+      additionalProperties: false
+      required: [event_id, event, occurred_at, environment, provider, operation, result, correlation_id]
+      properties:
+        event_id: {type: string, description: ULID ou UUID}
+        event: {type: string, enum: [external_call, exception]}
+        occurred_at: {type: string, format: date-time}
+        environment: {type: string}
+        provider: {type: string}
+        operation: {type: string}
+        result: {type: string, enum: [success, not_found, skipped, failure, timeout, connection_error, http_error, invalid_payload, rate_limited, unauthorized]}
+        http_status: {type: integer, minimum: 100, maximum: 599, nullable: true}
+        duration_ms: {type: number, minimum: 0, nullable: true}
+        failure_type: {type: string, nullable: true}
+        correlation_id: {type: string, description: ULID ou UUID}
+        error_class: {type: string, nullable: true}
+    Summary:
+      type: object
+      properties:
+        provider: {type: string}
+        operation: {type: string}
+        calls: {type: integer}
+        successes: {type: integer}
+        failures: {type: integer}
+        timeouts: {type: integer}
+        average_ms: {type: number}
+        p95_ms: {type: number}

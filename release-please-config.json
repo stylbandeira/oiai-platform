@@ -24,6 +24,12 @@
       "component": "web",
       "release-type": "node",
       "package-name": "oiai-web"
+    },
+    "apps/buras": {
+      "component": "buras",
+      "release-type": "simple",
+      "package-name": "oiai-buras",
+      "extra-files": ["VERSION"]
     }
   }
 }

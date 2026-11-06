@@ -6,17 +6,7 @@ on:
     paths:
       - 'apps/api/**'
       - 'apps/web/**'
-      - 'docker/**'
-      - 'docker-compose.yml'
-      - 'scripts/**'
-      - 'docs/**'
-      - 'docs/openapi.yaml'
-      - '.github/workflows/**'
-  push:
-    branches: [main, develop]
-    paths:
-      - 'apps/api/**'
-      - 'apps/web/**'
+      - 'apps/buras/**'
       - 'docker/**'
       - 'docker-compose.yml'
       - 'docker-compose.prod.yml'
@@ -24,6 +14,23 @@ on:
       - 'docs/**'
       - 'docs/openapi.yaml'
       - '.github/workflows/**'
+      - 'release-please-config.json'
+      - '.release-please-manifest.json'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/api/**'
+      - 'apps/web/**'
+      - 'apps/buras/**'
+      - 'docker/**'
+      - 'docker-compose.yml'
+      - 'docker-compose.prod.yml'
+      - 'scripts/**'
+      - 'docs/**'
+      - 'docs/openapi.yaml'
+      - '.github/workflows/**'
+      - 'release-please-config.json'
+      - '.release-please-manifest.json'
 
 permissions:
   contents: read
@@ -39,6 +46,7 @@ jobs:
     outputs:
       api: ${{ steps.filter.outputs.api }}
       web: ${{ steps.filter.outputs.web }}
+      buras: ${{ steps.filter.outputs.buras }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,16 +60,31 @@ jobs:
               - 'apps/api/**'
               - 'docker/**'
               - 'docker-compose.yml'
+              - 'docker-compose.prod.yml'
               - 'docs/openapi.yaml'
               - '.github/workflows/ci-api.yml'
               - '.github/workflows/ci-gate.yml'
+              - 'release-please-config.json'
+              - '.release-please-manifest.json'
+            buras:
+              - 'apps/buras/**'
+              - 'docker/buras/**'
+              - 'docker-compose.yml'
+              - 'docker-compose.prod.yml'
+              - '.github/workflows/ci-buras.yml'
+              - '.github/workflows/ci-gate.yml'
+              - 'release-please-config.json'
+              - '.release-please-manifest.json'
             web:
               - 'apps/web/**'
               - 'docker/**'
               - 'docker-compose.yml'
+              - 'docker-compose.prod.yml'
               - 'docs/openapi.yaml'
               - '.github/workflows/ci-web.yml'
               - '.github/workflows/ci-gate.yml'
+              - 'release-please-config.json'
+              - '.release-please-manifest.json'
 
   api:
     name: Required API CI
@@ -77,30 +100,50 @@ jobs:
     uses: ./.github/workflows/ci-web.yml
     secrets: inherit
 
+  buras:
+    name: Required Buras CI
+    needs: changes
+    if: needs.changes.outputs.buras == 'true'
+    uses: ./.github/workflows/ci-buras.yml
+    secrets: inherit
+
   result:
     name: CI Gate result
     if: always()
-    needs: [changes, api, web]
+    needs: [changes, api, web, buras]
     runs-on: ubuntu-latest
     steps:
       - name: Validate required pipelines
         env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          API_NEEDED: ${{ needs.changes.outputs.api }}
+          WEB_NEEDED: ${{ needs.changes.outputs.web }}
+          BURAS_NEEDED: ${{ needs.changes.outputs.buras }}
           API_RESULT: ${{ needs.api.result }}
           WEB_RESULT: ${{ needs.web.result }}
+          BURAS_RESULT: ${{ needs.buras.result }}
         run: |
-          if [ "$API_RESULT" = "failure" ] || [ "$API_RESULT" = "cancelled" ]; then
-            echo "API CI failed or was cancelled."
+          if [ "$CHANGES_RESULT" != "success" ]; then
+            echo "Change detection failed."
             exit 1
           fi
-          if [ "$WEB_RESULT" = "failure" ] || [ "$WEB_RESULT" = "cancelled" ]; then
-            echo "Web CI failed or was cancelled."
+          if [ "$API_NEEDED" = "true" ] && [ "$API_RESULT" != "success" ]; then
+            echo "Required API CI did not pass ($API_RESULT)."
+            exit 1
+          fi
+          if [ "$WEB_NEEDED" = "true" ] && [ "$WEB_RESULT" != "success" ]; then
+            echo "Required Web CI did not pass ($WEB_RESULT)."
+            exit 1
+          fi
+          if [ "$BURAS_NEEDED" = "true" ] && [ "$BURAS_RESULT" != "success" ]; then
+            echo "Required Buras CI did not pass ($BURAS_RESULT)."
             exit 1
           fi
           echo "All required CI pipelines passed or were not needed."
 
   deploy-production:
     name: Deploy production to VPS
-    needs: [api, web, result]
+    needs: [api, web, buras, result]
     if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.result.result == 'success' }}
     runs-on: ubuntu-latest
     environment:

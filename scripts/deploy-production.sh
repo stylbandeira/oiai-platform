@@ -19,7 +19,12 @@ compose=(docker compose --env-file .env -f docker-compose.prod.yml)
 "${compose[@]}" exec -T app php artisan optimize:clear
 "${compose[@]}" exec -T app php artisan optimize
 
-for service in app api-web queue scheduler web; do
+services=(app api-web queue scheduler web)
+if "${compose[@]}" config --services | grep -qx buras; then
+    services+=(buras)
+fi
+
+for service in "${services[@]}"; do
     container_id="$("${compose[@]}" ps -q "$service")"
     if [[ -z "$container_id" ]]; then
         printf 'Deployment aborted: %s container is not running.\n' "$service" >&2
@@ -33,3 +38,7 @@ for service in app api-web queue scheduler web; do
         exit 1
     fi
 done
+
+if "${compose[@]}" config --services | grep -qx buras; then
+    "${compose[@]}" exec -T buras wget -qO- http://127.0.0.1:8085/healthz >/dev/null
+fi

@@ -9,6 +9,7 @@ on:
       - 'docker/**'
       - '.github/workflows/ci-web.yml'
       - 'docker-compose.yml'
+      - 'docker-compose.prod.yml'
       - 'docs/openapi.yaml'
 
 permissions:

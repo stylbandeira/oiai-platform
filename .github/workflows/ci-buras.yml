@@ -1,0 +1,46 @@
+name: Buras CI
+
+on:
+  workflow_call:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'apps/buras/**'
+      - 'docker/buras/**'
+      - 'docker-compose.yml'
+      - 'docker-compose.prod.yml'
+      - '.github/workflows/ci-buras.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: buras-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Go tests and image build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/buras
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/buras/go.mod
+          cache-dependency-path: apps/buras/go.sum
+      - name: Verify dependencies
+        run: go mod download && go mod verify
+      - name: Format
+        run: test -z "$(gofmt -l .)"
+      - name: Vet
+        run: go vet ./...
+      - name: Test
+        run: go test -race ./...
+      - name: Build binary
+        run: go build ./cmd/buras
+      - name: Build container
+        working-directory: .
+        run: docker build -f docker/buras/Dockerfile -t buras:ci apps/buras

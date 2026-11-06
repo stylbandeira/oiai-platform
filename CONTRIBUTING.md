@@ -26,7 +26,7 @@ Use Conventional Commits:
 <type>(<scope>): <description>
 ```
 
-Scopes principais: `api`, `web`, `infra`, `ci` e `docs`. Tipos permitidos incluem `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `build` e `perf`.
+Scopes principais: `api`, `web`, `buras`, `infra`, `ci` e `docs`. Tipos permitidos incluem `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `build` e `perf`.
 
 Breaking changes usam `!` ou um rodapé `BREAKING CHANGE:`:
 
@@ -61,6 +61,17 @@ docker compose exec app vendor/bin/pint --test
 docker compose exec app vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=512M
 ```
 
+### Buras
+
+```bash
+cd apps/buras
+go mod verify
+test -z "$(gofmt -l .)"
+go vet ./...
+go test -race ./...
+go build ./cmd/buras
+```
+
 ### Web
 
 ```bash
@@ -80,18 +91,20 @@ O CI é separado por aplicação:
 
 - alterações em `apps/api/**` executam o CI da API;
 - alterações em `apps/web/**` executam o CI Web;
-- `docker/**`, `docker-compose.yml`, `docs/openapi.yaml` e workflows podem executar ambos;
+- alterações em `apps/buras/**` executam o CI Buras;
+- `docker/**`, `docker-compose*.yml`, `docs/openapi.yaml` e workflows podem executar mais de um pipeline;
 - `CI Gate / CI Gate result` é o check global recomendado para proteção da branch.
 
 Uma falha em lint, análise estática, testes, tipagem ou build impede o gate de passar.
 
 ## Versioning and releases
 
-API e Web usam Semantic Versioning independente. As tags são:
+API, Web e Buras usam Semantic Versioning independente. As tags são:
 
 ```text
 api-vX.Y.Z
 web-vX.Y.Z
+buras-vX.Y.Z
 ```
 
 O Release Please cria PRs de release separados, atualiza versões e CHANGELOGs, cria tags e publica GitHub Releases após o merge.
@@ -101,6 +114,7 @@ Consulte:
 - [Versionamento](docs/VERSIONING.md);
 - [CHANGELOG da API](apps/api/CHANGELOG.md);
 - [CHANGELOG do Web](apps/web/CHANGELOG.md);
+- [CHANGELOG do Buras](apps/buras/CHANGELOG.md);
 - [Guias de migração](docs/releases/README.md).
 
 ## Definition of done

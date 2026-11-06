@@ -222,6 +222,18 @@ paths:
     put: { security: [{ sanctum: [] }], summary: Atualiza usuário, parameters: [{ $ref: '#/components/parameters/UserId' }], responses: { '200': { description: Usuário atualizado } } }
   /admin/dashboard:
     get: { security: [{ sanctum: [] }], summary: Dashboard administrativo, responses: { '200': { description: Dados administrativos } } }
+  /admin/buras/overview:
+    get:
+      security: [{ sanctum: [] }]
+      summary: Consulta o painel Buras pelo admin autenticado
+      parameters:
+        - { name: environment, in: query, schema: { type: string, default: local } }
+        - { name: provider, in: query, schema: { type: string } }
+        - { name: period, in: query, schema: { type: string, enum: [1h, 6h, 24h, 72h, 168h, 720h], default: 24h } }
+      responses:
+        '200': { description: Resumo, eventos, checagens e alertas do Buras }
+        '422': { description: Filtros inválidos }
+        '503': { description: Buras indisponível ou não configurado }
   /admin/users/export:
     get: { security: [{ sanctum: [] }], summary: Exporta usuários, responses: { '200': { description: Arquivo CSV } } }
   /admin/products/import:

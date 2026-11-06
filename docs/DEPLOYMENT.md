@@ -16,15 +16,16 @@ feature/fix → PR para develop → CI → Release Please em develop
 
 - `develop` é a branch de integração. Pull requests e pushes para ela executam
   o CI aplicável. O Release Please também acompanha `develop` e pode abrir PRs
-  independentes de versão para API e Web.
+  independentes de versão para API, Web e Buras.
 - `main` representa produção. Abra um PR de promoção de `develop` para `main`;
   o CI valida o código antes do merge.
 - O deploy automático acontece somente em `push` para `main`, depois do sucesso
   do job `CI Gate result`. Um PR de Release Please ou um push em `develop` não
   implanta na VPS.
 - O CI detecta os caminhos alterados e executa os pipelines pertinentes: API
-  (Composer, Pint, PHPStan e testes) e Web (npm ci, lint, typecheck, testes
-  configurados e build). Alterações compartilhadas podem executar ambos.
+  (Composer, Pint, PHPStan e testes), Web (npm ci, lint, typecheck, testes
+  configurados e build) e Buras (Go test, vet, format e imagem Docker).
+  Alterações compartilhadas podem executar vários pipelines.
 - A publicação é uma atualização dos containers Docker existentes via
   `docker compose up -d --build`, seguida de migrações Laravel e health check.
   O workflow falha se o endpoint público de health check não retornar HTTP 200
@@ -135,7 +136,7 @@ fortes e distintas para `DB_PASSWORD`, `DB_ROOT_PASSWORD` e
 integrações. A configuração esperada inclui:
 
 - no `.env` da raiz: credenciais do MySQL e Meilisearch, `API_ENV_FILE`,
-  `WEB_PORT` e configuração de build do Web (`VITE_API_URL` etc.);
+  `WEB_PORT`, configuração de build do Web e, quando habilitado, `BURAS_*` (`VITE_API_URL` etc.);
 - em `apps/api/.env.prod`: `APP_ENV=production`, `APP_DEBUG=false`, `APP_KEY`,
   `DB_HOST=db`, `MEILISEARCH_HOST=http://meilisearch:7700`, URLs e domínios
   corretos, fila e e-mail.
@@ -144,7 +145,7 @@ Não compartilhe os valores desses arquivos em logs ou chamados. A stack de
 produção está em `docker-compose.prod.yml`: MySQL e Meilisearch não publicam
 portas no host; API e Web escutam somente em `127.0.0.1:8001` e
 `127.0.0.1:3000` (ou na porta definida por `WEB_PORT`). Os dados do MySQL,
-Meilisearch e armazenamento Laravel ficam em volumes nomeados do Docker.
+Meilisearch e armazenamento Laravel ficam em volumes nomeados do Docker. O Buras usa um volume próprio quando ativado.
 
 O primeiro deploy, a partir da raiz do clone, pode ser feito assim:
 
@@ -159,6 +160,20 @@ O script exige o SHA do checkout, constrói e inicia os serviços, aplica
 `php artisan migrate --force`, prepara o storage e otimiza o Laravel. Em cada
 deploy os containers da aplicação recebem o SHA publicado como label. O
 workflow também imprime o SHA solicitado e verifica o health check público.
+
+## Buras: ativação e operação
+
+O Buras é uma API separada no monorepo, com perfil Docker Compose `buras`. Um merge em `main` valida o código e atualiza a VPS, mas **não inicia o Buras** enquanto `COMPOSE_PROFILES` estiver vazio no `.env` da raiz. Isso permite configurar tokens sem interromper o deploy atual.
+
+1. Gere dois valores independentes com `openssl rand -hex 32`. Coloque-os no `.env` da raiz como `BURAS_INGEST_TOKEN` e `BURAS_ADMIN_TOKEN`; mantenha o arquivo em modo `600`. Não use a mesma chave para ingestão e painel.
+2. Defina `COMPOSE_PROFILES=buras` no mesmo arquivo. O Compose passa o token de ingestão à API Laravel, à fila e ao Buras, e o token administrativo ao Buras e somente ao container `app` da API. A tela `/admin/observability` no admin do Óiaí usa essa credencial no servidor; ela não é exposta ao navegador.
+3. Execute o deploy habitual. O script confere o SHA do container e consulta `/healthz` internamente quando o perfil está ativo.
+4. Abra `http://127.0.0.1:8002/dashboard` na VPS ou por túnel SSH (`ssh -L 8002:127.0.0.1:8002 <usuario>@<vps>`). Autentique-se com usuário `buras` e senha `BURAS_ADMIN_TOKEN`. A porta está vinculada a `127.0.0.1`; configure proxy HTTPS e autenticação adicional se precisar de acesso da equipe pela Internet.
+5. Para validar o fluxo, execute a API em homologação, provoque uma falha controlada com HTTP fake e confira `/v1/events`, `/v1/checks` e o painel. O webhook de alertas é opcional e só aceita URL HTTPS; configure um destino de homologação antes de testá-lo. Não use canais de produção nos testes.
+
+A camada passiva fica ativa por padrão. A sonda ativa fica desligada em produção; para usá-la, configure `BURAS_ACTIVE_ENABLED=true` e `BURAS_PROBE_URL` com um endpoint GET seguro e sem credenciais ou query. Não use consulta real de produtos OSCBR como sonda até existir operação segura que não consuma a cota. Alertas de falhas consecutivas usam `BURAS_ALERT_FAILURES`, `BURAS_ALERT_WINDOW` e `BURAS_ALERT_COOLDOWN`. O Buras guarda resultados em `buras_data` e remove eventos antigos segundo `BURAS_RETENTION_DAYS` (30 dias por padrão). Faça backup consistente do volume e mantenha cópia externa; para copiar o arquivo SQLite, pare o Buras antes de copiar o volume, pois há WAL ativo.
+
+O Buras compartilha a VPS com o Óiaí. Uma queda completa do host também derruba o painel e as sondas; use um monitor externo para detectar esse caso. Consulte o [guia do Buras](../apps/buras/README.md) para o contrato, filtros e triagem.
 
 ## DNS, Nginx externo e SSL
 

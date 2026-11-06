@@ -2,13 +2,20 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [3.4.0](https://github.com/stylbandeira/oiai-platform/compare/api-v3.3.0...api-v3.4.0) (2026-11-06)
+
+
+### Features
+
+* create buras project for observability and telemetry ([42803ea](https://github.com/stylbandeira/oiai-platform/commit/42803ea6ff3f987a9fdae6d88233f2efa8d18112))
+* show buras observability data on oiai-admin ([2cbca67](https://github.com/stylbandeira/oiai-platform/commit/2cbca673852e45f69e60110f02ae55a826e25559))
+
 ## [3.3.0](https://github.com/stylbandeira/oiai-platform/compare/api-v3.2.0...api-v3.3.0) (2026-11-03)
 
 
 ### Features
 
 * create external call telemetry service and set it on OSCBR Data Provider ([0853de9](https://github.com/stylbandeira/oiai-platform/commit/0853de91d639b391dfb247abbab013a74c9ee9b5))
-* implements Sentry metrics ([0ffe3db](https://github.com/stylbandeira/oiai-platform/commit/0ffe3db9203f33fbc58b5a7b9d69f005b61bcaf0))
 
 
 ### Bug Fixes

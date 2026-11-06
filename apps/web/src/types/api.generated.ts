@@ -1436,6 +1436,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/buras/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Consulta o painel Buras pelo admin autenticado */
+        get: {
+            parameters: {
+                query?: {
+                    environment?: string;
+                    provider?: string;
+                    period?: "1h" | "6h" | "24h" | "72h" | "168h" | "720h";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resumo */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Filtros inválidos */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Buras indisponível ou não configurado */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/users/export": {
         parameters: {
             query?: never;
