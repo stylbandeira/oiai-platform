@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AddressController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminBurasDashboardController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyOwnersController;
