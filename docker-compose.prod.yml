@@ -14,6 +14,7 @@ services:
             MEILISEARCH_HOST: http://meilisearch:7700
             BURAS_URL: http://buras:8085
             BURAS_INGEST_TOKEN: ${BURAS_INGEST_TOKEN:-}
+            BURAS_ADMIN_TOKEN: ${BURAS_ADMIN_TOKEN:-}
         volumes:
             - api_storage_prod:/var/www/html/storage
         depends_on:

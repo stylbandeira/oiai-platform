@@ -45,6 +45,7 @@ return [
     'buras' => [
         'url' => env('BURAS_URL'),
         'token' => env('BURAS_INGEST_TOKEN'),
+        'admin_token' => env('BURAS_ADMIN_TOKEN'),
     ],
 
     'oscbr' => [

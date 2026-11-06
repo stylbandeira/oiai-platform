@@ -13,6 +13,8 @@ SQLite -> /v1/summary, /v1/events, /v1/checks, /v1/alerts, /dashboard
 
 O envio ao Buras é opcional para o Óiaí. Se o Buras cair, o job de entrega termina sem afetar o fluxo de negócio; o evento estruturado permanece no log local Laravel. A fila de checagens do Buras é persistente. Nesta versão há um único worker dentro do processo Buras e um único arquivo SQLite local; a solução não compartilha o arquivo entre hosts. Para múltiplas réplicas ou escrita simultânea intensa, planeje migração para um banco servidor.
 
+Além do painel independente em `/dashboard`, os administradores do Óiaí podem consultar os mesmos resumos, alertas, checagens e eventos em `/admin/observability`. Essa tela usa a sessão de administrador do Óiaí e um proxy na API Laravel; o token administrativo do Buras permanece no servidor e nunca é enviado ao navegador.
+
 ## Execução local
 
 Defina no `.env` da raiz `BURAS_INGEST_TOKEN` e `BURAS_ADMIN_TOKEN` com **valores distintos de pelo menos 32 caracteres**. Gere cada um com `openssl rand -hex 32`. O Compose passa o token de ingestão também à API e à fila Laravel.
@@ -51,6 +53,8 @@ BURAS_INGEST_TOKEN=... BURAS_ADMIN_TOKEN=... BURAS_DB_PATH=./data/buras.sqlite g
 | `BURAS_RETENTION_DAYS` | `30` | Retenção de eventos e checagens |
 
 A produção fica **desativada por padrão**. Depois de configurar os dois tokens no `.env` da raiz da VPS, defina `COMPOSE_PROFILES=buras` e faça o deploy. O Compose repassa o token à API, ao worker Laravel e ao Buras. `BURAS_ACTIVE_ENABLED` deve continuar falso até existir uma URL de saúde segura. Uma sonda não deve realizar consultas reais de produto nem consumir cota da OSCBR sem um endpoint específico para isso.
+
+O `BURAS_ADMIN_TOKEN` também é passado ao container `app` para que a API Laravel consulte o painel em nome do administrador autenticado. Mantenha-o apenas no ambiente do backend; não use prefixo `VITE_` nem o inclua em código do frontend.
 
 ## Contrato e acesso
 

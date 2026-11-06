@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminBurasDashboardController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyOwnersController;
@@ -45,6 +46,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::post('/users/revertDeleted/{user}', [UserController::class, 'revertDestroy'])->withTrashed();
         Route::get('/users/export', [UserController::class, 'export']);
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/buras/overview', AdminBurasDashboardController::class);
 
         Route::apiResource('/companies', CompanyController::class)->names([
             'index' => 'admin.companies.index',

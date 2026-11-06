@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Users, Building2, Package, TrendingUp, Star, MapPin, BarChart3,
+  Users, Building2, Package, TrendingUp, Star, MapPin, BarChart3, Activity,
   Loader2, MoreVertical, ChevronDown, ChevronUp, Crown, Award, ShoppingBag
 } from "lucide-react";
 import api from "@/lib/api";
@@ -195,6 +195,15 @@ export function AdminDashboard() {
               >
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Relatórios
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/admin/observability')}
+                className="flex-1 sm:flex-initial"
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Observabilidade
               </Button>
             </div>
           </div>

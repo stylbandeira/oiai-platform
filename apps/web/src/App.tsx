@@ -20,6 +20,7 @@ import EditProduct from "./pages/admin/EditProduct";
 import ManageUsers from "./pages/admin/ManageUsers";
 import AddUser from "./pages/admin/AddUser";
 import EditUser from "./pages/admin/EditUser";
+import BurasDashboard from "./pages/admin/BurasDashboard";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import EditShoppingList from "./pages/client/EditShoppingLIst";
 import { NotificationProvider } from "./contexts/NotificationContext";
@@ -89,6 +90,10 @@ const App = () => (
                 </ProtectedRoute>} />
                 <Route path="/admin/users/edit/:id" element={<ProtectedRoute allowedTypes={['admin']}>
                   <EditUser />
+                </ProtectedRoute>} />
+
+                <Route path="/admin/observability" element={<ProtectedRoute allowedTypes={['admin']}>
+                  <BurasDashboard />
                 </ProtectedRoute>} />
               </Route>
 
