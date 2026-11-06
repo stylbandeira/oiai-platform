@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
-import { Activity, AlertTriangle, CheckCircle2, Clock3, Loader2, RefreshCw, Timer } from "lucide-react";
+import { Activity, AlertTriangle, ArrowLeft, CheckCircle2, Clock3, Loader2, RefreshCw, Timer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import api from "@/lib/api";
 import { getApiErrorMessage } from "@/utils/apiError";
+import { useNavigate } from "react-router-dom";
 
 interface BurasSummary {
   provider: string;
@@ -84,6 +85,7 @@ function stateBadge(state: string) {
 }
 
 export default function BurasDashboard() {
+  const navigate = useNavigate();
   const [environment, setEnvironment] = useState("local");
   const [provider, setProvider] = useState("");
   const [period, setPeriod] = useState("24h");
@@ -153,15 +155,31 @@ export default function BurasDashboard() {
   return (
     <div className="container mx-auto space-y-6 px-4 py-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-primary">
-            <Activity className="h-5 w-5" />
-            <span className="text-sm font-semibold">Buras</span>
+        <div className="flex items-start gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Voltar à página anterior"
+            onClick={() => {
+              if (window.history.state?.idx > 0) {
+                navigate(-1);
+              } else {
+                navigate("/");
+              }
+            }}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <div className="flex items-center gap-2 text-primary">
+              <Activity className="h-5 w-5" />
+              <span className="text-sm font-semibold">Buras</span>
+            </div>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Observabilidade</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Saúde, latência, eventos e alertas das integrações externas.
+            </p>
           </div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Observabilidade</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Saúde, latência, eventos e alertas das integrações externas.
-          </p>
         </div>
         <Button variant="outline" onClick={() => void loadOverview()} disabled={loading}>
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
