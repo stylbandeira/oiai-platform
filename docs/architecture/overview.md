@@ -1,12 +1,13 @@
 # Visão geral da arquitetura
 
-Oiaí é um monorepo composto por uma API Laravel e uma aplicação Web React/TypeScript.
+Oiaí é um monorepo composto por API Laravel, Web React/TypeScript e Buras Go/SQLite.
 
 ```text
 Web SPA ── HTTP/JSON + Sanctum ──> API Laravel ──> MySQL
                                       ├─ Meilisearch
                                       ├─ Queue/Scheduler
-                                      └─ provedores de NFC-e e APIs externas
+                                      ├─ provedores de NFC-e e APIs externas
+                                      └─ Buras API → SQLite (telemetria)
 ```
 
 ## Responsabilidades
@@ -15,7 +16,8 @@ Web SPA ── HTTP/JSON + Sanctum ──> API Laravel ──> MySQL
 - **Web**: interface do usuário, navegação, formulários e consumo dos contratos HTTP;
 - **MySQL**: fonte de verdade transacional;
 - **Meilisearch**: índice derivado para busca textual, fuzzy, prefixos e ranking;
-- **Queue/Scheduler**: processamento assíncrono e tarefas periódicas.
+- **Queue/Scheduler**: processamento assíncrono e tarefas periódicas;
+- **Buras**: eventos sanitizados, checagens, painel e alertas de integrações.
 
 O índice de busca pode ser apagado e reconstruído a partir do MySQL. Ele não substitui o banco transacional.
 
@@ -23,4 +25,5 @@ O índice de busca pode ser apagado e reconstruído a partir do MySQL. Ele não 
 
 - [Arquitetura da API](api.md);
 - [Arquitetura do Web](frontend.md);
-- [Decisões arquiteturais](decisions/).
+- [Decisões arquiteturais](decisions/);
+- [Buras](../../apps/buras/README.md).

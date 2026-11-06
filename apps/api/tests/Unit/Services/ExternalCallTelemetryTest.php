@@ -2,11 +2,13 @@
 
 namespace Tests\Unit\Services;
 
+use App\Services\BurasReporter;
 use App\Services\ExternalCallTelemetry;
 use App\Services\Product\Providers\OscbrProductDataProvider;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 use Tests\TestCase;
 
 class ExternalCallTelemetryTest extends TestCase
@@ -14,7 +16,6 @@ class ExternalCallTelemetryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config()->set('sentry.dsn', null);
         config()->set('services.oscbr.login', 'test-login');
         config()->set('services.oscbr.password', 'test-password');
         config()->set('services.oscbr.auth_url', 'https://oscbr.test/oauth/token');
@@ -85,7 +86,10 @@ class ExternalCallTelemetryTest extends TestCase
     public function test_reporter_failure_does_not_escape_the_business_flow(): void
     {
         $telemetry = new ExternalCallTelemetry;
-        config()->set('sentry.dsn', 'https://public@example.ingest.sentry.io/1');
+        Log::spy();
+        app()->bind(BurasReporter::class, function (): never {
+            throw new RuntimeException('reporter unavailable');
+        });
 
         $telemetry->record([
             'provider' => 'oscbr',
@@ -99,6 +103,13 @@ class ExternalCallTelemetryTest extends TestCase
             'payload' => ['email' => 'person@example.test'],
         ]);
 
-        $this->assertTrue(true);
+        Log::shouldHaveReceived('log')->once()->withArgs(function (string $level, string $message, array $context): bool {
+            $event = json_encode($context);
+
+            return $message === 'external_call'
+                && $context['result'] === 'http_error'
+                && ! str_contains($event, 'must-not-appear')
+                && ! str_contains($event, 'person@example.test');
+        });
     }
 }

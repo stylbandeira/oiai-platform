@@ -30,3 +30,8 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Buras local data and binaries
+/apps/buras/data/
+/apps/buras/buras
+/apps/buras/*.sqlite*

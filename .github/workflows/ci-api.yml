@@ -8,6 +8,7 @@ on:
       - 'apps/api/**'
       - 'docker/**'
       - 'docker-compose.yml'
+      - 'docker-compose.prod.yml'
       - 'docs/openapi.yaml'
       - '.github/workflows/ci-api.yml'
 

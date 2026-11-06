@@ -21,6 +21,8 @@ services:
             APACHE_RUN_GROUP: www-data
             FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
             MEILISEARCH_HOST: http://meilisearch:7700
+            BURAS_URL: http://buras:8085
+            BURAS_INGEST_TOKEN: ${BURAS_INGEST_TOKEN:-}
             DB_HOST: db
             DB_USERNAME: oiai
             DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
@@ -41,6 +43,8 @@ services:
             - ./apps/api:/var/www/html
         environment:
             MEILISEARCH_HOST: http://meilisearch:7700
+            BURAS_URL: http://buras:8085
+            BURAS_INGEST_TOKEN: ${BURAS_INGEST_TOKEN:-}
             DB_HOST: db
             DB_USERNAME: oiai
             DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
@@ -61,6 +65,8 @@ services:
             - ./apps/api:/var/www/html
         environment:
             MEILISEARCH_HOST: http://meilisearch:7700
+            BURAS_URL: http://buras:8085
+            BURAS_INGEST_TOKEN: ${BURAS_INGEST_TOKEN:-}
             DB_HOST: db
             DB_USERNAME: oiai
             DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
@@ -88,6 +94,26 @@ services:
             - app
         stdin_open: true
         tty: true
+
+    buras:
+        profiles: [buras]
+        build:
+            context: ./apps/buras
+            dockerfile: ../../docker/buras/Dockerfile
+        ports:
+            - "127.0.0.1:${BURAS_PORT:-8002}:8085"
+        environment:
+            BURAS_INGEST_TOKEN: ${BURAS_INGEST_TOKEN:-}
+            BURAS_ADMIN_TOKEN: ${BURAS_ADMIN_TOKEN:-}
+            BURAS_DB_PATH: /data/buras.sqlite
+            BURAS_PASSIVE_ENABLED: ${BURAS_PASSIVE_ENABLED:-true}
+            BURAS_ACTIVE_ENABLED: ${BURAS_ACTIVE_ENABLED:-true}
+            BURAS_PROBE_URL: http://app:8001/api/health
+            BURAS_PROBE_ENVIRONMENT: local
+        volumes:
+            - buras_data:/data
+        depends_on:
+            - app
 
     db:
         image: mysql:5.7
@@ -140,3 +166,4 @@ services:
 volumes:
     dbdata:
     meilisearch_data:
+    buras_data:

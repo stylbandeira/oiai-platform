@@ -12,6 +12,8 @@ services:
             APP_ENV: production
             APP_DEBUG: "false"
             MEILISEARCH_HOST: http://meilisearch:7700
+            BURAS_URL: http://buras:8085
+            BURAS_INGEST_TOKEN: ${BURAS_INGEST_TOKEN:-}
         volumes:
             - api_storage_prod:/var/www/html/storage
         depends_on:
@@ -47,6 +49,8 @@ services:
             APP_ENV: production
             APP_DEBUG: "false"
             MEILISEARCH_HOST: http://meilisearch:7700
+            BURAS_URL: http://buras:8085
+            BURAS_INGEST_TOKEN: ${BURAS_INGEST_TOKEN:-}
         command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
         user: "www-data"
         depends_on:
@@ -65,6 +69,8 @@ services:
         environment:
             APP_ENV: production
             APP_DEBUG: "false"
+            BURAS_URL: http://buras:8085
+            BURAS_INGEST_TOKEN: ${BURAS_INGEST_TOKEN:-}
         command: php artisan schedule:work
         user: "www-data"
         depends_on:
@@ -84,6 +90,32 @@ services:
             - "127.0.0.1:${WEB_PORT:-3000}:80"
         depends_on:
             - app
+
+    buras:
+        profiles: [buras]
+        labels:
+            org.opencontainers.image.revision: ${DEPLOY_SHA:?DEPLOY_SHA is required}
+        build:
+            context: ./apps/buras
+            dockerfile: ../../docker/buras/Dockerfile
+        restart: unless-stopped
+        environment:
+            BURAS_INGEST_TOKEN: ${BURAS_INGEST_TOKEN:-}
+            BURAS_ADMIN_TOKEN: ${BURAS_ADMIN_TOKEN:-}
+            BURAS_DB_PATH: /data/buras.sqlite
+            BURAS_PASSIVE_ENABLED: ${BURAS_PASSIVE_ENABLED:-true}
+            BURAS_ACTIVE_ENABLED: ${BURAS_ACTIVE_ENABLED:-false}
+            BURAS_PROBE_URL: ${BURAS_PROBE_URL:-}
+            BURAS_PROBE_ENVIRONMENT: production
+            BURAS_ALERT_WEBHOOK_URL: ${BURAS_ALERT_WEBHOOK_URL:-}
+            BURAS_ALERT_FAILURES: ${BURAS_ALERT_FAILURES:-5}
+            BURAS_ALERT_WINDOW: ${BURAS_ALERT_WINDOW:-1h}
+            BURAS_ALERT_COOLDOWN: ${BURAS_ALERT_COOLDOWN:-1h}
+            BURAS_RETENTION_DAYS: ${BURAS_RETENTION_DAYS:-30}
+        ports:
+            - "127.0.0.1:${BURAS_PORT:-8002}:8085"
+        volumes:
+            - buras_data:/data
 
     db:
         image: mysql:8.0
@@ -113,3 +145,4 @@ volumes:
     dbdata_prod:
     meilisearch_data_prod:
     api_storage_prod:
+    buras_data:

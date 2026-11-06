@@ -42,6 +42,11 @@ return [
         'daily_limit' => env('COSMOS_API_DAILY_LIMIT', 45),
     ],
 
+    'buras' => [
+        'url' => env('BURAS_URL'),
+        'token' => env('BURAS_INGEST_TOKEN'),
+    ],
+
     'oscbr' => [
         'login' => env('OSCBR_API_LOGIN'),
         'password' => env('OSCBR_API_PASSWORD'),

@@ -1,0 +1,7 @@
+data/
+buras
+.env
+.env.*
+*.sqlite
+*.sqlite-*
+*.db

@@ -8,7 +8,6 @@ Todas as alterações relevantes da API são registradas neste arquivo.
 ### Features
 
 * create external call telemetry service and set it on OSCBR Data Provider ([0853de9](https://github.com/stylbandeira/oiai-platform/commit/0853de91d639b391dfb247abbab013a74c9ee9b5))
-* implements Sentry metrics ([0ffe3db](https://github.com/stylbandeira/oiai-platform/commit/0ffe3db9203f33fbc58b5a7b9d69f005b61bcaf0))
 
 
 ### Bug Fixes

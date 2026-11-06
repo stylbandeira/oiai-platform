@@ -1,13 +1,14 @@
 # Versionamento das aplicações
 
-API e Web possuem ciclos de release independentes. Uma release de uma aplicação não exige alteração de versão na outra.
+API, Web e Buras possuem ciclos de release independentes. Uma release de uma aplicação não exige alteração de versão na outra.
 
 ## Versões atuais
 
 - API: [`apps/api/VERSION`](../apps/api/VERSION)
 - Web: [`apps/web/package.json`](../apps/web/package.json)
+- Buras: [`apps/buras/VERSION`](../apps/buras/VERSION)
 
-Ambas usam Semantic Versioning (`MAJOR.MINOR.PATCH`):
+As três usam Semantic Versioning (`MAJOR.MINOR.PATCH`):
 
 - `PATCH`: correção compatível, como `1.2.0` → `1.2.1`;
 - `MINOR`: funcionalidade compatível, como `1.2.1` → `1.3.0`;
@@ -25,15 +26,18 @@ api-v1.1.1
 web-v1.0.0
 web-v1.1.0
 web-v2.0.0
+
+buras-v0.1.0
+buras-v0.2.0
 ```
 
-Uma tag `api-v*` só deve ser criada quando houver release da API. Uma tag `web-v*` só deve ser criada quando houver release do Web.
+Uma tag `api-v*` só deve ser criada quando houver release da API. Uma tag `web-v*` só deve ser criada quando houver release do Web. Uma tag `buras-v*` só deve ser criada quando houver release do Buras.
 
 ## Releases automáticas
 
 O workflow `Release Please` acompanha `develop`, usa os Conventional Commits e cria PRs de release independentes com destino a `develop`. O estado atual fica em `.release-please-manifest.json`.
 
-Ao integrar um PR de release em `develop`, a automação atualiza os arquivos de versão e o CHANGELOG do componente, cria a tag (`api-vX.Y.Z` ou `web-vX.Y.Z`) e publica o GitHub Release. Isso não implanta em produção: somente um push em `main`, após o PR de promoção `develop → main`, ativa o CD no `CI Gate`.
+Ao integrar um PR de release em `develop`, a automação atualiza os arquivos de versão e o CHANGELOG do componente, cria a tag (`api-vX.Y.Z`, `web-vX.Y.Z` ou `buras-vX.Y.Z`) e publica o GitHub Release. Isso não implanta em produção: somente um push em `main`, após o PR de promoção `develop → main`, ativa o CD no `CI Gate`.
 
 Fluxo normal:
 
@@ -43,11 +47,11 @@ feature → PR/CI → develop → PR de release por componente → develop
                               PR develop → main → CI/CD → produção
 ```
 
-API e Web podem ter PRs e tags diferentes. `separate-pull-requests` mantém a aprovação independente, e o prefixo do componente nas tags impede colisões (`api-v...` e `web-v...`).
+API, Web e Buras podem ter PRs e tags diferentes. `separate-pull-requests` mantém a aprovação independente, e o prefixo do componente nas tags impede colisões (`api-v...`, `web-v...` e `buras-v...`).
 
 ### Transição do fluxo antigo
 
-As tags atuais `api-v3.0.0` e `web-v3.0.0` foram criadas pelo fluxo antigo em `main`. O manifesto, o arquivo de versão da API, o `package.json` do Web e os changelogs são alinhados em 3.0.0 nesta mudança. Assim, a próxima versão parte do estado já publicado, e os prefixos de componente mantêm as tags API/Web distintas. Não crie nem mova tags manualmente.
+As tags de API/Web já existentes `api-v3.0.0` e `web-v3.0.0` foram criadas pelo fluxo antigo em `main`. O manifesto, o arquivo de versão da API, o `package.json` do Web e os changelogs são alinhados em 3.0.0 nesta mudança. Assim, a próxima versão parte do estado já publicado, e os prefixos de componente mantêm as tags API/Web distintas. O Buras inicia com manifesto `0.1.0`; o Release Please publicará as próximas versões. Não crie nem mova tags manualmente.
 
 ### Configuração da GitHub App de release
 
@@ -72,6 +76,7 @@ Cada GitHub Release deve corresponder a uma única tag de componente:
 | --- | --- | --- |
 | API | `api-vX.Y.Z` | [`apps/api/CHANGELOG.md`](../apps/api/CHANGELOG.md) |
 | Web | `web-vX.Y.Z` | [`apps/web/CHANGELOG.md`](../apps/web/CHANGELOG.md) |
+| Buras | `buras-vX.Y.Z` | [`apps/buras/CHANGELOG.md`](../apps/buras/CHANGELOG.md) |
 
 As notas da release são geradas a partir dos Conventional Commits e organizadas por categoria. Assim, é possível rastrear a alteração desde o commit até a tag, a versão, o CHANGELOG e a release publicada.
 
@@ -79,13 +84,14 @@ Breaking changes e migrações que exigirem ação adicional devem apontar para 
 
 ## Relação com commits
 
-Os scopes `api` e `web` dos Conventional Commits ajudam a identificar a aplicação afetada. O incremento da versão deve considerar somente os commits da aplicação que está sendo publicada.
+Os scopes `api`, `web` e `buras` dos Conventional Commits ajudam a identificar a aplicação afetada. O incremento da versão deve considerar somente os commits da aplicação que está sendo publicada.
 
 Exemplos:
 
 ```text
 feat(api): add product ranking       # incrementa a API
 fix(web): correct mobile pagination  # incrementa o Web
+feat(buras): add active probe        # incrementa o Buras
 ```
 
 Uma alteração compartilhada pode exigir duas releases, mas as versões continuam sendo calculadas e publicadas separadamente.
