@@ -2,6 +2,18 @@
 
 Todas as alterações relevantes do frontend são registradas neste arquivo.
 
+## [3.4.0](https://github.com/stylbandeira/oiai-platform/compare/web-v3.3.0...web-v3.4.0) (2026-11-06)
+
+
+### Features
+
+* show buras observability data on oiai-admin ([2cbca67](https://github.com/stylbandeira/oiai-platform/commit/2cbca673852e45f69e60110f02ae55a826e25559))
+
+
+### Bug Fixes
+
+* add return button ([59dc8f1](https://github.com/stylbandeira/oiai-platform/commit/59dc8f18b5d3c18c49f38e54f17a21807a208497))
+
 ## [3.3.0](https://github.com/stylbandeira/oiai-platform/compare/web-v3.2.1...web-v3.3.0) (2026-10-27)
 
 
