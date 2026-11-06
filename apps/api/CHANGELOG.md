@@ -2,6 +2,14 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [3.4.1](https://github.com/stylbandeira/oiai-platform/compare/api-v3.4.0...api-v3.4.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* define environment on env ([2dba9d3](https://github.com/stylbandeira/oiai-platform/commit/2dba9d35ba60d4a67bd15d411b57ebfb4815fd59))
+* define environment on env ([632489b](https://github.com/stylbandeira/oiai-platform/commit/632489be495ae0ee6927e16bed50058b92bf609d))
+
 ## [3.4.0](https://github.com/stylbandeira/oiai-platform/compare/api-v3.3.0...api-v3.4.0) (2026-11-06)
 
 
