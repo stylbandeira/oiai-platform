@@ -29,7 +29,7 @@ final class AdminBurasDashboardController extends Controller
             ], 503);
         }
 
-        $environment = $filters['environment'] ?? 'local';
+        $environment = $filters['environment'] ?? (string) config('app.env');
         $provider = $filters['provider'] ?? '';
         $period = $filters['period'] ?? '24h';
 
