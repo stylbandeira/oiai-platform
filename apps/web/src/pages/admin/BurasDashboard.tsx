@@ -61,6 +61,8 @@ interface BurasOverview {
   alerts: BurasAlert[];
 }
 
+const defaultEnvironment = import.meta.env.PROD ? "production" : "local";
+
 const periodOptions = [
   { value: "1h", label: "Última hora" },
   { value: "6h", label: "Últimas 6 horas" },
@@ -86,10 +88,10 @@ function stateBadge(state: string) {
 
 export default function BurasDashboard() {
   const navigate = useNavigate();
-  const [environment, setEnvironment] = useState("local");
+  const [environment, setEnvironment] = useState(defaultEnvironment);
   const [provider, setProvider] = useState("");
   const [period, setPeriod] = useState("24h");
-  const [appliedFilters, setAppliedFilters] = useState({ environment: "local", provider: "", period: "24h" });
+  const [appliedFilters, setAppliedFilters] = useState({ environment: defaultEnvironment, provider: "", period: "24h" });
   const [overview, setOverview] = useState<BurasOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
