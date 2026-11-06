@@ -21,6 +21,8 @@ class ProductDataServiceTest extends TestCase
     {
         parent::setUp();
         Cache::flush();
+        config()->set('services.buras.url', null);
+        config()->set('services.buras.token', null);
     }
 
     protected function tearDown(): void
@@ -204,6 +206,81 @@ class ProductDataServiceTest extends TestCase
             ));
         Http::assertSent(fn (Request $request) => $request->url() === 'https://oscbr.test/api/v3/gtin/7896116900029'
             && $request->hasHeader('Authorization', 'Bearer short-lived-token'));
+    }
+
+    public function test_oscbr_reauthenticates_once_when_a_fresh_token_is_rejected(): void
+    {
+        config()->set([
+            'services.oscbr.login' => 'api-user',
+            'services.oscbr.password' => 'api-password',
+            'services.oscbr.auth_url' => 'https://oscbr.test/api/v3/oauth/token',
+            'services.oscbr.product_url' => 'https://oscbr.test/api/v3/gtin',
+        ]);
+
+        $authCalls = 0;
+        $productTokens = [];
+        Http::fake(function (Request $request) use (&$authCalls, &$productTokens) {
+            if ($request->url() === 'https://oscbr.test/api/v3/oauth/token') {
+                $authCalls++;
+
+                return Http::response(['token' => $authCalls === 1 ? 'rejected-token' : 'new-token']);
+            }
+
+            $productTokens[] = $request->header('Authorization')[0] ?? null;
+
+            return count($productTokens) === 1
+                ? Http::response(['erro' => 'Não autorizado'], 401)
+                : Http::response(['nome' => 'Produto recuperado', 'link_foto' => 'https://oscbr.test/image'], 200);
+        });
+
+        $result = (new OscbrProductDataProvider)->getProductData('7896116900029');
+
+        $this->assertSame('Produto recuperado', $result['name']);
+        $this->assertSame('Bearer new-token', $result['_image_headers']['Authorization']);
+        $this->assertSame(['Bearer rejected-token', 'Bearer new-token'], $productTokens);
+        $this->assertSame(2, $authCalls);
+        Http::assertSentCount(4);
+    }
+
+    public function test_oscbr_stops_after_a_second_unauthorized_product_response(): void
+    {
+        config()->set([
+            'services.oscbr.login' => 'api-user',
+            'services.oscbr.password' => 'api-password',
+            'services.oscbr.auth_url' => 'https://oscbr.test/api/v3/oauth/token',
+            'services.oscbr.product_url' => 'https://oscbr.test/api/v3/gtin',
+        ]);
+
+        Http::fake(fn (Request $request) => $request->method() === 'POST'
+            ? Http::response(['token' => 'still-rejected'])
+            : Http::response(['erro' => 'Não autorizado'], 401));
+
+        $this->assertSame([], (new OscbrProductDataProvider)->getProductData('7896116900029'));
+        Http::assertSentCount(4);
+    }
+
+    public function test_oscbr_pauses_authentication_after_invalid_credentials(): void
+    {
+        config()->set([
+            'services.oscbr.login' => 'api-user',
+            'services.oscbr.password' => 'wrong-password',
+            'services.oscbr.auth_url' => 'https://oscbr.test/api/v3/oauth/token',
+            'services.oscbr.product_url' => 'https://oscbr.test/api/v3/gtin',
+        ]);
+
+        Http::fake([
+            'https://oscbr.test/api/v3/oauth/token' => Http::response(['erro' => 'Senha recusada'], 401),
+        ]);
+
+        $provider = new OscbrProductDataProvider;
+        $this->assertSame([], $provider->getProductData('7896116900029'));
+        $this->assertSame([], $provider->getProductData('7896116900029'));
+        Http::assertSentCount(1);
+        $this->assertTrue(Cache::has('oscbr:auth-rejected'));
+
+        Carbon::setTestNow(now()->addMinutes(16));
+        $this->assertSame([], $provider->getProductData('7896116900029'));
+        Http::assertSentCount(2);
     }
 
     private function configureUsagePolicy(

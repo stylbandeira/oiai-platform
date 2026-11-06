@@ -6,11 +6,14 @@ use App\Contracts\Product\ProductDataProvider;
 use App\Enums\ProductQuantitySource;
 use App\Enums\ProductRefinementStatus;
 use App\Services\ExternalCallTelemetry;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class OscbrProductDataProvider extends AbstractProductDataProvider implements ProductDataProvider
 {
+    private const AUTH_REJECTED_CACHE_KEY = 'oscbr:auth-rejected';
+
     public function key(): string
     {
         return 'oscbr';
@@ -45,6 +48,11 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
             return [];
         }
 
+        return $this->lookupProduct($ean, $token, $correlationId, true);
+    }
+
+    private function lookupProduct(string $ean, string $token, string $correlationId, bool $retryOnUnauthorized): array
+    {
         $url = rtrim((string) config('services.oscbr.product_url'), '/')
             .'/'.rawurlencode($ean);
         Log::info('Consultando dados do produto na OSCBR.', ['ean' => $ean, 'url' => $url]);
@@ -74,8 +82,22 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
             return [];
         }
 
+        if ($response->status() === 401 && $retryOnUnauthorized) {
+            $this->recordCall('product.lookup', 'unauthorized', 401, $startedAt, $correlationId);
+            Log::warning('Token da OSCBR recusado; solicitando novo token para a consulta.');
+
+            $newToken = $this->authenticate($correlationId);
+
+            return $newToken === null ? [] : $this->lookupProduct($ean, $newToken, $correlationId, false);
+        }
+
         if ($response->successful() === false) {
-            $this->recordCall('product.lookup', $response->status() === 404 ? 'not_found' : 'http_error', $response->status(), $startedAt, $correlationId);
+            $result = match ($response->status()) {
+                401 => 'unauthorized',
+                404 => 'not_found',
+                default => 'http_error',
+            };
+            $this->recordCall('product.lookup', $result, $response->status(), $startedAt, $correlationId);
             $context = $this->responseContext($ean, $url, $response);
 
             if ($response->status() === 404) {
@@ -116,6 +138,10 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
 
     private function authenticate(string $correlationId): ?string
     {
+        if (Cache::has(self::AUTH_REJECTED_CACHE_KEY)) {
+            return null;
+        }
+
         $login = (string) config('services.oscbr.login');
         $password = (string) config('services.oscbr.password');
 
@@ -152,7 +178,11 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
         }
 
         if ($response->successful() === false) {
-            $this->recordCall('auth.token', 'http_error', $response->status(), $startedAt, $correlationId);
+            if ($response->status() === 401) {
+                Cache::put(self::AUTH_REJECTED_CACHE_KEY, true, now()->addMinutes(15));
+            }
+
+            $this->recordCall('auth.token', $response->status() === 401 ? 'unauthorized' : 'http_error', $response->status(), $startedAt, $correlationId);
             Log::warning(
                 'Autenticação recusada pela OSCBR; consulta ao produto não foi realizada.',
                 $this->responseContext('authentication', $url, $response),
@@ -191,7 +221,7 @@ class OscbrProductDataProvider extends AbstractProductDataProvider implements Pr
             'duration_ms' => (microtime(true) - $startedAt) * 1000,
             'failure_type' => $exception
                 ? ($result === 'timeout' ? 'timeout' : 'connection')
-                : ($result === 'http_error' ? 'http' : ($result === 'invalid_payload' ? 'invalid_payload' : null)),
+                : (in_array($result, ['http_error', 'unauthorized'], true) ? 'http' : ($result === 'invalid_payload' ? 'invalid_payload' : null)),
             'correlation_id' => $correlationId,
             'error_class' => $exception ? $exception::class : null,
         ]);

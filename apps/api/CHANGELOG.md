@@ -2,6 +2,14 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [3.4.2](https://github.com/stylbandeira/oiai-platform/compare/api-v3.4.1...api-v3.4.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* OSCBR integration correction ([0af9717](https://github.com/stylbandeira/oiai-platform/commit/0af9717dc4b961aff635cd25704746f90dd122bf))
+* OSCBR integration correction ([df56cbc](https://github.com/stylbandeira/oiai-platform/commit/df56cbc551e5648c94b12c536415867ea733027d))
+
 ## [3.4.1](https://github.com/stylbandeira/oiai-platform/compare/api-v3.4.0...api-v3.4.1) (2026-11-06)
 
 
