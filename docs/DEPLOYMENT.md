@@ -161,6 +161,12 @@ O script exige o SHA do checkout, constrói e inicia os serviços, aplica
 deploy os containers da aplicação recebem o SHA publicado como label. O
 workflow também imprime o SHA solicitado e verifica o health check público.
 
+## OSCBR: senha recusada e bloqueio de token
+
+A API solicita um token novo antes de cada consulta à OSCBR. Se `auth.token` retornar HTTP 401, confira `OSCBR_API_LOGIN` e `OSCBR_API_PASSWORD` no arquivo definido por `API_ENV_FILE` (normalmente `apps/api/.env.prod` na VPS). Um 401 nessa etapa indica que não houve consulta ao produto; trocar apenas um token antigo não corrige a senha recusada. Não copie credenciais para logs ou chamados.
+
+Após corrigir a senha, atualize os containers `app` e `queue` pelo deploy habitual para recarregar a configuração. Aguarde o bloqueio temporário da conta expirar antes de validar uma nova consulta. O cliente pausa novas tentativas de autenticação por 15 minutos após um 401; confira no Buras `auth.token` para falhas de autenticação e `product.lookup` para falhas da consulta.
+
 ## Buras: ativação e operação
 
 O Buras é uma API separada no monorepo, com perfil Docker Compose `buras`. Um merge em `main` valida o código e atualiza a VPS, mas **não inicia o Buras** enquanto `COMPOSE_PROFILES` estiver vazio no `.env` da raiz. Isso permite configurar tokens sem interromper o deploy atual.
