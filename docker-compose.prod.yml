@@ -54,6 +54,8 @@ services:
             BURAS_INGEST_TOKEN: ${BURAS_INGEST_TOKEN:-}
         command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
         user: "www-data"
+        volumes:
+            - api_storage_prod:/var/www/html/storage
         depends_on:
             db:
                 condition: service_healthy
