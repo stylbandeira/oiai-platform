@@ -2,6 +2,13 @@
 
 Todas as alterações relevantes do frontend são registradas neste arquivo.
 
+## [3.4.2](https://github.com/stylbandeira/oiai-platform/compare/web-v3.4.1...web-v3.4.2) (2026-11-07)
+
+
+### Bug Fixes
+
+* correct product image problem ([180298b](https://github.com/stylbandeira/oiai-platform/commit/180298b55cb6186ce59389e7e6e952d0898b0ecf))
+
 ## [3.4.1](https://github.com/stylbandeira/oiai-platform/compare/web-v3.4.0...web-v3.4.1) (2026-11-06)
 
 
