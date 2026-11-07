@@ -63,6 +63,20 @@ const defaultCounts: ProductCounts = {
   invalidos: 0,
 };
 
+function ProductImage({ src, alt, iconClassName }: { src: string | null; alt: string; iconClassName: string }) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+
+  if (!src || failedSrc === src) {
+    return (
+      <div className="w-full h-full flex items-center justify-center" role="img" aria-label={`Sem imagem para ${alt}`}>
+        <ImageIcon className={iconClassName} aria-hidden="true" />
+      </div>
+    );
+  }
+
+  return <img src={src} alt={alt} className="w-full h-full object-cover" loading="lazy" onError={() => setFailedSrc(src)} />;
+}
+
 export default function ManageProducts() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
@@ -237,8 +251,11 @@ export default function ManageProducts() {
 
   const getImageUrl = (img: string | null | undefined) => {
     if (!img) return null;
-    if (img.startsWith('http')) return img;
-    return `${import.meta.env.VITE_API_URL}/storage/${img}`;
+    if (/^https?:\/\//i.test(img) || img.startsWith('data:') || img.startsWith('blob:')) return img;
+
+    const apiUrl = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+    const path = img.replace(/^\/?storage\//, '').replace(/^\//, '');
+    return `${apiUrl}/storage/${path}`;
   };
 
   const statusLabel = (product: Product) => {
@@ -380,20 +397,7 @@ export default function ManageProducts() {
                       </td>
                       <td className="py-3">
                         <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-100 border">
-                          {product.img ? (
-                            <img
-                              src={getImageUrl(product.img) || ''}
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/placeholder-image.png';
-                              }}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ImageIcon className="w-6 h-6 text-gray-400" />
-                            </div>
-                          )}
+                          <ProductImage src={getImageUrl(product.img)} alt={product.name} iconClassName="w-6 h-6 text-gray-400" />
                         </div>
                       </td>
                       <td className="py-3">
@@ -477,20 +481,7 @@ export default function ManageProducts() {
                 <div className="flex items-start gap-3">
                   {/* Imagem */}
                   <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 border flex-shrink-0">
-                    {product.img ? (
-                      <img
-                        src={getImageUrl(product.img) || ''}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder-image.png';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ImageIcon className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
+                    <ProductImage src={getImageUrl(product.img)} alt={product.name} iconClassName="w-8 h-8 text-gray-400" />
                   </div>
 
                   {/* Informações */}
@@ -621,17 +612,7 @@ export default function ManageProducts() {
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <div className="w-20 h-20 rounded-md overflow-hidden bg-gray-100 border flex-shrink-0">
-                  {selectedProductDetail.img ? (
-                    <img
-                      src={getImageUrl(selectedProductDetail.img) || ''}
-                      alt={selectedProductDetail.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="w-10 h-10 text-gray-400" />
-                    </div>
-                  )}
+                  <ProductImage src={getImageUrl(selectedProductDetail.img)} alt={selectedProductDetail.name} iconClassName="w-10 h-10 text-gray-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-bold truncate">{selectedProductDetail.name}</h3>

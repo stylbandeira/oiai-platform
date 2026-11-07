@@ -145,7 +145,7 @@ Não compartilhe os valores desses arquivos em logs ou chamados. A stack de
 produção está em `docker-compose.prod.yml`: MySQL e Meilisearch não publicam
 portas no host; API e Web escutam somente em `127.0.0.1:8001` e
 `127.0.0.1:3000` (ou na porta definida por `WEB_PORT`). Os dados do MySQL,
-Meilisearch e armazenamento Laravel ficam em volumes nomeados do Docker. O Buras usa um volume próprio quando ativado.
+Meilisearch e armazenamento Laravel ficam em volumes nomeados do Docker. O Buras usa um volume próprio quando ativado. Os containers `app`, `queue` e `api-web` compartilham `api_storage_prod`; `api-web` monta esse volume somente para leitura. No primeiro deploy após a correção do storage da fila, o script copia imagens de produtos que ainda estejam no filesystem do container `queue` antigo para o volume antes de recriá-lo. Ele interrompe a fila durante essa cópia. Imagens de um container antigo já removido não podem ser recuperadas por esse procedimento.
 
 O primeiro deploy, a partir da raiz do clone, pode ser feito assim:
 
