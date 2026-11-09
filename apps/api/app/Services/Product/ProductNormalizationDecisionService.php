@@ -48,14 +48,22 @@ final class ProductNormalizationDecisionService
             );
         }
 
+        if ($product->name_normalization_validated_at !== null) {
+            unset($values['normalized_name'], $values['search_description']);
+        }
+        if ($product->quantity_normalization_validated_at !== null) {
+            unset($values['normalized_quantity'], $values['quantity_dimension']);
+        }
+        if ($values === []) {
+            return false;
+        }
+
         $this->applyQuantityAndUnity($product, $values);
         $this->applyName($product, $values);
 
-        if ($values !== []) {
-            $product->forceFill($values)->saveQuietly();
-            $this->markValidatedSteps($product, $values);
-            $this->syncOverallValidation($product);
-        }
+        $product->forceFill($values)->saveQuietly();
+        $this->markValidatedSteps($product, $values);
+        $this->syncOverallValidation($product);
 
         return true;
     }
@@ -186,14 +194,17 @@ final class ProductNormalizationDecisionService
             $normalizedName,
         ));
 
-        $product->forceFill([
+        $updates = [
             'normalized_quantity' => $values['normalized_quantity'],
             'quantity' => $quantity,
             'quantity_dimension' => $unity instanceof Unity ? $unity->dimension : $dimension,
             'unit_id' => $unity instanceof Unity ? $unity->getKey() : $product->unit_id,
-            'name' => $normalizedName,
-            'normalized_name' => $normalizedName,
-        ])->saveQuietly();
+        ];
+        if ($product->name_normalization_validated_at === null) {
+            $updates['name'] = $normalizedName;
+            $updates['normalized_name'] = $normalizedName;
+        }
+        $product->forceFill($updates)->saveQuietly();
 
         IndexProductJob::dispatch((int) $product->getKey());
     }
