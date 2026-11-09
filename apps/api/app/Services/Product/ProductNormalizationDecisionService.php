@@ -61,11 +61,9 @@ final class ProductNormalizationDecisionService
         $this->applyQuantityAndUnity($product, $values);
         $this->applyName($product, $values);
 
-        if ($values !== []) {
-            $product->forceFill($values)->saveQuietly();
-            $this->markValidatedSteps($product, $values);
-            $this->syncOverallValidation($product);
-        }
+        $product->forceFill($values)->saveQuietly();
+        $this->markValidatedSteps($product, $values);
+        $this->syncOverallValidation($product);
 
         return true;
     }
