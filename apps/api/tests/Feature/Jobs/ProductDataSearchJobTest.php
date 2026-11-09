@@ -93,6 +93,74 @@ class ProductDataSearchJobTest extends TestCase
         );
     }
 
+    public function test_external_refinement_preserves_admin_approved_name_and_quantity_independently(): void
+    {
+        $nameApproved = Product::factory()->create([
+            'name' => 'Nome aprovado pelo admin',
+            'raw_name' => 'Nome original',
+            'validated' => true,
+            'ncm' => null,
+        ]);
+        $nameApproved->forceFill([
+            'normalized_name' => 'nome aprovado pelo admin',
+            'search_description' => 'nome aprovado pelo admin',
+            'name_normalization_validated_at' => now(),
+        ])->saveQuietly();
+        $quantityApproved = Product::factory()->create([
+            'name' => 'Nome anterior',
+            'validated' => true,
+            'ncm' => null,
+        ]);
+        $quantityApproved->forceFill([
+            'normalized_quantity' => '500 g',
+            'quantity_dimension' => 'mass',
+            'quantity_source' => ProductQuantitySource::AdminValidated,
+            'quantity_confidence' => 1.0,
+            'quantity_normalization_validated_at' => now(),
+        ])->saveQuietly();
+        $originalQuantity = $quantityApproved->quantity;
+        $originalUnitId = $quantityApproved->unit_id;
+        $result = [
+            'name' => 'Nome retornado pela OSCBR',
+            'raw_name' => 'Nome retornado pela OSCBR',
+            'normalized_name' => 'nome retornado pela oscbr',
+            'search_description' => 'nome retornado pela oscbr',
+            'normalized_quantity' => '1000 g',
+            'quantity_dimension' => 'mass',
+            'quantity_source' => ProductQuantitySource::DefaultExtraction->value,
+            'quantity_confidence' => ProductQuantitySource::DefaultExtraction->confidence(),
+            'ncm' => '17019900',
+            'refined' => ProductRefinementStatus::OscbrValidated->value,
+        ];
+
+        /** @var ProductDataService&Mockery\MockInterface $productDataService */
+        $productDataService = Mockery::mock(ProductDataService::class);
+        $productDataService->shouldReceive('startRun')->once();
+        $productDataService->shouldReceive('hasAvailableProvider')->twice()->andReturnTrue();
+        $productDataService->shouldReceive('maximumProductsPerRun')->once()->andReturn(2);
+        $productDataService->shouldReceive('getProductData')->twice()->andReturn($result);
+        /** @var ProductCategoryRepository&Mockery\MockInterface $categoryRepository */
+        $categoryRepository = Mockery::mock(ProductCategoryRepository::class);
+
+        (new ProductDataSearchJob)->handle($productDataService, $categoryRepository);
+
+        $this->assertSame('Nome aprovado pelo admin', $nameApproved->fresh()->name);
+        $this->assertSame('Nome original', $nameApproved->fresh()->raw_name);
+        $this->assertSame('nome aprovado pelo admin', $nameApproved->fresh()->normalized_name);
+        $this->assertSame('nome aprovado pelo admin', $nameApproved->fresh()->search_description);
+        $this->assertSame('1000 g', $nameApproved->fresh()->normalized_quantity);
+        $this->assertSame('17019900', $nameApproved->fresh()->ncm);
+
+        $this->assertSame('Nome retornado pela OSCBR', $quantityApproved->fresh()->name);
+        $this->assertSame('500 g', $quantityApproved->fresh()->normalized_quantity);
+        $this->assertSame('mass', $quantityApproved->fresh()->quantity_dimension);
+        $this->assertSame(ProductQuantitySource::AdminValidated, $quantityApproved->fresh()->quantity_source);
+        $this->assertSame(1.0, $quantityApproved->fresh()->quantity_confidence);
+        $this->assertSame((float) $originalQuantity, (float) $quantityApproved->fresh()->quantity);
+        $this->assertSame($originalUnitId, $quantityApproved->fresh()->unit_id);
+        $this->assertSame('17019900', $quantityApproved->fresh()->ncm);
+    }
+
     public function test_marks_product_as_not_found_after_all_providers_return_404(): void
     {
         $product = Product::factory()->create([

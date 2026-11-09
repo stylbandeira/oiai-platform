@@ -33,15 +33,19 @@ final class NormalizeProductJob implements ShouldQueue
             $reusedDecision = $decisions->applyConfirmedDecision($product, self::VERSION);
             $normalization = $normalizer->normalize($name, $product->normalized_quantity);
 
-            if (! $reusedDecision) {
-                $product->forceFill([
-                    'normalized_name' => $normalization->normalizedName,
-                    'normalized_quantity' => $normalization->normalizedQuantity,
-                    'quantity_dimension' => $normalization->quantityDimension ?? $product->quantity_dimension,
-                    'package_count' => $normalization->packageCount,
-                    'normalization_conflict' => $normalization->hasConflict,
-                    'search_description' => trim((string) ($product->search_description ?: $product->description)),
-                ])->saveQuietly();
+            $updates = [];
+            if (! $reusedDecision && $product->name_normalization_validated_at === null) {
+                $updates['normalized_name'] = $normalization->normalizedName;
+                $updates['search_description'] = trim((string) ($product->search_description ?: $product->description));
+            }
+            if (! $reusedDecision && $product->quantity_normalization_validated_at === null) {
+                $updates['normalized_quantity'] = $normalization->normalizedQuantity;
+                $updates['quantity_dimension'] = $normalization->quantityDimension ?? $product->quantity_dimension;
+                $updates['package_count'] = $normalization->packageCount;
+                $updates['normalization_conflict'] = $normalization->hasConflict;
+            }
+            if ($updates !== []) {
+                $product->forceFill($updates)->saveQuietly();
             }
 
             $product->forceFill([

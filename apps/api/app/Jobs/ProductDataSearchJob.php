@@ -121,6 +121,9 @@ class ProductDataSearchJob implements ShouldQueue
 
             $product->img = $img !== '' ? $img : $product->img;
 
+            $nameApproved = $product->name_normalization_validated_at !== null;
+            $quantityApproved = $product->quantity_normalization_validated_at !== null;
+
             foreach ([
                 'name',
                 'raw_name',
@@ -129,7 +132,8 @@ class ProductDataSearchJob implements ShouldQueue
                 'ncm',
             ] as $field) {
                 if (
-                    array_key_exists($field, $productData)
+                    ($field === 'ncm' || ! $nameApproved)
+                    && array_key_exists($field, $productData)
                     && (! $isCosmosSupplement || blank($product->{$field}))
                 ) {
                     $product->{$field} = $productData[$field];
@@ -137,7 +141,8 @@ class ProductDataSearchJob implements ShouldQueue
             }
 
             if (
-                array_key_exists('normalized_quantity', $productData)
+                ! $quantityApproved
+                && array_key_exists('normalized_quantity', $productData)
                 && (! $isCosmosSupplement || blank($product->normalized_quantity))
             ) {
                 foreach ([
