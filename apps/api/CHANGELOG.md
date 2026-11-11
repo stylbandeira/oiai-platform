@@ -2,6 +2,14 @@
 
 Todas as alterações relevantes da API são registradas neste arquivo.
 
+## [3.4.3](https://github.com/stylbandeira/oiai-platform/compare/api-v3.4.2...api-v3.4.3) (2026-11-09)
+
+
+### Bug Fixes
+
+* don't allow product data search to overwrite normalization decis… ([94bebd2](https://github.com/stylbandeira/oiai-platform/commit/94bebd2a6afafaf4713e73f4924640568df5ba44))
+* don't allow product data search to overwrite normalization decisions ([b3ab880](https://github.com/stylbandeira/oiai-platform/commit/b3ab880b16e62d329a80fdc0a0594f82cd8b518b))
+
 ## [3.4.2](https://github.com/stylbandeira/oiai-platform/compare/api-v3.4.1...api-v3.4.2) (2026-11-06)
 
 
