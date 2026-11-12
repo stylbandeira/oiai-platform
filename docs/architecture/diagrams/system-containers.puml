@@ -1,0 +1,45 @@
+@startuml system-containers
+!include <C4/C4_Container>
+
+title Oiaí — containers e integrações confirmadas no repositório
+LAYOUT_LEFT_RIGHT()
+
+Person(user, "Pessoa usuária", "Usa a aplicação para consultar preços e gerir listas")
+Person(admin, "Administrador", "Acessa funções administrativas protegidas")
+
+System_Boundary(oiai, "Plataforma Oiaí") {
+  Container(web, "Web", "React / TypeScript", "SPA; cliente HTTP para a API")
+  Container(api, "API", "Laravel / PHP", "Rotas HTTP, autenticação Sanctum e regras de negócio")
+  Container(worker, "Queue worker", "Laravel queue:work", "Executa jobs enfileirados")
+  Container(scheduler, "Scheduler", "Laravel schedule:work", "Agenda processamento de notas, preços, geocodificação e enriquecimento")
+  ContainerDb(mysql, "MySQL", "MySQL 5.7 local / 8.0 produção", "Persistência transacional; pode também armazenar jobs quando QUEUE_CONNECTION=database")
+  Container(search, "Busca de produtos", "Meilisearch", "Índice derivado quando SCOUT_DRIVER=meilisearch")
+
+  System_Boundary(buras, "Perfil opcional: buras") {
+    Container(burasApi, "Buras", "Go / HTTP", "Recebe telemetria sanitizada; API e painel")
+    ContainerDb(sqlite, "Buras store", "SQLite", "Eventos, checagens e alertas em volume persistente")
+  }
+}
+
+System_Ext(productData, "OSCBR / Cosmos", "Enriquecimento de catálogo, se habilitado")
+System_Ext(sefaz, "Portais SEFAZ NFC-e", "Consulta de notas suportada para PE, SC e SP")
+System_Ext(nominatim, "Nominatim / OpenStreetMap", "Geocodificação de endereço")
+
+Rel(user, web, "Usa", "HTTPS")
+Rel(admin, web, "Usa funções administrativas", "HTTPS")
+Rel(web, api, "Consome rotas HTTP/JSON", "Sanctum")
+Rel(api, mysql, "Lê e grava")
+Rel(api, search, "Busca e atualiza índice", "Scout; configurável")
+Rel(api, worker, "Despacha jobs; processamento depende da conexão de fila")
+Rel(worker, mysql, "Lê/grava domínio; consulta jobs se fila database")
+Rel(scheduler, mysql, "Lê/grava domínio e despacha jobs")
+Rel(scheduler, worker, "Agenda trabalho na conexão de fila configurada")
+Rel(worker, burasApi, "Envia eventos sanitizados", "job assíncrono; perfil opcional")
+Rel(burasApi, sqlite, "Persiste eventos, checagens e alertas")
+Rel(api, productData, "Consulta dados de produto", "quando habilitado")
+Rel(worker, productData, "Jobs de enriquecimento", "quando habilitado")
+Rel(worker, sefaz, "Consulta QR Code/XML de NFC-e")
+Rel(worker, nominatim, "Geocodifica endereços")
+
+SHOW_LEGEND()
+@enduml
