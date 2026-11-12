@@ -1,0 +1,76 @@
+@startuml product-list-flow
+title Product search and shopping list creation
+autonumber
+
+actor "User" as User
+participant "Web React\nNewShoppingList" as Web
+participant "API Laravel\nProductController" as API
+participant "IndexProductAction" as IndexAction
+participant "ProductRepository" as ProductRepo
+participant "MeilisearchProductSearch" as Search
+database "MySQL" as MySQL
+participant "ListController / StoreListAction" as ListAPI
+participant "ListRepository" as ListRepo
+
+== Search from the new list page ==
+User -> Web: Enters a search term
+Web -> Web: Waits 500 ms, then calls fetchProducts
+alt Search HTTP/network request fails
+  Web -> API: GET /api/products?search={term}&page=1\nAuthorization: Bearer token
+  API --> Web: HTTP error or network failure
+  Web -> Web: fetchProducts catches error and sets productsError
+  Web --> User: “Could not load products. Please try again.”
+else Search succeeds
+  Web -> API: GET /api/products?search={term}&page=1\nAuthorization: Bearer token
+  API -> IndexAction: index(validated request)
+  IndexAction -> ProductRepo: paginate(user, filters)
+  ProductRepo -> Search: search(ProductSearchCriteria)
+  alt Meilisearch is available
+    Search -> Search: Runs text search and returns ordered IDs
+  else Meilisearch fails
+    Search -> MySQL: MySqlProductSearch.search(criteria)
+    MySQL --> Search: Ranked IDs; fallbackUsed=true
+  end
+  ProductRepo -> MySQL: Loads validated products, relations, and page\nfilters by search IDs
+  MySQL --> ProductRepo: Products and pagination
+  ProductRepo --> IndexAction: Product page
+  opt search term is not empty
+    IndexAction -> MySQL: Inserts SearchLog (term, engine, duration, fallback)
+    MySQL --> IndexAction: Search log persisted
+  end
+  IndexAction --> API: Paginated products
+  API --> Web: 200 JSON: data, meta\nClientProductResource includes name and average_price
+  Web --> User: Displays products and prices for selection
+
+  User -> Web: Selects products and enters a list name
+  Web -> Web: Keeps selections locally; validates name and items
+  Web -> ListAPI: POST /api/lists\n{name, products:[{product:{id}, quantity}]}\nAuthorization: Bearer token
+  ListAPI -> ListAPI: ListStoreRequest validates name, items, and existing IDs
+  alt Invalid data / product no longer exists
+    ListAPI --> Web: 422 JSON with message and errors
+    Web -> Web: saveList catches error; does not navigate to /
+    note right of Web
+      Current code logs the error to the console;
+      this page does not show a dedicated error message.
+    end note
+  else Data is valid
+    ListAPI -> ListRepo: DB::transaction: createForUser(user, data)
+    ListRepo -> MySQL: INSERT list (user_id, name, total=0)
+    MySQL --> ListRepo: List created
+    ListAPI -> ListRepo: attachProducts(list, IDs and quantities)
+    ListRepo -> MySQL: INSERT list-product relations
+    MySQL --> ListRepo: Relations persisted
+    ListAPI -> ProductRepo: incrementListAdded(product IDs)
+    ProductRepo -> MySQL: Increments listAdded for products
+    MySQL --> ProductRepo: Update completed
+    ListAPI --> Web: 200 JSON: “List created successfully!” + ClientListResource
+    Web -> Web: navigate("/")
+    Web --> User: Returns to the home page after saving
+  end
+end
+
+note over Search,MySQL
+  Meilisearch is an optional search index; failures fall back to MySQL.
+  The list and its relations are written to MySQL in a transaction.
+end note
+@enduml

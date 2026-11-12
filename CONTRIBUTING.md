@@ -85,6 +85,18 @@ npm test --if-present
 npm run build
 ```
 
+### Architecture diagrams
+
+```bash
+scripts/check-architecture-diagrams.sh
+```
+
+When a change affects architecture, update the relevant `.puml` sources and
+their versioned SVGs in the same PR. Review the rendered diagrams visually and
+explain any affected diagram that did not need a visual change. See the
+[architecture index](docs/architecture/overview.md) and
+[diagram workflow](docs/architecture/diagrams/README.md).
+
 ## CI behavior
 
 O CI é separado por aplicação:
@@ -92,6 +104,7 @@ O CI é separado por aplicação:
 - alterações em `apps/api/**` executam o CI da API;
 - alterações em `apps/web/**` executam o CI Web;
 - alterações em `apps/buras/**` executam o CI Buras;
+- alterações em código de aplicação ou diagramas executam o CI de arquitetura;
 - `docker/**`, `docker-compose*.yml`, `docs/openapi.yaml` e workflows podem executar mais de um pipeline;
 - `CI Gate / CI Gate result` é o check global recomendado para proteção da branch.
 

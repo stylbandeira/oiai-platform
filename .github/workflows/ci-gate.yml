@@ -43,10 +43,14 @@ jobs:
   changes:
     name: Detect impacted applications
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
       api: ${{ steps.filter.outputs.api }}
       web: ${{ steps.filter.outputs.web }}
       buras: ${{ steps.filter.outputs.buras }}
+      architecture: ${{ steps.filter.outputs.architecture }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -85,6 +89,16 @@ jobs:
               - '.github/workflows/ci-gate.yml'
               - 'release-please-config.json'
               - '.release-please-manifest.json'
+            architecture:
+              - 'apps/api/**'
+              - 'apps/web/**'
+              - 'apps/buras/**'
+              - 'docker/**'
+              - 'docker-compose.yml'
+              - 'docker-compose.prod.yml'
+              - 'docs/architecture/**'
+              - 'scripts/check-architecture-diagrams.sh'
+              - '.github/workflows/**'
 
   api:
     name: Required API CI
@@ -107,10 +121,42 @@ jobs:
     uses: ./.github/workflows/ci-buras.yml
     secrets: inherit
 
+  architecture:
+    name: Required architecture diagrams CI
+    needs: changes
+    if: needs.changes.outputs.architecture == 'true'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Install Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y graphviz
+
+      - name: Download PlantUML
+        env:
+          PLANTUML_VERSION: 1.2025.2
+        run: |
+          mkdir -p "$RUNNER_TEMP/plantuml"
+          curl -fL "https://github.com/plantuml/plantuml/releases/download/v${PLANTUML_VERSION}/plantuml-${PLANTUML_VERSION}.jar" \
+            -o "$RUNNER_TEMP/plantuml/plantuml-${PLANTUML_VERSION}.jar"
+          echo "PLANTUML_JAR=$RUNNER_TEMP/plantuml/plantuml-${PLANTUML_VERSION}.jar" >> "$GITHUB_ENV"
+
+      - name: Render and verify every architecture diagram
+        run: scripts/check-architecture-diagrams.sh
+
   result:
     name: CI Gate result
     if: always()
-    needs: [changes, api, web, buras]
+    needs: [changes, api, web, buras, architecture]
     runs-on: ubuntu-latest
     steps:
       - name: Validate required pipelines
@@ -119,9 +165,11 @@ jobs:
           API_NEEDED: ${{ needs.changes.outputs.api }}
           WEB_NEEDED: ${{ needs.changes.outputs.web }}
           BURAS_NEEDED: ${{ needs.changes.outputs.buras }}
+          ARCHITECTURE_NEEDED: ${{ needs.changes.outputs.architecture }}
           API_RESULT: ${{ needs.api.result }}
           WEB_RESULT: ${{ needs.web.result }}
           BURAS_RESULT: ${{ needs.buras.result }}
+          ARCHITECTURE_RESULT: ${{ needs.architecture.result }}
         run: |
           if [ "$CHANGES_RESULT" != "success" ]; then
             echo "Change detection failed."
@@ -137,6 +185,10 @@ jobs:
           fi
           if [ "$BURAS_NEEDED" = "true" ] && [ "$BURAS_RESULT" != "success" ]; then
             echo "Required Buras CI did not pass ($BURAS_RESULT)."
+            exit 1
+          fi
+          if [ "$ARCHITECTURE_NEEDED" = "true" ] && [ "$ARCHITECTURE_RESULT" != "success" ]; then
+            echo "Required architecture diagrams CI did not pass ($ARCHITECTURE_RESULT)."
             exit 1
           fi
           echo "All required CI pipelines passed or were not needed."

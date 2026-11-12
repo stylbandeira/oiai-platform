@@ -2,18 +2,90 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\NormalizeProductJob;
 use App\Models\Product;
 use App\Models\ProductNormalizationDecision;
 use App\Models\ProductReviewSuggestion;
 use App\Models\Unity;
 use App\Models\User;
+use App\Services\Product\ProductNameNormalizer;
 use App\Services\Product\ProductNormalizationDecisionService;
+use App\Services\Product\ProductOperationMonitor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ProductNormalizationDecisionTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_delayed_normalization_preserves_admin_approved_name_and_quantity(): void
+    {
+        $product = Product::factory()->create(['raw_name' => 'PRODUTO EXTERNO 1KG']);
+        $product->forceFill([
+            'name' => 'Nome aprovado',
+            'normalized_name' => 'Nome aprovado',
+            'search_description' => 'Nome aprovado',
+            'normalized_quantity' => '500 g',
+            'quantity_dimension' => 'mass',
+            'name_normalization_validated_at' => now(),
+            'quantity_normalization_validated_at' => now(),
+            'normalization_version' => 0,
+        ])->saveQuietly();
+
+        (new NormalizeProductJob($product->id))->handle(
+            app(ProductNormalizationDecisionService::class),
+            app(ProductNameNormalizer::class),
+            app(ProductOperationMonitor::class),
+        );
+
+        $product->refresh();
+        $this->assertSame('Nome aprovado', $product->name);
+        $this->assertSame('Nome aprovado', $product->normalized_name);
+        $this->assertSame('Nome aprovado', $product->search_description);
+        $this->assertSame('500 g', $product->normalized_quantity);
+        $this->assertSame('mass', $product->quantity_dimension);
+        $this->assertSame(NormalizeProductJob::VERSION, $product->normalization_version);
+    }
+
+    public function test_reused_decision_cannot_replace_an_approved_name(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $product = Product::factory()->create(['raw_name' => 'PRODUTO EXTERNO 1KG']);
+        $product->forceFill([
+            'name' => 'Nome aprovado',
+            'normalized_name' => 'Nome aprovado',
+            'name_normalization_validated_at' => now(),
+        ])->saveQuietly();
+        $service = app(ProductNormalizationDecisionService::class);
+        ProductNormalizationDecision::create([
+            'product_id' => $product->id,
+            'raw_name' => 'PRODUTO EXTERNO 1KG',
+            'normalized_raw_name' => $service->normalizedKey('PRODUTO EXTERNO 1KG'),
+            'selected_values' => [
+                'normalized_name' => 'Nome de outra decisão',
+                'normalized_quantity' => '1000 g',
+                'quantity_dimension' => 'g',
+            ],
+            'decision_source' => 'manual',
+            'algorithm_version' => 2,
+            'confidence' => 0.9,
+            'confirmation_count' => 3,
+            'reviewed_by' => $admin->id,
+        ]);
+
+        $product->forceFill(['normalization_version' => 0])->saveQuietly();
+        (new NormalizeProductJob($product->id))->handle(
+            $service,
+            app(ProductNameNormalizer::class),
+            app(ProductOperationMonitor::class),
+        );
+
+        $product->refresh();
+        $this->assertSame('Nome aprovado', $product->name);
+        $this->assertSame('Nome aprovado', $product->normalized_name);
+        $this->assertSame('1000 g', $product->normalized_quantity);
+        $this->assertNotNull($product->quantity_normalization_validated_at);
+    }
 
     public function test_client_suggestion_waits_for_admin_without_changing_product(): void
     {

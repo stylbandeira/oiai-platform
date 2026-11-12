@@ -33,6 +33,7 @@ npm run check:api
 ```
 
 Execute localmente os comandos descritos na seção [Local checks](../CONTRIBUTING.md#local-checks).
+Para alterações arquiteturais, consulte [Architecture diagrams](../CONTRIBUTING.md#architecture-diagrams), atualize os diagramas afetados e registre no PR quais diagramas mudaram ou por que não houve mudança visual.
 
 ## 3. Commit
 
