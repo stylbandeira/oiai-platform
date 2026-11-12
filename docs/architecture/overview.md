@@ -1,14 +1,117 @@
 # Visão geral da arquitetura
 
-Oiaí é um monorepo composto por API Laravel, Web React/TypeScript e Buras Go/SQLite.
+## Contexto do sistema
 
-```text
-Web SPA ── HTTP/JSON + Sanctum ──> API Laravel ──> MySQL
-                                      ├─ Meilisearch
-                                      ├─ Queue/Scheduler
-                                      ├─ provedores de NFC-e e APIs externas
-                                      └─ Buras API → SQLite (telemetria)
-```
+![Diagrama de contexto do Óiaí](context.svg)
+
+O diagrama mostra os perfis e sistemas vizinhos sem expor componentes de
+implementação. O ator administrador é sustentado pelo middleware `role:admin`
+nas rotas administrativas. Representantes de empresas usam as rotas como
+usuários autenticados comuns e não formam um papel de autenticação separado.
+
+OSCBR, Cosmos, portais SEFAZ e Nominatim têm clientes ativos no código; o uso
+dos provedores de produto depende de credenciais e configuração. O transporte
+de e-mail é configurável e a identidade do provedor depende do ambiente. Buras
+é um serviço companheiro implementado no monorepo, ativado opcionalmente pelo
+perfil Compose, não um fornecedor terceiro.
+
+O webhook de alertas do Buras não aparece como integração atual: sua URL é
+configurável e vazia por padrão. Redis, AWS/S3, Meilisearch, MySQL, Web, API,
+worker e scheduler também não aparecem nesta visão; são infraestrutura,
+contêineres ou opções de configuração documentadas na visão abaixo ou nos ADRs.
+Não há no código atual evidência de outros provedores de dados ou regiões NFC-e
+além dos indicados no diagrama.
+
+Fonte: [context.puml](context.puml). Perfis e integrações são rastreáveis em
+`apps/api/routes/api.php`, `apps/api/app/Http/Middleware/EnsureUserHasRole.php`,
+`apps/api/app/Services/Product/Providers/`, `apps/api/app/Services/NFCe/`,
+`apps/api/app/Services/Geolocation/GeolocationService.php`,
+`apps/api/app/Notifications/`, `apps/api/config/services.php` e
+`apps/api/.env.example`; a relação opcional com Buras está em
+`apps/api/app/Services/BurasReporter.php`, `apps/buras/README.md` e
+`docker-compose.yml`.
+
+## Visão de contêineres C4
+
+![Diagrama de contêineres C4 do Óiaí](containers.svg)
+
+O fonte editável está em [containers.puml](containers.puml). Nesta visão, um
+contêiner C4 é uma parte executável ou um armazenamento lógico, não um
+container/imagem Docker. `API`, `Queue worker` e `Scheduler` são processos
+separados que executam o mesmo código Laravel (`apps/api`) com comandos
+diferentes; não são microsserviços independentes.
+
+O diagrama combina os ambientes com diferenças materiais anotadas: MySQL 5.7
+local e 8.0 em produção, Vite local e Nginx para servir o build Web em produção,
+Artisan local e PHP-FPM/Nginx para a API em produção. MySQL guarda a fila quando
+`QUEUE_CONNECTION=database`; com `sync`, jobs executam no processo chamador. O
+Compose local inclui MailHog, mas a API só o usa se `MAIL_HOST` apontar para ele;
+em produção o mailer é configurado no ambiente. phpMyAdmin é ferramenta local
+de administração do banco, omitida do fluxo lógico da aplicação.
+
+As relações com OSCBR, Cosmos, portais SEFAZ e Nominatim já estão detalhadas na
+visão de contexto; não são repetidas nesta visão para manter o foco nos
+processos e armazenamentos executáveis. Meilisearch, MySQL, fila Laravel, e-mail
+e Buras são mostrados aqui conforme sua execução/configuração nos Compose e nos
+arquivos de ambiente.
+
+Buras aparece como sistema companheiro independente e opcional, conforme seu
+perfil Compose e ciclo de release separados. Veja [diagramas como código](diagrams/README.md)
+para convenções e geração local.
+
+## Componentes da API
+
+![Diagrama de componentes da API Óiaí](components-api.svg)
+
+O fonte editável está em [components-api.puml](components-api.puml). A visão
+agrupa rotas/adaptadores e responsabilidades visíveis em Actions e Services;
+os grupos são conveniências para localizar mudanças, não bounded contexts nem
+serviços independentes. Controllers e policies aplicam autenticação e
+autorização antes de delegar às Actions. Há dependências cruzadas: listas
+consultam catálogo/ofertas, e jobs de NFC-e criam ou atualizam empresas,
+produtos e ofertas.
+
+| Componente | Evidência principal |
+| --- | --- |
+| Rotas e adaptadores HTTP | `apps/api/routes/api.php`; `apps/api/app/Http/Controllers/`; `apps/api/app/Http/Requests/`; `apps/api/app/Policies/`; `apps/api/app/Http/Resources/` |
+| Autenticação e contas | `apps/api/app/Actions/Auth/`; `apps/api/app/Actions/User/`; `apps/api/app/Services/Auth/AuthAuditLogger.php`; `apps/api/config/sanctum.php`; `apps/api/app/Notifications/` |
+| Catálogo e busca de produtos | `apps/api/app/Actions/Product/`; `apps/api/app/Services/Product/`; `apps/api/app/Observers/ProductObserver.php`; `apps/api/app/Jobs/NormalizeProductJob.php`; `apps/api/app/Jobs/IndexProductJob.php` |
+| Listas e otimização | `apps/api/app/Actions/List/`; `apps/api/app/Actions/ListItens/`; `apps/api/app/Services/Product/GreedyProductCombinationOptimizer.php`; `apps/api/app/Services/Geolocation/GeolocationService.php` |
+| Empresas e representantes | `apps/api/app/Actions/Company/`; `apps/api/app/Actions/CompanyOwners/`; `apps/api/app/Services/CompanyOwners/CompanyOwnerService.php`; `apps/api/app/Policies/CompanyOwnersPolicy.php` |
+| Importação de NFC-e | `apps/api/app/Actions/Invoice/`; `apps/api/app/Services/Invoice/InvoiceService.php`; `apps/api/app/Services/NFCeScraperService.php`; `apps/api/app/Services/NFCeXMLParserService.php`; `apps/api/app/Services/NFCe/` |
+| Dashboards e eventos | `apps/api/app/Services/DashboardService.php`; `apps/api/app/Actions/Event/`; `apps/api/app/Http/Controllers/AdminController.php`; `apps/api/app/Http/Controllers/AdminBurasDashboardController.php` |
+| Jobs e agendamentos | `apps/api/app/Jobs/`; `apps/api/app/Console/Kernel.php`; `apps/api/app/Observers/ProductObserver.php` |
+| Telemetria Buras | `apps/api/app/Services/BurasReporter.php`; `apps/api/app/Jobs/Telemetry/SendBurasEvent.php`; `apps/api/app/Http/Controllers/AdminBurasDashboardController.php` |
+
+Meilisearch é um índice derivado e opcional; a busca possui fallback MySQL. Os
+provedores OSCBR/Cosmos dependem de configuração. NFC-e consulta portais dos
+estados implementados (PE, SC e SP). O uso de e-mail depende do mailer por
+ambiente. Buras é opcional. O processamento de geocodificação pertence ao
+fluxo de jobs; a otimização de listas calcula distância localmente usando
+coordenadas já armazenadas.
+
+## Product list flow
+
+![Sequence diagram for product search and shopping list creation](product-list-flow.svg)
+
+The source is [product-list-flow.puml](product-list-flow.puml). The flow follows
+`NewShoppingList`: paginated search after a 500 ms delay, selections held in Web
+state, then authenticated list creation. Search uses Meilisearch when available
+and falls back to MySQL on failure; the list, its items, and the `listAdded`
+counter update are written to MySQL in a transaction. Search request failures
+show the page's error message. Save failures are currently logged to the console
+without a dedicated user-facing message.
+
+Traceable in `apps/web/src/pages/client/NewShoppingList.tsx`,
+`apps/web/src/lib/api.ts`, `apps/api/routes/api.php`,
+`apps/api/app/Http/Controllers/ProductController.php`,
+`apps/api/app/Actions/Product/IndexProductAction.php`,
+`apps/api/app/Repositories/ProductRepository.php`,
+`apps/api/app/Services/Product/MeilisearchProductSearch.php`,
+`apps/api/app/Services/Product/MySqlProductSearch.php`,
+`apps/api/app/Http/Requests/List/ListStoreRequest.php`,
+`apps/api/app/Actions/List/StoreListAction.php` e
+`apps/api/app/Repositories/ListRepository.php`.
 
 ## Responsabilidades
 
@@ -20,6 +123,43 @@ Web SPA ── HTTP/JSON + Sanctum ──> API Laravel ──> MySQL
 - **Buras**: eventos sanitizados, checagens, painel e alertas de integrações.
 
 O índice de busca pode ser apagado e reconstruído a partir do MySQL. Ele não substitui o banco transacional.
+
+## Inventário baseado no repositório
+
+Os elementos abaixo estão presentes no código ou nas configurações atuais. A
+presença de um serviço no Compose não significa que ele seja obrigatório em
+todos os ambientes; itens opcionais e configurações dependentes do ambiente
+estão identificados.
+
+| Elemento | Estado e papel | Evidência no repositório |
+| --- | --- | --- |
+| Pessoa usuária e administrador | Atores inferidos pelas rotas públicas de registro/login e pelo grupo administrativo protegido por Sanctum e role | `apps/api/routes/api.php`, `apps/api/app/Http/Controllers/AdminBurasDashboardController.php` |
+| Web React/TypeScript | SPA servida pelo container `oiai-front` local e `web` em produção; cliente HTTP centralizado | `apps/web/package.json`, `apps/web/src/lib/api.ts`, `docker-compose.yml`, `docker-compose.prod.yml` |
+| API Laravel | Aplicação HTTP; rotas, autenticação, regras de domínio e health check | `apps/api/routes/api.php`, `apps/api/routes/web.php`, `apps/api/app/Http/Controllers/HealthController.php`, `docker-compose.yml` |
+| Worker Laravel | Container separado executando `php artisan queue:work` local e em produção; execução de jobs depende de `QUEUE_CONNECTION` | `docker-compose.yml`, `docker-compose.prod.yml`, `apps/api/config/queue.php`, `apps/api/.env.example` |
+| Scheduler Laravel | Container separado executando `php artisan schedule:work`; tarefas registradas no Kernel | `docker-compose.yml`, `docker-compose.prod.yml`, `apps/api/app/Console/Kernel.php` |
+| MySQL | Banco transacional persistido em volume; MySQL 5.7 local e 8.0 em produção | `apps/api/config/database.php`, `apps/api/.env.example`, `docker-compose.yml`, `docker-compose.prod.yml` |
+| Meilisearch | Serviço de busca textual; Scout pode usar o driver `database` por padrão na configuração, mas o `.env.example` e os Compose configuram Meilisearch | `apps/api/config/scout.php`, `apps/api/.env.example`, `apps/api/app/Services/Product/MeilisearchProductSearch.php`, `docker-compose.yml`, `docker-compose.prod.yml` |
+| Fila persistente | Exemplo local configura driver `database`; `config/queue.php` tem fallback `sync`. O storage efetivo é determinado por `QUEUE_CONNECTION` do ambiente | `apps/api/.env.example`, `apps/api/config/queue.php`, `apps/api/app/Console/Kernel.php` |
+| Mail/SMTP | Notificações Laravel dependem de mailer configurável; MailHog está apenas no Compose local, produção injeta configuração de ambiente | `apps/api/config/mail.php`, `apps/api/app/Notifications/VerifyEmailNotification.php`, `apps/api/app/Notifications/ResetPasswordNotification.php`, `docker-compose.yml` |
+| Buras | Serviço Go com API HTTP e SQLite em volume; perfil Compose opcional, recebe telemetria sanitizada da API | `apps/buras/README.md`, `apps/buras/internal/buras/store.go`, `apps/api/app/Services/BurasReporter.php`, `apps/api/app/Jobs/Telemetry/SendBurasEvent.php`, `docker-compose.yml`, `docker-compose.prod.yml` |
+| OSCBR e Cosmos | Provedores externos de enriquecimento de produtos, condicionados à configuração/ativação do fluxo | `apps/api/app/Services/Product/Providers/OscbrProductDataProvider.php`, `apps/api/app/Services/Product/Providers/CosmosProductDataProvider.php`, `apps/api/app/Jobs/ProductDataSearchJob.php`, `docs/architecture/external-services-and-telemetry.md` |
+| SEFAZ/NFC-e | Portais externos chamados pelos providers de Pernambuco, Santa Catarina e São Paulo | `apps/api/app/Services/NFCe/PernambucoNFCeProvider.php`, `apps/api/app/Services/NFCe/SantaCatarinaNFCeProvider.php`, `apps/api/app/Services/NFCe/SaoPauloNFCeProvider.php`, `apps/api/app/Jobs/ProcessInvoiceJob.php` |
+| Nominatim/OpenStreetMap | Geocodificação externa de endereços | `apps/api/app/Services/Geolocation/GeolocationService.php`, `apps/api/config/services.php`, `apps/api/app/Jobs/GeocodeScheduleJob.php` |
+| Webhook de alertas Buras | Integração opcional configurada por `BURAS_ALERT_WEBHOOK_URL`; ausência de URL não impede armazenar alertas | `apps/buras/README.md`, `apps/buras/internal/buras/config.go`, `apps/buras/internal/buras/worker.go` |
+
+### Fora do escopo implementado
+
+- Redis aparece como driver possível no Laravel, mas o Compose atual não sobe
+  Redis; não é uma dependência confirmada do deployment padrão.
+- AWS/S3, broadcasting Pusher e outros mailers aparecem como opções de
+  configuração Laravel, sem evidência de uso obrigatório no Compose atual.
+- Réplicas do Buras, armazenamento SQLite compartilhado entre hosts e um
+  serviço externo de monitoramento são possibilidades futuras descritas no
+  ADR 0005, não elementos implantados pelo Compose deste repositório.
+- Domínios, limites de confiança e integrações habilitadas em produção variam
+  com secrets/variáveis da VPS e não podem ser determinados apenas pelos arquivos
+  versionados.
 
 ## Documentos relacionados
 

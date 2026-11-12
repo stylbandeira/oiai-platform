@@ -1,0 +1,29 @@
+@startuml context
+!include <C4/C4_Context>
+
+title Óiaí — contexto do sistema
+LAYOUT_LEFT_RIGHT()
+
+Person(user, "Pessoa usuária", "Pesquisa preços, cria listas, consulta produtos, processa NFC-e e pode representar uma empresa")
+Person(admin, "Administrador", "Gerencia usuários, catálogo e empresas; acompanha observabilidade")
+
+System(oiai, "Óiaí", "Plataforma colaborativa para pesquisa de preços e organização de compras")
+
+System_Ext(oscbr, "OSCBR", "Consulta dados e valida produtos identificados por GTIN")
+System_Ext(cosmos, "Cosmos Bluesoft", "Consulta dados de produtos identificados por GTIN")
+System_Ext(sefaz, "Portais de consulta NFC-e", "Disponibilizam dados de notas fiscais para PE, SC e SP")
+System_Ext(nominatim, "Nominatim / OpenStreetMap", "Geocodifica endereços")
+System_Ext(mail, "Transporte de e-mail configurado", "Envia verificação de endereço e redefinição de senha")
+System_Ext(buras, "Buras (serviço companheiro opcional)", "Recebe eventos sanitizados de observabilidade")
+
+Rel(user, oiai, "Pesquisa preços, organiza listas e envia dados de NFC-e", "Web; HTTPS produção, HTTP local")
+Rel(admin, oiai, "Administra usuários, produtos e empresas", "Web; HTTPS produção, HTTP local")
+Rel(oiai, oscbr, "Enriquece e valida dados de produto; habilitado por ambiente e credenciais", "HTTPS / JSON")
+Rel(oiai, cosmos, "Enriquece dados de produto; habilitado por ambiente e token", "HTTPS / JSON")
+Rel(oiai, sefaz, "Consulta dados públicos de NFC-e a partir do QR Code", "HTTPS / HTML ou XML")
+Rel(oiai, nominatim, "Obtém coordenadas de endereços", "HTTPS / JSON")
+Rel(oiai, mail, "Envia mensagens de verificação e redefinição de senha", "Mailer configurado; SMTP no exemplo local")
+Rel(oiai, buras, "Envia telemetria sanitizada; serviço opcional", "HTTP / JSON")
+
+SHOW_LEGEND()
+@enduml

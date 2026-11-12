@@ -115,7 +115,7 @@ npm run check:api
 
 ## Continuous Integration
 
-`ci-api.yml` valida o Backend, `ci-web.yml` valida o Web e `ci-buras.yml` valida o Buras. Os filtros por caminho evitam pipelines desnecessários. Alterações em `docker/**`, `docker-compose.yml`, `docker-compose.prod.yml`, `docs/openapi.yaml` ou workflows podem afetar mais de uma aplicação. O `ci-gate.yml` detecta os componentes necessários e publica o check global `CI Gate / CI Gate result`, recomendado como obrigatório na proteção da branch.
+`ci-api.yml` valida o Backend, `ci-web.yml` valida o Web, `ci-buras.yml` valida o Buras e o CI de arquitetura renderiza todos os diagramas e verifica os SVGs versionados. Os filtros por caminho evitam pipelines desnecessários. Alterações em `docker/**`, `docker-compose.yml`, `docker-compose.prod.yml`, `docs/openapi.yaml` ou workflows podem afetar mais de uma aplicação. O `ci-gate.yml` detecta os componentes necessários e publica o check global `CI Gate / CI Gate result`, recomendado como obrigatório na proteção da branch.
 
 ## Environments
 
@@ -161,7 +161,8 @@ GitHub Releases é o registro oficial das versões publicadas. Cada release iden
 - [CI API](.github/workflows/ci-api.yml) · [CI Web](.github/workflows/ci-web.yml) · [CI Buras](.github/workflows/ci-buras.yml) · [CI Gate](.github/workflows/ci-gate.yml);
 - [GitHub Releases](https://github.com/stylbandeira/oiai-platform/releases).
 - [Guias de migração e breaking changes](docs/releases/README.md).
-- [Documentação arquitetural e ADRs](docs/architecture/overview.md).
+- [Índice de arquitetura, diagramas C4, fluxo de negócio e ADRs](docs/architecture/overview.md).
+- Os fontes `.puml` são a fonte de verdade dos diagramas; gere os SVGs e revise-os visualmente conforme o [fluxo de diagramas](docs/architecture/diagrams/README.md).
 - [Observabilidade e telemetria das integrações](docs/architecture/external-services-and-telemetry.md);
 - [Buras: uso, contrato e operação](apps/buras/README.md) · [OpenAPI do Buras](apps/buras/openapi.yaml) · [ADR](docs/architecture/decisions/0005-buras-observability.md).
 - [Fluxo de engenharia](docs/ENGINEERING_WORKFLOW.md).
