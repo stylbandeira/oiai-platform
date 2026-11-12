@@ -1,0 +1,64 @@
+@startuml componentes-api
+!include <C4/C4_Component>
+
+title Óiaí — componentes da API Laravel
+LAYOUT_LEFT_RIGHT()
+
+Person(user, "Pessoa usuária", "Usa produtos, listas, empresas e NFC-e")
+Person(admin, "Administrador", "Administra catálogo, usuários e operações")
+
+Container_Boundary(api, "API Laravel (apps/api; mesma base do worker e scheduler)") {
+  Component(http, "Rotas e adaptadores HTTP", "Laravel Routes / Controllers / Requests / Policies / Resources", "Autentica, valida, autoriza e traduz operações HTTP")
+  Component(accounts, "Autenticação e contas", "Actions/Auth, Actions/User, Sanctum", "Login, cadastro, perfil, endereços e notificações de conta")
+  Component(catalog, "Catálogo e busca de produtos", "Actions/Product; Services/Product", "Produtos, categorias, normalização, busca e ofertas de empresas")
+  Component(lists, "Listas e otimização", "Actions/List, Actions/ListItens", "Mantém listas e escolhe ofertas por preço e distância")
+  Component(companies, "Empresas e representantes", "Actions/Company, Actions/CompanyOwners", "Empresas, solicitações de acesso e vínculo com representantes")
+  Component(invoices, "Importação de NFC-e", "Actions/Invoice; Services/NFCe", "Consulta QR Code/SEFAZ, interpreta XML e registra notas pendentes")
+  Component(operations, "Dashboards e eventos", "DashboardService; Actions/Event; controllers administrativos", "Agrega métricas e registra eventos operacionais")
+  Component(jobs, "Jobs e agendamentos", "app/Jobs; app/Console/Kernel.php", "Processa notas, atualiza preços, geocodifica, indexa e enriquece produtos")
+  Component(telemetry, "Telemetria Buras", "BurasReporter; SendBurasEvent", "Envia eventos sanitizados e consulta painel companheiro quando configurado")
+}
+
+ContainerDb(mysql, "Banco transacional", "MySQL", "Dados de domínio e, se QUEUE_CONNECTION=database, fila Laravel")
+Container(search, "Busca textual", "Meilisearch (opcional por configuração)", "Índice derivado de produtos; busca tem fallback para MySQL")
+System_Ext(mail, "Transporte de e-mail", "Mailer configurado por ambiente")
+System_Ext(nominatim, "Nominatim / OpenStreetMap", "Geocodificação HTTP")
+System_Ext(productProviders, "Provedores de dados de produtos", "OSCBR e Cosmos; condicionados a configuração")
+System_Ext(sefaz, "Portais estaduais SEFAZ", "Consulta pública NFC-e para PE, SC e SP")
+System_Ext(buras, "Buras (opcional)", "API HTTP do sistema companheiro no monorepo")
+
+Rel(user, http, "Usa operações", "HTTP / JSON")
+Rel(admin, http, "Usa operações administrativas", "HTTP / JSON")
+Rel(http, accounts, "Encaminha autenticação e perfil")
+Rel(http, catalog, "Encaminha catálogo e busca")
+Rel(http, lists, "Encaminha listas e otimização")
+Rel(http, companies, "Encaminha empresas e acessos")
+Rel(http, invoices, "Encaminha importação de notas")
+Rel(http, operations, "Encaminha dashboards e eventos")
+
+Rel(accounts, mysql, "Lê e grava usuários e endereços", "Eloquent / SQL")
+Rel(accounts, mail, "Envia verificação e redefinição de senha", "Mailer")
+Rel(catalog, mysql, "Lê e grava catálogo, ofertas e sugestões", "Eloquent / SQL")
+Rel(catalog, search, "Pesquisa produtos; Scout indexa alterações", "HTTP")
+Rel(catalog, productProviders, "Enriquece dados de produtos quando ativado", "HTTP / API")
+Rel(lists, catalog, "Consulta produtos e ofertas; otimiza por preço")
+Rel(lists, mysql, "Lê e grava listas e ofertas", "Eloquent / SQL")
+Rel(companies, mysql, "Lê e grava empresas e representantes", "Eloquent / SQL")
+Rel(invoices, mysql, "Persiste NFC-e pendentes", "Eloquent / SQL")
+Rel(invoices, sefaz, "Consulta dados da NFC-e pelo QR Code", "HTTP")
+Rel(operations, mysql, "Consulta métricas e grava eventos", "Eloquent / SQL")
+Rel(jobs, mysql, "Processa registros e fila conforme driver", "Eloquent / SQL")
+Rel(jobs, catalog, "Atualiza catálogo, busca e dados de produto")
+Rel(jobs, companies, "Cria/atualiza empresa e endereço da nota")
+Rel(jobs, nominatim, "Geocodifica endereços agendados", "HTTP / JSON")
+Rel(jobs, productProviders, "Consulta enriquecimento agendado", "HTTP / API")
+Rel(jobs, buras, "Entrega eventos sanitizados", "HTTP / JSON")
+Rel(telemetry, buras, "Consulta resumo e envia eventos", "HTTP / JSON; configuração opcional")
+
+note bottom of jobs
+  Jobs são classes da mesma aplicação Laravel, executadas pelos processos
+  Queue worker e Scheduler da visão de contêineres; não são serviços separados.
+end note
+
+SHOW_LEGEND()
+@enduml

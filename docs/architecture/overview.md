@@ -2,7 +2,7 @@
 
 ## Contexto do sistema
 
-![Diagrama de contexto do Óiaí](contexto.svg)
+![Diagrama de contexto do Óiaí](context.svg)
 
 O diagrama mostra os perfis e sistemas vizinhos sem expor componentes de
 implementação. O ator administrador é sustentado pelo middleware `role:admin`
@@ -22,7 +22,7 @@ contêineres ou opções de configuração documentadas na visão abaixo ou nos 
 Não há no código atual evidência de outros provedores de dados ou regiões NFC-e
 além dos indicados no diagrama.
 
-Fonte: [contexto.puml](contexto.puml). Perfis e integrações são rastreáveis em
+Fonte: [context.puml](context.puml). Perfis e integrações são rastreáveis em
 `apps/api/routes/api.php`, `apps/api/app/Http/Middleware/EnsureUserHasRole.php`,
 `apps/api/app/Services/Product/Providers/`, `apps/api/app/Services/NFCe/`,
 `apps/api/app/Services/Geolocation/GeolocationService.php`,
@@ -58,6 +58,37 @@ arquivos de ambiente.
 Buras aparece como sistema companheiro independente e opcional, conforme seu
 perfil Compose e ciclo de release separados. Veja [diagramas como código](diagrams/README.md)
 para convenções e geração local.
+
+## Componentes da API
+
+![Diagrama de componentes da API Óiaí](components-api.svg)
+
+O fonte editável está em [components-api.puml](components-api.puml). A visão
+agrupa rotas/adaptadores e responsabilidades visíveis em Actions e Services;
+os grupos são conveniências para localizar mudanças, não bounded contexts nem
+serviços independentes. Controllers e policies aplicam autenticação e
+autorização antes de delegar às Actions. Há dependências cruzadas: listas
+consultam catálogo/ofertas, e jobs de NFC-e criam ou atualizam empresas,
+produtos e ofertas.
+
+| Componente | Evidência principal |
+| --- | --- |
+| Rotas e adaptadores HTTP | `apps/api/routes/api.php`; `apps/api/app/Http/Controllers/`; `apps/api/app/Http/Requests/`; `apps/api/app/Policies/`; `apps/api/app/Http/Resources/` |
+| Autenticação e contas | `apps/api/app/Actions/Auth/`; `apps/api/app/Actions/User/`; `apps/api/app/Services/Auth/AuthAuditLogger.php`; `apps/api/config/sanctum.php`; `apps/api/app/Notifications/` |
+| Catálogo e busca de produtos | `apps/api/app/Actions/Product/`; `apps/api/app/Services/Product/`; `apps/api/app/Observers/ProductObserver.php`; `apps/api/app/Jobs/NormalizeProductJob.php`; `apps/api/app/Jobs/IndexProductJob.php` |
+| Listas e otimização | `apps/api/app/Actions/List/`; `apps/api/app/Actions/ListItens/`; `apps/api/app/Services/Product/GreedyProductCombinationOptimizer.php`; `apps/api/app/Services/Geolocation/GeolocationService.php` |
+| Empresas e representantes | `apps/api/app/Actions/Company/`; `apps/api/app/Actions/CompanyOwners/`; `apps/api/app/Services/CompanyOwners/CompanyOwnerService.php`; `apps/api/app/Policies/CompanyOwnersPolicy.php` |
+| Importação de NFC-e | `apps/api/app/Actions/Invoice/`; `apps/api/app/Services/Invoice/InvoiceService.php`; `apps/api/app/Services/NFCeScraperService.php`; `apps/api/app/Services/NFCeXMLParserService.php`; `apps/api/app/Services/NFCe/` |
+| Dashboards e eventos | `apps/api/app/Services/DashboardService.php`; `apps/api/app/Actions/Event/`; `apps/api/app/Http/Controllers/AdminController.php`; `apps/api/app/Http/Controllers/AdminBurasDashboardController.php` |
+| Jobs e agendamentos | `apps/api/app/Jobs/`; `apps/api/app/Console/Kernel.php`; `apps/api/app/Observers/ProductObserver.php` |
+| Telemetria Buras | `apps/api/app/Services/BurasReporter.php`; `apps/api/app/Jobs/Telemetry/SendBurasEvent.php`; `apps/api/app/Http/Controllers/AdminBurasDashboardController.php` |
+
+Meilisearch é um índice derivado e opcional; a busca possui fallback MySQL. Os
+provedores OSCBR/Cosmos dependem de configuração. NFC-e consulta portais dos
+estados implementados (PE, SC e SP). O uso de e-mail depende do mailer por
+ambiente. Buras é opcional. O processamento de geocodificação pertence ao
+fluxo de jobs; a otimização de listas calcula distância localmente usando
+coordenadas já armazenadas.
 
 ## Responsabilidades
 
