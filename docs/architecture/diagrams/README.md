@@ -3,8 +3,7 @@
 ## Convenções
 
 - Um arquivo `.puml` por visão; nomes em `kebab-case` com o nível C4 no nome
-  quando houver mais de uma visão (por exemplo, `system-context.puml` e
-  `system-containers.puml`).
+  quando necessário (por exemplo, `contexto.puml` e `containers.puml`).
 - Mantenha decisões e histórico nos ADRs em `../decisions/`; os diagramas
   representam o estado observado no código/configuração e apontam para dúvidas
   ou opções explicitamente condicionais.
@@ -41,24 +40,23 @@ Na raiz do repositório, gere os SVGs:
 ```bash
 GRAPHVIZ_DOT="$(command -v dot)" java -Djava.awt.headless=true \
   -jar ~/.local/share/plantuml/plantuml-1.2025.2.jar \
-  -tsvg docs/architecture/diagrams/system-containers.puml
+  -tsvg docs/architecture/contexto.puml docs/architecture/containers.puml
 ```
 
 O `GRAPHVIZ_DOT` explícito evita que uma configuração antiga aponte para outro
 sistema (por exemplo `/opt/local/bin/dot`). `dot -V` mostra a versão instalada.
 
-O comando escreve `system-containers.svg` ao lado do fonte. A renderização desta
-base foi concluída com PlantUML 1.2025.2, C4-PlantUML 2.11.0, OpenJDK 11 e
-Graphviz 2.43.0 em Ubuntu 20.04. Se `dot` estiver em um caminho diferente,
-defina `GRAPHVIZ_DOT` para o caminho retornado por `command -v dot`, como no
-comando acima.
+O comando escreve `contexto.svg` e `containers.svg` ao lado dos fontes. A
+renderização desta base foi concluída com PlantUML 1.2025.2, C4-PlantUML 2.11.0,
+OpenJDK 11 e Graphviz 2.43.0 em Ubuntu 20.04. Se `dot` estiver em outro
+caminho, defina `GRAPHVIZ_DOT` para o resultado de `command -v dot`.
 
 ## Fontes
 
-- [`system-containers.puml`](system-containers.puml): visão C4 de containers.
-- [`system-containers.svg`](system-containers.svg): saída PlantUML SVG versionada.
 - [`../contexto.puml`](../contexto.puml): visão C4 de contexto do sistema.
-- [`../contexto.svg`](../contexto.svg): saída PlantUML SVG versionada.
+- [`../contexto.svg`](../contexto.svg): renderização SVG versionada.
+- [`../containers.puml`](../containers.puml): visão C4 de contêineres executáveis e armazenamentos.
+- [`../containers.svg`](../containers.svg): renderização SVG versionada.
 
 Para regenerar as duas visões, a partir da raiz do repositório:
 
@@ -66,5 +64,5 @@ Para regenerar as duas visões, a partir da raiz do repositório:
 GRAPHVIZ_DOT="$(command -v dot)" java -Djava.awt.headless=true \
   -jar ~/.local/share/plantuml/plantuml-1.2025.2.jar -tsvg \
   docs/architecture/contexto.puml \
-  docs/architecture/diagrams/system-containers.puml
+  docs/architecture/containers.puml
 ```

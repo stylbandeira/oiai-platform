@@ -31,17 +31,33 @@ Fonte: [contexto.puml](contexto.puml). Perfis e integrações são rastreáveis 
 `apps/api/app/Services/BurasReporter.php`, `apps/buras/README.md` e
 `docker-compose.yml`.
 
-## Visão de contêineres
+## Visão de contêineres C4
 
-Oiaí é um monorepo composto por Web React/TypeScript, API Laravel e o serviço
-opcional de observabilidade Buras (Go/SQLite). O diagrama abaixo descreve a
-topologia configurada no Compose; Buras só inicia quando o perfil `buras` é
-ativado.
+![Diagrama de contêineres C4 do Óiaí](containers.svg)
 
-![Diagrama de containers do Oiaí](diagrams/system-containers.svg)
+O fonte editável está em [containers.puml](containers.puml). Nesta visão, um
+contêiner C4 é uma parte executável ou um armazenamento lógico, não um
+container/imagem Docker. `API`, `Queue worker` e `Scheduler` são processos
+separados que executam o mesmo código Laravel (`apps/api`) com comandos
+diferentes; não são microsserviços independentes.
 
-O fonte editável está em [diagrams/system-containers.puml](diagrams/system-containers.puml).
-Veja [diagramas como código](diagrams/README.md) para convenções e geração local.
+O diagrama combina os ambientes com diferenças materiais anotadas: MySQL 5.7
+local e 8.0 em produção, Vite local e Nginx para servir o build Web em produção,
+Artisan local e PHP-FPM/Nginx para a API em produção. MySQL guarda a fila quando
+`QUEUE_CONNECTION=database`; com `sync`, jobs executam no processo chamador. O
+Compose local inclui MailHog, mas a API só o usa se `MAIL_HOST` apontar para ele;
+em produção o mailer é configurado no ambiente. phpMyAdmin é ferramenta local
+de administração do banco, omitida do fluxo lógico da aplicação.
+
+As relações com OSCBR, Cosmos, portais SEFAZ e Nominatim já estão detalhadas na
+visão de contexto; não são repetidas nesta visão para manter o foco nos
+processos e armazenamentos executáveis. Meilisearch, MySQL, fila Laravel, e-mail
+e Buras são mostrados aqui conforme sua execução/configuração nos Compose e nos
+arquivos de ambiente.
+
+Buras aparece como sistema companheiro independente e opcional, conforme seu
+perfil Compose e ciclo de release separados. Veja [diagramas como código](diagrams/README.md)
+para convenções e geração local.
 
 ## Responsabilidades
 

@@ -1,0 +1,40 @@
+@startuml containers
+!include <C4/C4_Container>
+
+title Óiaí — contêineres C4 (visão lógica, não inventário Docker)
+LAYOUT_LEFT_RIGHT()
+
+Person(user, "Pessoa usuária", "Consulta produtos, organiza listas e envia dados de NFC-e")
+Person(admin, "Administrador", "Administra usuários, catálogo, empresas e observabilidade")
+
+System_Boundary(oiai, "Sistema Óiaí") {
+  Container(web, "Web", "React / TypeScript; Vite dev, Nginx prod", "SPA de produtos e listas")
+  Container(api, "API", "Laravel / PHP 8.2; Artisan dev, PHP-FPM + Nginx prod", "Rotas HTTP e regras de negócio")
+  Container(worker, "Queue worker", "Laravel, mesmo código; queue:work", "Executa jobs assíncronos")
+  Container(scheduler, "Scheduler", "Laravel, mesmo código; schedule:work", "Dispara jobs recorrentes")
+  ContainerDb(mysql, "Banco transacional", "MySQL 5.7 dev / 8.0 prod", "Dados de domínio em volume; jobs se QUEUE_CONNECTION=database")
+  ContainerDb(meili, "Índice de busca", "Meilisearch v1.15", "Índice derivado em volume; usado com SCOUT_DRIVER=meilisearch")
+}
+
+System_Ext(mail, "Transporte de e-mail", "Mailer por ambiente; MailHog local, SMTP real em produção")
+System_Ext(buras, "Buras (opcional)", "Sistema companheiro Go / HTTP, com persistência SQLite")
+
+Rel(user, web, "Usa", "Web; HTTPS produção, HTTP local")
+Rel(admin, web, "Usa funções administrativas", "Web; HTTPS produção, HTTP local")
+Rel(web, api, "Envia operações e recebe resultados", "HTTP / JSON; proxy Nginx em produção")
+
+Rel(api, mysql, "Lê/grava domínio; enfileira jobs no driver database", "SQL")
+Rel(worker, mysql, "Lê/grava domínio; consome jobs se driver database", "SQL")
+Rel(scheduler, mysql, "Dispara jobs agendados; usa esta fila no driver database", "SQL")
+
+Rel(api, meili, "Pesquisa produtos via Scout quando habilitado", "HTTP")
+Rel(worker, meili, "Atualiza índice via Scout quando enfileirado", "HTTP")
+
+Rel(api, mail, "Envia notificações de verificação e redefinição", "Mailer por ambiente")
+Rel(worker, mail, "Entrega notificações enfileiradas", "Mailer por ambiente")
+
+Rel(api, buras, "Consulta resumos administrativos quando configurado", "HTTP / JSON")
+Rel(worker, buras, "Entrega eventos sanitizados por job", "HTTP / JSON; perfil opcional")
+
+SHOW_LEGEND()
+@enduml
