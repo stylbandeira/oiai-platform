@@ -1,5 +1,38 @@
 # Visão geral da arquitetura
 
+## Contexto do sistema
+
+![Diagrama de contexto do Óiaí](contexto.svg)
+
+O diagrama mostra os perfis e sistemas vizinhos sem expor componentes de
+implementação. O ator administrador é sustentado pelo middleware `role:admin`
+nas rotas administrativas. Representantes de empresas usam as rotas como
+usuários autenticados comuns e não formam um papel de autenticação separado.
+
+OSCBR, Cosmos, portais SEFAZ e Nominatim têm clientes ativos no código; o uso
+dos provedores de produto depende de credenciais e configuração. O transporte
+de e-mail é configurável e a identidade do provedor depende do ambiente. Buras
+é um serviço companheiro implementado no monorepo, ativado opcionalmente pelo
+perfil Compose, não um fornecedor terceiro.
+
+O webhook de alertas do Buras não aparece como integração atual: sua URL é
+configurável e vazia por padrão. Redis, AWS/S3, Meilisearch, MySQL, Web, API,
+worker e scheduler também não aparecem nesta visão; são infraestrutura,
+contêineres ou opções de configuração documentadas na visão abaixo ou nos ADRs.
+Não há no código atual evidência de outros provedores de dados ou regiões NFC-e
+além dos indicados no diagrama.
+
+Fonte: [contexto.puml](contexto.puml). Perfis e integrações são rastreáveis em
+`apps/api/routes/api.php`, `apps/api/app/Http/Middleware/EnsureUserHasRole.php`,
+`apps/api/app/Services/Product/Providers/`, `apps/api/app/Services/NFCe/`,
+`apps/api/app/Services/Geolocation/GeolocationService.php`,
+`apps/api/app/Notifications/`, `apps/api/config/services.php` e
+`apps/api/.env.example`; a relação opcional com Buras está em
+`apps/api/app/Services/BurasReporter.php`, `apps/buras/README.md` e
+`docker-compose.yml`.
+
+## Visão de contêineres
+
 Oiaí é um monorepo composto por Web React/TypeScript, API Laravel e o serviço
 opcional de observabilidade Buras (Go/SQLite). O diagrama abaixo descreve a
 topologia configurada no Compose; Buras só inicia quando o perfil `buras` é

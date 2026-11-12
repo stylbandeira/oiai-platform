@@ -57,3 +57,14 @@ comando acima.
 
 - [`system-containers.puml`](system-containers.puml): visão C4 de containers.
 - [`system-containers.svg`](system-containers.svg): saída PlantUML SVG versionada.
+- [`../contexto.puml`](../contexto.puml): visão C4 de contexto do sistema.
+- [`../contexto.svg`](../contexto.svg): saída PlantUML SVG versionada.
+
+Para regenerar as duas visões, a partir da raiz do repositório:
+
+```bash
+GRAPHVIZ_DOT="$(command -v dot)" java -Djava.awt.headless=true \
+  -jar ~/.local/share/plantuml/plantuml-1.2025.2.jar -tsvg \
+  docs/architecture/contexto.puml \
+  docs/architecture/diagrams/system-containers.puml
+```
