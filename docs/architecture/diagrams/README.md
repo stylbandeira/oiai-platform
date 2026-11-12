@@ -14,7 +14,11 @@
   Atualize ambos na mesma alteração e valide todos os diagramas. A versão C4
   incluída é registrada no [histórico oficial do PlantUML](https://plantuml.com/changes).
 - Os SVGs são artefatos versionados para leitura no GitHub. Regenere-os junto
-  com a fonte sempre que alterar um `.puml`.
+  com a fonte sempre que alterar um `.puml`; não edite o SVG manualmente.
+- Os `.puml` são a fonte de verdade. A checagem automatizada renderiza todas as
+  fontes, valida o XML SVG e falha se um artefato versionado não corresponder à
+  renderização atual. Isso verifica sintaxe e sincronização, não fidelidade
+  semântica ao código.
 
 ## Gerar SVG
 
@@ -54,6 +58,19 @@ renderização desta base foi concluída com PlantUML 1.2025.2, C4-PlantUML 2.11
 OpenJDK 11 e Graphviz 2.43.0 em Ubuntu 20.04. Se `dot` estiver em outro
 caminho, defina `GRAPHVIZ_DOT` para o resultado de `command -v dot`.
 
+Para verificar todas as fontes e confirmar que os SVGs versionados estão
+atualizados, execute `scripts/check-architecture-diagrams.sh` na raiz. Na
+revisão visual, abra cada SVG e confira fronteiras, participantes, direções e
+rótulos das relações contra o código/configuração citados no
+[índice da arquitetura](../overview.md). O sucesso do renderizador não garante
+que o diagrama descreva corretamente o sistema.
+
+Exemplo de decisão: ao adicionar um fallback de busca MySQL quando Meilisearch
+falha, atualize `components-api.puml` (dependência e armazenamento do catálogo)
+e `product-list-flow.puml` (ramo de fallback observável na busca). Uma mudança
+interna de consulta que preserve essas responsabilidades, dependências e o
+fluxo não exige alteração visual; justifique isso no PR.
+
 ## Fontes
 
 - [`../context.puml`](../context.puml): visão C4 de contexto do sistema.
@@ -65,7 +82,7 @@ caminho, defina `GRAPHVIZ_DOT` para o resultado de `command -v dot`.
 - [`../product-list-flow.puml`](../product-list-flow.puml): product search and shopping list creation sequence.
 - [`../product-list-flow.svg`](../product-list-flow.svg): versioned SVG rendering.
 
-Para regenerar as duas visões, a partir da raiz do repositório:
+Para regenerar todas as visões, a partir da raiz do repositório:
 
 ```bash
 GRAPHVIZ_DOT="$(command -v dot)" java -Djava.awt.headless=true \

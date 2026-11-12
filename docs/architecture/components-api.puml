@@ -1,4 +1,4 @@
-@startuml componentes-api
+@startuml components-api
 !include <C4/C4_Component>
 
 title Óiaí — componentes da API Laravel
