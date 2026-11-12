@@ -90,6 +90,29 @@ ambiente. Buras é opcional. O processamento de geocodificação pertence ao
 fluxo de jobs; a otimização de listas calcula distância localmente usando
 coordenadas já armazenadas.
 
+## Product list flow
+
+![Sequence diagram for product search and shopping list creation](product-list-flow.svg)
+
+The source is [product-list-flow.puml](product-list-flow.puml). The flow follows
+`NewShoppingList`: paginated search after a 500 ms delay, selections held in Web
+state, then authenticated list creation. Search uses Meilisearch when available
+and falls back to MySQL on failure; the list, its items, and the `listAdded`
+counter update are written to MySQL in a transaction. Search request failures
+show the page's error message. Save failures are currently logged to the console
+without a dedicated user-facing message.
+
+Traceable in `apps/web/src/pages/client/NewShoppingList.tsx`,
+`apps/web/src/lib/api.ts`, `apps/api/routes/api.php`,
+`apps/api/app/Http/Controllers/ProductController.php`,
+`apps/api/app/Actions/Product/IndexProductAction.php`,
+`apps/api/app/Repositories/ProductRepository.php`,
+`apps/api/app/Services/Product/MeilisearchProductSearch.php`,
+`apps/api/app/Services/Product/MySqlProductSearch.php`,
+`apps/api/app/Http/Requests/List/ListStoreRequest.php`,
+`apps/api/app/Actions/List/StoreListAction.php` e
+`apps/api/app/Repositories/ListRepository.php`.
+
 ## Responsabilidades
 
 - **API**: autenticação, autorização, regras de negócio, persistência, processamento de NFC-e, busca e jobs;

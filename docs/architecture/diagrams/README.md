@@ -41,13 +41,15 @@ Na raiz do repositório, gere os SVGs:
 GRAPHVIZ_DOT="$(command -v dot)" java -Djava.awt.headless=true \
   -jar ~/.local/share/plantuml/plantuml-1.2025.2.jar \
   -tsvg docs/architecture/context.puml docs/architecture/containers.puml \
-  docs/architecture/components-api.puml
+  docs/architecture/components-api.puml \
+  docs/architecture/product-list-flow.puml
 ```
 
 O `GRAPHVIZ_DOT` explícito evita que uma configuração antiga aponte para outro
 sistema (por exemplo `/opt/local/bin/dot`). `dot -V` mostra a versão instalada.
 
-O comando escreve `context.svg`, `containers.svg` e `components-api.svg` ao lado dos fontes. A
+O comando escreve `context.svg`, `containers.svg`, `components-api.svg` e
+`product-list-flow.svg` ao lado dos fontes. A
 renderização desta base foi concluída com PlantUML 1.2025.2, C4-PlantUML 2.11.0,
 OpenJDK 11 e Graphviz 2.43.0 em Ubuntu 20.04. Se `dot` estiver em outro
 caminho, defina `GRAPHVIZ_DOT` para o resultado de `command -v dot`.
@@ -60,6 +62,8 @@ caminho, defina `GRAPHVIZ_DOT` para o resultado de `command -v dot`.
 - [`../containers.svg`](../containers.svg): renderização SVG versionada.
 - [`../components-api.puml`](../components-api.puml): componentes significativos dentro da API Laravel.
 - [`../components-api.svg`](../components-api.svg): renderização SVG versionada.
+- [`../product-list-flow.puml`](../product-list-flow.puml): product search and shopping list creation sequence.
+- [`../product-list-flow.svg`](../product-list-flow.svg): versioned SVG rendering.
 
 Para regenerar as duas visões, a partir da raiz do repositório:
 
@@ -68,5 +72,6 @@ GRAPHVIZ_DOT="$(command -v dot)" java -Djava.awt.headless=true \
   -jar ~/.local/share/plantuml/plantuml-1.2025.2.jar -tsvg \
   docs/architecture/context.puml \
   docs/architecture/containers.puml \
-  docs/architecture/components-api.puml
+  docs/architecture/components-api.puml \
+  docs/architecture/product-list-flow.puml
 ```
